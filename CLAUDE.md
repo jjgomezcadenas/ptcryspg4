@@ -19,15 +19,15 @@ pipeline. Read it first. If code and spec disagree, the spec wins unless a
 decision here supersedes it. This file records implementation decisions; the spec
 records the method.
 
-## Architecture — three stages joined by HDF5 files
+## Architecture — three stages joined by CSV files
 
 ```
 [A] Geant4 transport      protons → PMMA → β+ emitter → annihilation    RUNS ONCE
-        ⟹  prod_anh.h5   (detector-independent source)
+        ⟹  emitters.csv + run_meta.csv   (detector-independent source)
 [B0] Time-decay bookkeeping (Python, analytic)   P_j → N_j(t_del)
         ⟹  sampled annihilation events (draw N_j per isotope)
 [B] Geant4 detector       annihilation events → detector → coincidences  RUNS PER DETECTOR
-        ⟹  coincidences_<config>.h5
+        ⟹  coincidences_<config>.csv
         ───────── independent boundary ─────────
 [C] Reconstruction        coincidence list → image → σ(range)            TOOLKIT DEFERRED
 ```
@@ -43,12 +43,12 @@ records the method.
    production-proportional, 1:1.) The measured number N_j and the acquisition
    timing are owned solely by the analytic bookkeeping (Stage B0). The positron's
    global-time stamp is physically real but carries no acquisition meaning and is
-   never written — `prod_anh.h5` stores no time field.
+   never written — `emitters.csv` has no time column.
 2. **Stage A runs once.** Never re-run proton transport when the detector changes.
 3. **N_j sampling happens only at the A→B handoff.** Raw produced counts are
    *production*-proportional; the measured ¹⁵O/¹¹C mix is set only by drawing
    `N_j` per isotope from the source file. Do not use raw counts as the budget.
-4. **Every detector config consumes the identical source** (same `prod_anh.h5`,
+4. **Every detector config consumes the identical source** (same `emitters.csv`,
    same sampled-event set per realization) — otherwise the ranking is polluted by
    per-run statistical drift.
 5. **Reconstruction consumes only the coincidence list.** Keep it decoupled; no
@@ -56,12 +56,15 @@ records the method.
 
 ## Tech stack (decided)
 
-- **Stage A & B:** C++ / **Geant4** (target a recent release, e.g. 11.2.x; CMake).
-- **File format:** **HDF5** for both interface files. In C++ use
-  [HighFive](https://github.com/BlueBrain/HighFive) (header-only wrapper). In
-  Python use `h5py`.
+- **Stage A & B:** C++ / **Geant4** (11.4.x; CMake).
+- **File format:** **CSV** (flat, columnar) for the interface files, each with a
+  companion `*_meta.csv` for run-level metadata. Chosen over HDF5: files are
+  small at realistic statistics, no extra dependency, pandas-native and
+  human-readable. **HDF5 is deferred** — revisit (HighFive in C++ / h5py in
+  Python) only if file size or read speed demands it; the columnar schema is
+  identical, so the switch is cheap.
 - **Stage B0 (bookkeeping/sampling) + analysis:** **Python** (`numpy`, `scipy`,
-  `h5py`).
+  `pandas`).
 - **Reconstruction (Stage C):** **deferred.** Candidates: custom list-mode
   MLEM/OSEM, or CASToR, or STIR. Must be list-mode, DOI-aware, optionally TOF.
 - **Stage A starting point:** the Geant4 advanced example **`hadrontherapy`**
@@ -73,28 +76,31 @@ records the method.
 ## Units convention
 
 Positions **mm**, energies **keV** (beam energy **MeV**), times **ns**, dose
-**Gy**. State units in HDF5 attributes.
+**Gy**. State units as column-name suffixes (e.g. `prod_x_mm`) and in the
+companion `*_meta.csv`.
 
-## HDF5 schemas (the interface contracts)
+## File schemas (the interface contracts)
 
-### `prod_anh.h5` — Stage A output (one row per β⁺ emitter)
-Dataset `/emitters` (columnar or compound):
+`common/SCHEMA.md` is the authoritative contract; this is the summary.
 
-| field        | type      | meaning                                   |
-|--------------|-----------|-------------------------------------------|
-| `isotope_id` | int8      | 0=¹⁵O 1=¹¹C 2=¹³N 3=¹⁰C 4=¹⁴O             |
-| `prod_xyz`   | float32[3]| production point (mm) — the **truth** map |
-| `anh_xyz`    | float32[3]| annihilation point (mm) — detector source |
+### `emitters.csv` — Stage A output (one row per β⁺ emitter)
+Flat columns:
 
-> The two-point pair is consolidated into **one row** (cleaner in HDF5 than
-> separate PROD/ANH records); positron range = `anh_xyz − prod_xyz`.
+| column | type | meaning |
+|--------|------|---------|
+| `event_id` | int | primary that produced it (diagnostic) |
+| `isotope_id` | int8 | 0=¹⁵O 1=¹¹C 2=¹³N 3=¹⁰C 4=¹⁴O |
+| `prod_x_mm,prod_y_mm,prod_z_mm` | float | production point (mm) — the **truth** map |
+| `anh_x_mm,anh_y_mm,anh_z_mm` | float | annihilation point (mm) — detector source |
 
-Root attributes (for normalization + reproducibility): `beam_energy_MeV`,
-`phantom_material`, `n_protons_simulated`, `dose_Gy_total`, `Pj_per_proton`
-(per isotope), `geant4_version`, `physics_list`, `random_seed`.
+> One row holds both points (positron range = `anh − prod`). Run-level metadata
+> (`n_protons`, `beam_energy_MeV`, `dose_total_Gy`, `geant4_version`,
+> `physics_list`, `random_seed`, …) is in the companion `run_meta.csv`;
+> `Pj_per_proton` is derivable as per-isotope count / `n_protons`. Stage A also
+> writes `depth_dose.csv` (the Bragg profile).
 
-### `coincidences_<config>.h5` — Stage B output (one row per accepted coincidence)
-Dataset `/coincidences`:
+### `coincidences_<config>.csv` — Stage B output (one row per accepted coincidence)
+Flat columns:
 
 | field      | type       | meaning                          |
 |------------|------------|----------------------------------|
@@ -104,9 +110,10 @@ Dataset `/coincidences`:
 | `t1`,`t2`  | float64    | timestamps (ns) — for TOF        |
 | `truth`    | int8       | optional: 0 true,1 scatter,2 rand|
 
-Root attributes: `detector_config`, geometry params, `energy_window_keV`,
+Companion `*_meta.csv`: `detector_config`, geometry params, `energy_window_keV`,
 `coinc_time_window_ns`, `Nj_budget` (per isotope), `realization_index`,
-`random_seed`.
+`random_seed`. (Hit positions may carry `_mm` / energies `_keV` / times `_ns`
+column suffixes.)
 
 ## Fixed parameters
 
@@ -163,13 +170,14 @@ Poisson realizations — vs. counts (or dose, or t_del).
 ## Suggested repo layout
 
 ```
-stageA_transport/    # Geant4 C++: protons → prod_anh.h5
-handoff/             # Python: time-decay bookkeeping + N_j sampling
-stageB_detector/     # Geant4 C++: annihilation events → coincidences_*.h5
+stageA_transport/    # Geant4 C++: protons → emitters.csv + run_meta.csv
+decay_sampling/      # Python: time-decay bookkeeping + N_j sampling (Stage B0)
+stageB_detector/     # Geant4 C++: annihilation events → coincidences_*.csv
 reconstruction/      # deferred (Stage C)
-common/              # shared HDF5 schema defs, units, isotope table
-docs/                # copy of simulate_pt_pet.tex (the spec)
-data/                # generated HDF5 (gitignored)
+analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
+common/              # shared schema defs, units, isotope table
+docs/                # spec (simulate_pt_pet.tex) + references
+data/                # generated CSV (gitignored)
 ```
 
 ## Build / run
@@ -177,8 +185,8 @@ data/                # generated HDF5 (gitignored)
 **Toolchain (this machine).** Geant4 **11.4.1** at `~/Software/geant4/install`,
 built multithreaded (tasking) with **Qt visualization ON** (ToolsSG-Qt drivers:
 `TSG_QT_ZB` software / `TSG_QT_GLES` GPU; no classic OpenGL). No ROOT. Activate
-with `source $HOME/Software/geant4/install/bin/geant4.sh` (in `~/.zshrc`). HDF5
-via Homebrew (`/opt/homebrew/opt/hdf5`); HighFive fetched by CMake when needed.
+with `source $HOME/Software/geant4/install/bin/geant4.sh` (in `~/.zshrc`). Output
+is CSV — no HDF5/HighFive dependency.
 
 ### Stage A — `proton_transport`
 
@@ -193,27 +201,36 @@ Run:
 
 ```bash
 ./proton_transport            # interactive Qt viewer; runs macros/vis.mac,
-                              #   draws the PMMA phantom + shoots 20 protons
-./proton_transport run.mac    # batch (18 threads); macros/run.mac smoke test
+                              #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
+./proton_transport run.mac    # batch (18 threads); writes emitters/run_meta/depth_dose.csv to data/
 ```
 
 `build/compile_commands.json` (the `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` flag)
 feeds VS Code IntelliSense; `.vscode/settings.json` points the C++ extension at
 it via CMake Tools.
 
-### Handoff + analysis (Python)
+### Analysis + handoff (Python)
+
+System `python3` (already has numpy/scipy/pandas/matplotlib — no venv). Validate
+a Stage-A run:
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r handoff/requirements.txt   # numpy scipy h5py
+python3 analysis_transport/validate_transport.py   # -> data/transport_validation.png
 ```
+
+Deps listed in `analysis_transport/requirements.txt` and
+`decay_sampling/requirements.txt` (numpy, scipy, pandas).
 
 ## First-session checklist
 
+**Status:** steps 1–3 done — the custom Stage-A app (`stageA_transport/`, not
+hadrontherapy) builds, runs MT on 18 threads, writes `emitters.csv` +
+`run_meta.csv` + `depth_dose.csv`, and is validated (yields sane, Bragg curve,
+endpoint-ordered positron ranges). **Next: step 4** (the Python handoff).
+
 1. Read `docs/simulate_pt_pet.tex` end to end.
-2. Stand up the `hadrontherapy`-based Stage-A app; confirm proton range and dose
-   in the PMMA cylinder.
-3. Add the `prod_anh.h5` writer (with the metadata attributes); rely on standard
+2. Stand up the Stage-A app; confirm proton range and dose in the PMMA cylinder.
+3. Add the `emitters.csv` writer (+ `run_meta.csv` metadata); rely on standard
    radioactive decay (no prompt-decay override); validate yields-per-proton
    against literature order-of-magnitude.
 4. Implement the Python A→B handoff (Eqs. of spec §3) and verify the ¹⁵O/¹¹C mix

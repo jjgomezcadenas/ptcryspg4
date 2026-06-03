@@ -2,12 +2,20 @@
 
 **This file is the authoritative contract** for everything shared between the
 stages of the simulation chain: the isotope encoding, the units convention, and
-the layout of the three HDF5 interface files. The code mirrors
-(`common/Isotopes.hh` for C++, `common/isotopes.py` for Python) and every
-reader/writer must conform to it. If code and this file disagree, the code is
-wrong.
+the layout of the interface files. The code mirrors it (`common/Isotopes.hh` for
+C++, `common/isotopes.py` for Python) and every reader/writer must conform. If
+code and this file disagree, the code is wrong.
 
 Spec reference: `docs/simulate_pt_pet.tex` (§2 Stage A, §3 handoff, §4 Stage B).
+
+**File format: CSV.** Interface files are flat, columnar **CSV** (one row per
+record, one scalar per column, header row, units as `_mm`/`_keV`/`_ns` column
+suffixes). Each data file has a companion `*_meta.csv` (a single wide row)
+holding run-level metadata. CSV was chosen over HDF5 because the files are small
+at realistic statistics and it needs no extra dependency (pandas-native,
+human-readable). **HDF5 is deferred** — if size or read speed ever demands it,
+switch to HighFive (C++) / h5py (Python); the columnar schema below is identical,
+so only the container changes.
 
 ---
 
@@ -20,7 +28,8 @@ Spec reference: `docs/simulate_pt_pet.tex` (§2 Stage A, §3 handoff, §4 Stage 
 | time | ns | |
 | dose | Gy | |
 
-Every HDF5 file states units in root attributes (`units_position = "mm"`, etc.).
+Columns carry the unit as a suffix (e.g. `prod_x_mm`); the companion
+`*_meta.csv` records the rest.
 
 ---
 
@@ -34,130 +43,117 @@ Every HDF5 file states units in root attributes (`units_position = "mm"`, etc.).
 | 3 | ¹⁰C | 6 | 10 | 19.29 | 1.91 | yes (718 keV) |
 | 4 | ¹⁴O | 8 | 14 | 70.62 | 1.81 | yes |
 
-- 100 % β⁺ branching assumed (spec §3).
+- 100 % β⁺ branching assumed in the bookkeeping (spec §3); Geant4 samples the
+  true β⁺/EC split, so captured positrons ≈ production × β⁺-BR (≳99 %).
 - Half-lives: tabulated nuclear data, consistent with spec Table 2 / Parodi 2008.
 - Prompt γ's are **discarded** in Stage A (spec §2.4, "backgrounds discarded").
-- Arrays indexed by isotope (e.g. `Pj_per_proton`) always have length 5, ordered
-  by `isotope_id`.
+- Per-isotope arrays (e.g. `Nj_budget`) expand to 5 columns suffixed by
+  `isotope_id` (`_0`…`_4`), ordered by the table above.
 
 ---
 
-## File 1: `prod_anh.h5` — Stage A output (the detector-independent source)
+## File 1: Stage A output — `emitters.csv` (+ `run_meta.csv`, `depth_dose.csv`)
 
-Written once by `stageA_transport`. One row per β⁺ emitter produced.
+Written once by `stageA_transport`. The detector-independent source.
 
-### Datasets (columnar, all length N)
+### `emitters.csv` — one row per β⁺ emitter
 
-| path | type | meaning |
-|------|------|---------|
-| `/emitters/isotope_id` | int8 | see encoding table |
-| `/emitters/prod_xyz` | float32 [N,3] | production/decay point (mm) — the **truth** activity map |
-| `/emitters/anh_xyz` | float32 [N,3] | positron annihilation point (mm) — the detector source |
+| column | type | meaning |
+|--------|------|---------|
+| `event_id` | int | primary (event) that produced it — diagnostic, multiplicity |
+| `isotope_id` | int8 | see encoding table |
+| `prod_x_mm`, `prod_y_mm`, `prod_z_mm` | float32 | production/decay point — the **truth** activity map |
+| `anh_x_mm`, `anh_y_mm`, `anh_z_mm` | float32 | positron annihilation point — the detector source |
 
-Positron range per event = `anh_xyz − prod_xyz` (no separate kernel needed).
+Positron range per event = `anh − prod` (no separate kernel needed). Positrons
+that would escape the phantom into air are killed at the boundary, so their
+`anh` is pinned to the phantom surface (keep-at-surface; ~0.6 % of rows).
 
-### Root attributes
+### `run_meta.csv` — one wide row of run metadata
 
-| name | type | meaning |
-|------|------|---------|
-| `beam_energy_MeV` | float64 | primary proton kinetic energy |
-| `beam_sigma_mm` | float64 | pencil-beam Gaussian σ at entrance |
-| `phantom_material` | string | `"PMMA"` (or `"Water"` for the cross-check) |
-| `phantom_diameter_mm` | float64 | 200.0 baseline |
-| `phantom_length_mm` | float64 | 200.0 baseline |
-| `n_protons_simulated` | uint64 | primaries actually run |
-| `dose_Gy_total` | float64 | deposited dose for `n_protons_simulated` (scoring volume defined by `dose_definition`) |
-| `dose_definition` | string | how/where dose is scored (e.g. `"whole phantom"`) |
-| `Pj_per_proton` | float64 [5] | emitters produced per primary, by isotope_id |
+| column | type | meaning |
+|--------|------|---------|
+| `n_protons` | int | primaries run |
+| `beam_energy_MeV` | float | primary proton kinetic energy |
+| `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
+| `phantom_material` | string | `"G4_PLEXIGLASS"` (PMMA) |
+| `phantom_diameter_mm`, `phantom_length_mm` | float | 200.0 baseline |
+| `phantom_mass_g` | float | scoring-volume mass (for dose) |
+| `edep_total_MeV` | float | total energy deposited in the phantom |
+| `dose_total_Gy` | float | whole-phantom dose for `n_protons` |
 | `geant4_version` | string | e.g. `"11.4.1"` |
 | `physics_list` | string | e.g. `"QGSP_BIC_HP"` |
-| `random_seed` | uint64 | master seed of the run |
-| `units_position` | string | `"mm"` |
+| `random_seed` | int | master seed of the run |
+
+`Pj_per_proton` is derivable as per-isotope count / `n_protons`. Dose is
+whole-phantom; a Bragg-region "dose at target" definition is TBD (spec §2.5).
+
+### `depth_dose.csv` — Bragg profile (1 mm z-bins)
+
+| column | type | meaning |
+|--------|------|---------|
+| `z_mm` | float | bin centre along the beam axis |
+| `edep_total_MeV` | float | energy deposit in the bin (all particles) |
+| `edep_primary_MeV` | float | energy deposit by the primary proton only |
 
 ### Invariants
-
-- This file is generated **once** and never modified by downstream stages.
-- The lists encode the production **shape** P_j(r) at high statistics; the
-  absolute number of measured decays is set downstream (File 2), never here.
+- Generated **once**; never modified by downstream stages.
+- Encodes the production **shape** P_j(r) at high statistics; the absolute
+  measured count is set downstream (File 2), never here.
 
 ---
 
-## File 2: `sampled_events_<scenario>_r<realization>.h5` — handoff output
+## File 2: handoff output — `sampled_events_<scenario>_r<realization>.csv`
 
-Written by `handoff/` (Python). The result of computing N_j from spec Eq. (7)
-and drawing N_j annihilation points per isotope (with replacement) from File 1.
+Written by `decay_sampling/` (Python): compute N_j from spec Eq. (7) and draw
+N_j annihilation points per isotope (with replacement) from File 1.
 
-### Datasets (columnar, all length M = Σ_j N_j)
+### Columns — one row per sampled annihilation (M = Σ_j N_j rows)
 
-| path | type | meaning |
-|------|------|---------|
-| `/annihilations/isotope_id` | int8 | which species this decay belongs to |
-| `/annihilations/anh_xyz` | float32 [M,3] | annihilation point (mm) |
+| column | type | meaning |
+|--------|------|---------|
+| `isotope_id` | int8 | which species this decay belongs to |
+| `anh_x_mm`, `anh_y_mm`, `anh_z_mm` | float32 | annihilation point |
 
-Note: the two back-to-back 511 keV photons (with ~0.5° FWHM acollinearity) are
-generated by **Stage B's primary generator** from each point; they are not
-stored here.
+The back-to-back 511 keV photons (~0.5° FWHM acollinearity) are generated by
+**Stage B's primary generator** from each point; not stored here.
 
-### Root attributes
+### Companion `sampled_events_<...>_meta.csv` (one wide row)
 
-| name | type | meaning |
-|------|------|---------|
-| `source_file` | string | the `prod_anh.h5` this was drawn from |
-| `accelerator` | string | `"cyclotron"`, `"synchrotron_GSI"`, `"synchrotron_HIT"` |
-| `t_spill_s`, `t_pause_s` | float64 | spill structure (spec Table 3) |
-| `n_spills` | uint64 | S |
-| `t_irr_s` | float64 | total irradiation time |
-| `t_del_s` | float64 | delay after end of irradiation (in-room: ≥ 120) |
-| `t_meas_s` | float64 | measurement window length |
-| `dose_Gy` | float64 | the dose this budget corresponds to (baseline 1.0) |
-| `Nj_budget` | int64 [5] | decays drawn per isotope (the Poisson draw) |
-| `Nj_expected` | float64 [5] | expectation values from Eq. (7), before Poisson |
-| `realization_index` | uint64 | which of the M Poisson realizations |
-| `random_seed` | uint64 | seed of this realization's draw |
-| `units_position` | string | `"mm"` |
+`source_file`, `accelerator` (`cyclotron`/`synchrotron_GSI`/`synchrotron_HIT`),
+`t_spill_s`, `t_pause_s`, `n_spills`, `t_irr_s`, `t_del_s`, `t_meas_s`,
+`dose_Gy`, `Nj_budget_0..4` (Poisson draw per isotope), `Nj_expected_0..4`,
+`realization_index`, `random_seed`.
 
 ### Invariants
-
 - N_j sampling happens **only here** (CLAUDE.md invariant 3).
 - Every detector config consumes the **identical** sampled-event files
   (CLAUDE.md invariant 4).
 
 ---
 
-## File 3: `coincidences_<config>.h5` — Stage B output (the deliverable)
+## File 3: Stage B output — `coincidences_<config>.csv` (the deliverable)
 
 Written by `stageB_detector`, one file per (detector config, realization).
-One row per accepted coincidence.
 
-### Datasets (columnar, all length C)
+### Columns — one row per accepted coincidence
 
-| path | type | meaning |
-|------|------|---------|
-| `/coincidences/hit1_xyz` | float32 [C,3] | DOI-resolved 3-D hit position (mm) |
-| `/coincidences/hit2_xyz` | float32 [C,3] | DOI-resolved 3-D hit position (mm) |
-| `/coincidences/e1` | float32 | deposited energy, hit 1 (keV) |
-| `/coincidences/e2` | float32 | deposited energy, hit 2 (keV) |
-| `/coincidences/t1` | float64 | timestamp, hit 1 (ns) — for TOF |
-| `/coincidences/t2` | float64 | timestamp, hit 2 (ns) — for TOF |
-| `/coincidences/truth` | int8 | 0 = true, 1 = phantom scatter, 2 = random, −1 = not classified |
+| column | type | meaning |
+|--------|------|---------|
+| `hit1_x_mm`, `hit1_y_mm`, `hit1_z_mm` | float32 | DOI-resolved 3-D hit position |
+| `hit2_x_mm`, `hit2_y_mm`, `hit2_z_mm` | float32 | DOI-resolved 3-D hit position |
+| `e1_keV`, `e2_keV` | float32 | deposited energies |
+| `t1_ns`, `t2_ns` | float64 | timestamps — for TOF |
+| `truth` | int8 | 0 = true, 1 = phantom scatter, 2 = random, −1 = unclassified |
 
-### Root attributes
+### Companion `coincidences_<config>_meta.csv` (one wide row)
 
-| name | type | meaning |
-|------|------|---------|
-| `detector_config` | string | e.g. `"CRYSP_baseline"`, `"LYSO"`, `"BGO"` |
-| `geometry_json` | string | JSON blob with ring Ø, AFOV, crystal dims, σ_E, σ_t, DOI res |
-| `energy_window_keV` | float64 [2] | [low, high] |
-| `coinc_time_window_ns` | float64 | |
-| `source_file` | string | the sampled-events file consumed |
-| `Nj_budget` | int64 [5] | copied from the source file |
-| `realization_index` | uint64 | copied from the source file |
-| `random_seed` | uint64 | seed of the Stage B run |
-| `geant4_version` | string | |
-| `units_position`, `units_energy`, `units_time` | string | `"mm"`, `"keV"`, `"ns"` |
+`detector_config` (e.g. `CRYSP_baseline`/`LYSO`/`BGO`), geometry params (ring Ø,
+AFOV, crystal dims, σ_E, σ_t, DOI res), `energy_window_lo_keV`,
+`energy_window_hi_keV`, `coinc_time_window_ns`, `source_file`, `Nj_budget_0..4`,
+`realization_index`, `random_seed`, `geant4_version`.
 
 ### Invariants
-
 - Reconstruction (Stage C) consumes **only this file** — never Geant4 truth
-  (CLAUDE.md invariant 5). The `truth` column is for our own diagnostics; a
+  (CLAUDE.md invariant 5). The `truth` column is for our diagnostics; a
   reconstructor must work with it removed.
