@@ -1,0 +1,613 @@
+                                                                                  Int. J. Radiation Oncology Biol. Phys., Vol. 71, No. 3, pp. 945–956, 2008
+                                                                                                                            Copyright Ó 2008 Elsevier Inc.
+                                                                                                                     Printed in the USA. All rights reserved
+                                                                                                                           0360-3016/08/$–see front matter
+
+                                                   doi:10.1016/j.ijrobp.2008.02.033
+
+
+
+
+PHYSICS CONTRIBUTION
+
+           COMPARISON BETWEEN IN-BEAM AND OFFLINE POSITRON EMISSION
+          TOMOGRAPHY IMAGING OF PROTON AND CARBON ION THERAPEUTIC
+          IRRADIATION AT SYNCHROTRON- AND CYCLOTRON-BASED FACILITIES
+
+                KATIA PARODI, PH.D.,* THOMAS BORTFELD, PH.D.,y AND THOMAS HABERER, PH.D.*
+                * Heidelberg Ion-Beam Therapy Centre, Heidelberg, Germany; and y Massachusetts General Hospital and
+                                              Harvard Medical School, Boston, MA
+
+         Purpose: The benefit of using dedicated in-beam positron emission tomography (PET) detectors in the treatment
+         room instead of commercial tomographs nearby is an open question. This work quantitatively compares the mea-
+         surable signal for in-beam and offline PET imaging, taking into account realistic acquisition strategies at different
+         ion beam facilities. Both scenarios of pulsed and continuous irradiation from synchrotron and cyclotron acceler-
+         ators are considered, because of their widespread use in most carbon ion and proton therapy centers.
+         Methods and Materials: A mathematical framework is introduced to compare the time-dependent amount and
+         spatial distribution of decays from irradiation-induced isotope production. The latter is calculated with Monte
+         Carlo techniques for real proton treatments of head-and-neck and paraspinal tumors. Extrapolation to carbon
+         ion irradiation is based on results of previous phantom experiments. Biologic clearance is modeled taking into ac-
+         count available data from previous animal and clinical studies.
+         Results: Ratios between the amount of physical decays available for in-beam and offline detection range from 40%
+         to 60% for cyclotron-based facilities, to 65% to 110% (carbon ions) and 94% to 166% (protons) at synchrotron-
+         based facilities, and increase when including biologic clearance. Spatial distributions of decays during irradiation
+         exhibit better correlation with the dose delivery and reduced influence of biologic processes.
+         Conclusions: In-beam imaging can be advantageous for synchrotron-based facilities, provided that efficient PET
+         systems enabling detection of isotope decays during beam extraction are implemented. For very short (<2 min)
+         irradiation times at cyclotron-based facilities, a few minutes of acquisition time after the end of irradiation are
+         needed for counting statistics, thus affecting patient throughput. Ó 2008 Elsevier Inc.
+
+         Ion therapy, Positron emission tomography.
+
+                     INTRODUCTION                                         several institutions are considering the establishment of PET
+Positron emission tomography (PET) has been suggested by                  quality assurance at existent or upcoming ion beam therapy
+several investigators as a valuable tool for in vivo, noninva-            facilities worldwide. The optimal implementation is still
+sive confirmation of the treatment delivery in ion beam ther-             a topic of debate.
+apy (1–6). The method exploits the b+-activity produced in                    Similar to the first prototype (14), in-beam PET detectors
+nuclear interactions between the ions and the irradiated tis-             inside the treatment room are the method of choice for acqui-
+sue. Phantom experiments (7–10) and clinical trials (11,                  sition in treatment position—ideally in real-time during irra-
+12) performed during (in-beam) or shortly after (offline) irra-           diation—and for detection of the activity contribution from
+diation with carbon ion and proton beams indicate 1- to 2-mm              short-lived emitters such as 15O (half-life T1/2=121.8s).
+achievable accuracy for verification of the beam range in rig-            This solution is clinically implemented at the Gesellschaft
+idly immobilized sites. Use of PET imaging can also enable                für Schwerioneneforschung (GSI), Darmstadt, Germany,
+within-millimeter control of the lateral field position (1, 6,            for therapy with stable carbon ion beams (2, 11). A similar
+8–10) and detection of deviations between planned and ap-                 experimental installation was developed at the secondary
+plied treatment, e.g., because of minor misalignments or local            beam course of the Heavy Ion Medical Accelerator in Chiba,
+changes of the patient anatomy or physiology (13). Therefore              Japan, for range verification of implanted radioactive beams
+
+   Reprint requests to: Katia Parodi, Ph.D., Heidelberg Ion-Beam          of the proton treatments. The authors also thank Jürgen Debus (Hei-
+Therapy Centre, Im Neuenheimer Feld 450, 69120 Heidelberg,                delberg University Clinic, Heidelberg, Germany) and Wolfgang
+Germany. Tel: (+49) 62215638239, Fax: (+49) 6221568739;                   Enghardt (Oncoray and Forschungszentrum Rossendorf, Dresden,
+E-mail: Katia.Parodi@med.uni-heidelberg.de                                Germany), for fruitful discussions.
+   Conflict of interest: none.                                               Received Aug 16, 2007, and in revised form Dec 28, 2007.
+Acknowledgments—The authors acknowledge Harald Paganetti                  Accepted for publication Feb 5, 2008.
+from Massachusetts General Hospital for providing the phase-space
+                                                                    945
+946                    I. J. Radiation Oncology d Biology d Physics   Volume 71, Number 3, 2008
+
+
+(15). A third is under development in Kashiwa, Japan, for                Therefore, this study aims to investigate the advantage of
+verification of proton treatments (9).                                in-beam against offline PET imaging for each individual
+   As a technical challenge, integration into the treatment en-       ion species (1H, 12C) and accelerator system. In addition to
+vironment poses geometric constraints because of the need of          the synchrotron-based facilities at GSI and HIT, we include
+an opening for the beam portal (and exit cone of light frag-          conventional cyclotrons coupled to passive beam shaping
+ments for heavy ions) and flexible patient positioning, typi-         systems as widely used in most proton therapy centers. There
+cally resulting in dual-head configurations. Furthermore              is, however, no aim to compare, e.g., PET imaging of syn-
+production of background radiation during beam extraction             chrotron-based carbon ion treatments against protons at
+(2, 3, 16) and sensitivity of PET imaging to the time course          cyclotron-based facilities.
+of irradiation (especially for dynamic beam application) de-
+mand synchronization of the PET data acquisition with the                            METHODS AND MATERIALS
+beam control system (11). To date, the former problem re-
+stricts usable ‘‘in-beam’’ detection during the pauses of             Production of b+-emitters
+pulsed beam delivery (2, 3, 11) or directly after continuous             Amount and spatial distribution of irradiation-induced b+-emitters
+irradiation (3, 9), although solutions have already been pro-         were obtained from CT-based Monte Carlo (MC) calculations (19)
+                                                                      for head-and-neck and paraspinal tumors treated with proton beams
+posed and successfully tested (17).
+                                                                      at Massachusetts General Hospital (MGH) in Boston, MA (12). This
+   A technically less demanding alternative is offered by
+                                                                      approach provides more accurate isotope identification, at the ex-
+commercial full-ring PET scanners, measuring the activity             pense of computing time (19), in comparison to carbon ion modeling
+contribution from long-lived emitters such as 11C (T1/                as described by Pönisch et al. (20), which adapts b+-emitter yield in
+2=1223s) shortly after treatment (offline). This approach             polymethylmethacrylate (C5H8O2) to the patient anatomy by means
+uses resources which are typically located outside the treat-         of stretching and weighting algorithms. Moreover the b+-activity
+ment room and can serve other applications besides ion                pattern induced by light ions like protons is more sensitive to the in-
+beam quality assurance. The method becomes particularly               fluence of the time course of beam delivery and data acquisition. This
+attractive with devices combining PET and computed tomog-             results from the limitation to b+-activation of target fragments of the
+raphy (CT) (10, 12). The additional CT enables accurate co-           irradiated tissue (8). Besides the production channels of 11C, 15O,
+                                                                      13
+                                                                         N, 38K, 30P, and 14O considered by Parodi et al. (19),10C yield
+registration between the treatment and imaging position,
+                                                                      from proton interaction on 12C was included based on the experimen-
+compensating for unavoidable patient movement caused by
+                                                                      tal cross-sections described elsewhere (21, 22).
+transportation and/or repositioning. Moreover it allows de-              The integral isotope production induced by carbon ion beams was
+tection of morphologic modifications with respect to the              extrapolated from the proton clinical cases, based on experimental
+planning CT, which is used in in-beam PET imaging for cal-            b+-emitter yield after proton and carbon ion irradiation of organic
+culation of the attenuation map and co-registration to the            targets at the same penetration depth. According to data from Parodi
+patient anatomy.                                                      et al. (5) and Fiedler et al. (23), the scaling formalism of Sihver et al.
+   The imaging performances are mostly conditioned by the             (24), and additional MC calculations, a ratio of 2.5 was assumed be-
+geometrical detector arrangement and the severity of lim-             tween the production of target fragments induced by the same
+ited-angle artifacts (18). The second major factor is counting        amount of primary carbon ions and protons at the same range. An
+                                                                      additional average-enhancing factor of 2 and 4 was applied to the
+statistics (18), which, for a given fractionation scheme and
+                                                                      yield of 11C and 10C induced by 12C irradiation, to account for the
+detector arrangement, depends on the time course of the
+                                                                      possible formation as target and projectile fragments. The yield in-
+beam delivery and PET acquisition. In both in-beam and off-           duced by the same amount of primary carbon ions was finally scaled
+line imaging scenarios, prolongation of the measuring time            down with the 20-fold lower fluence required for delivery of the
+for the sake of statistics is limited. For detectors inside the       same physical dose as protons (4). Normalization to the same bio-
+treatment room, this results from the requirement of efficient        logic dose would require a further downscaling by the ratio r z 1
+patient throughput. For offline imaging at remote sites, major         3 between the relative biologic effectiveness of carbon ions and
+restrictions come from considerations of patient comfort. Fi-         protons. However this factor was omitted because it can vary sub-
+nally biologic clearance and/or transport of the produced ac-         stantially and is still subject to clinical debate. Note that this simpli-
+tivity increases with the time after treatment, affecting the         fication does not affect our relative comparison between in-beam
+                                                                      and offline PET imaging of carbon ion data. A detailed direct com-
+spatial distribution and the intensity of the measurable signal.
+                                                                      parison between proton and carbon ion induced activation is beyond
+   At the upcoming Heidelberg Ion-Beam Therapy (HIT)
+                                                                      the scope of this work.
+Centre in Heidelberg, Germany, we are evaluating the inte-
+gration of the in-beam PET scanner, which has been devel-
+oped and operated at the GSI experimental therapy unit by             Mathematical framework
+the Forschungszentrum Dresden-Rossendorf (11). In com-                   The number of isotopes decayed in different acquisition windows
+                                                                      was modeled under the assumption of constant activation during
+parison to GSI, the dedicated synchrotron of the new hospi-
+                                                                      irradiation of fixed parameters. This approximation disregards,
+tal-based facility is designed for more efficient use of its          e.g., temporal variations of the beam energy, position, and inten-
+duty cycle in combination with the active beam delivery sys-          sity, as well as the adjustment of individual pulse lengths in the
+tem. This will result in shorter treatment times with reduced         active beam delivery at the GSI and HIT synchrotrons. Similarly
+pauses during the pulsed beam delivery, compromising the              it neglects minor dynamic effects of passive modulation, e.g.,
+counting statistics of in-beam PET imaging.                           via a rotating wheel, for most cyclotron-based proton centers.
+                                          In-beam and offline PET imaging at different ion beam facilities d K. PARODI et al.                                         947
+
+
+The advantage is to allow a considerable simplification of the                           If the acquisition is prolonged for a short time tend directly after the
+mathematical formalism without impairing the comparative goal                          end of irradiation (Fig. 1a), as it is done at GSI in the 40 s needed
+of this study.                                                                         by the medical staff to enter the treatment site for changing the
+   Synchrotron. Similar to the report by Parodi et al. (5), a recur-                   patient position (11), additional decays Nj,end can be collected:
+sive model was used to describe the isotope build-up and decay
+during a synchrotron-based beam delivery, consisting in repeti-                                               Kj                           SX1
+                                                                                                   Nj;end ¼        1  elj ts 1  elj tend        eilj textr       (6)
+tion of pulses (spills) of duration ts followed by pauses of dura-                                            lj                                i¼0
+tion tp at a fixed extraction period textr=ts+tp (Fig. 1a). The main
+ingredients are (a) the formation and decay of activity Aj be-                           Similarly the amount Nj,off of decays from isotopes of species j in
+cause of the constant production rate Kj of b+-emitters j of de-                       an offline acquisition window tmeas starting with a delay tdel after end
+cay constant l j during irradiation, which is expressed in the first                   of irradiation is:
+spill by:
+                                                                                                          Kj                                    X
+                                                                                                                                                    S1
+
+                                                                                             Nj;off ¼       1  elj ts elj tdel 1  elj tmeas      e-ilj textr   (7)
+                    Aj ðtÞ ¼ Kj 1  e     lj t
+                                                     0 # t # ts ;              (1)                        lj                                        i¼0
+
+
+  (b) the subsequent activity decay between the beam pulses,
+e.g., during the first pause:                                                             Cyclotron. The formulas for PET imaging at a continuous cyclo-
+                                                                                     tron-based irradiation (Fig. 1b) can be derived from Eq. 4, 6, and 7 of
+           Aj ðtÞ ¼ Kj 1  elj ts elj ðtts Þ ts \ t \ textr; (2)                    a synchrotron-based beam delivery with only one spill of duration ts
+                                                                                       equal to the total irradiation time tirr (i.e., S =1 and textr=ts=tirr).
+  and (c) the superimposition between newly formed activity and
+decays from activity produced in previous beam pulses for the spills                   Biologic decay
+after the first extraction cycle. The production rate Kj of each j spe-                    Biologic processes of radiation-induced b+-activity are a complex
+cies is given by the MC-calculated isotope production Pj divided by                    problem because of the unknown molecular forms. Nonetheless the
+the total beam-on time, i.e., Kj = Pj /(S$ts) for S spills.                            formalism of Mizuno et al. (25), in combination with data from an-
+   The number Nj of decays from isotopes of species j in an acqui-                     imal studies with stable or radioactive carbon ion beams (25, 26)
+sition interval Dt starting at a time t can be finally deduced (assum-                 and their empirically driven extension to human tissue, provided rea-
+ing a 100% b+-decay branching ratio) as:                                               sonable results in clinical offline PET/CT imaging after proton radio-
+                                          ð tþDt                                       therapy (12). Because of the 14 to 20 min elapsed between irradiation
+                           Nj ðt; DtÞ ¼             Aj ðt0 Þdt0                (3)     and imaging, that clinical study was sensitive only to the slow com-
+                                            t                                          ponent of biologic washout (biologic half-life T1/2bio,s3,000–
+                                                                                       10,000 s). Thus the modeling described by Parodi et al. (12)
+  Following this formalism, the number of in-beam decays from
+                                                                                       is here extended to include the documented existence of fast
+a given isotope species j can be split into the component Nj,spill
+                                                                                       (T1/2bio,f2–10 s) and medium (T1/2bio,m100–200 s) processes (25).
+decayed during the S beam pulses:
+                                                                                           The MC-simulated isotope P production Pj(r) is decomposed into
+                                                 X
+                                                 S1                                   three fractions Ml(r)Pj(r) ( lMl(r)=1 cr) undergoing fast (f), me-
+                       Kj               2
+Nj;spill ¼ SDspill þ      ð1  elj ts Þ elj tp     ðS  iÞeði1Þlj textr ; where    dium (m), and slow (s) biologic decay with a biologic half-life T1/2,bi-
+                       lj                        i¼1                                   o,l(r). Note that Ml(r) and T1/2,bio,l(r) are regarded as tissue specific
+                    Kj                                                                 (i.e., space dependent), and distinctions in the metabolism of indi-
+Dspill ¼ K j ts       ð1-elj ts Þ;
+                    lj                                                                 vidual isotope species j are neglected (25). Similar to the report by
+                                                                               (4)     Parodi et al. (12), thresholds were set on the planning CT for iden-
+                                                                                       tification of fat (150 # Hounsfield Units [HU] # 30), soft bone
+  and into the component Nj,pause decayed during the S -1 beam
+                                                                                       (200 # HU < 1,000), and compact bone (HU $1,000). In these tis-
+pauses:
+                                                                                       sues, the values of Parodi et al. (12) were used for the slow compo-
+                 Kj                        X
+                                               S1                                     nents of the biologic parameters, whereas assumptions based on
+    Nj;pause ¼        1  elj ts 1  elj tp      ðS  iÞeði1Þlj textr      (5)     trends in literature data (25, 26) were used for the fast and medium
+                 lj                            i¼1                                     components. In all the remaining tissues, the animal data of brain
+
+
+
+
+          Fig. 1. Considered time structure of irradiation delivered by a synchrotron (left, a) and a continuous-wave cyclotron (right,
+          b). Grey squares indicate beam-on status. Time intervals t correspond to definitions given in text. ‘‘In-beam’’ PET imaging
+          includes data decayed during and shortly after irradiation. Offline acquisition is started with a delay tdel after irradiation.
+948                                   I. J. Radiation Oncology d Biology d Physics   Volume 71, Number 3, 2008
+
+
+      Table 1. Values used for the fast (f), medium (m) and slow (s)                 spinal tumors treated with multi-field irradiation at the proton
+        biologic decay properties (M: fraction, T1/2,bio: biologic                   therapy unit at MGH. The selected fields were chosen be-
+                   half-life) of different tissue types
+                                                                                     cause they do not necessarily require a beam gantry, which,
+                    Fast decay               Medium decay         Slow decay         for example, is not available at GSI. The data were normal-
+                                                                                     ized to the delivery of a typical field dose of 1 Gy.
+Tissue type Mf T1/2, bio,f (s) Mm T1/2, bio,m (s) Ms T1/2, bio,s (s)                    The corresponding spatial distributions of the most abun-
+Hard bone 0.05                 20          0.05        300     0.9z  15,000z         dant positron emitters are depicted in Figs. 3 and 4 in the
+                                                                   z
+Soft bone 0.2                  15          0.2         250     0.6    8,000z         same isocenter coronal slice of Fig. 2. This choice corre-
+Fat       0.05                 20          0.05        300     0.9z  15,000z         sponds to the plane which is imaged with best quality by
+Muscle    0.3*                10*          0.15*      195*     0.55* 3,500*          dual-head PET scanners adapted to treatment sites with hor-
+Brain     0.35*                2*          0.3*       140*     0.35* 10,000*
+                                                                                     izontal beam delivery and rotating table (11). The integral
+   Values marked by *were approximated from [25], whereas zrefers                    amount of all the considered b+-emitters is summarized in
+to [12].                                                                             Table 2, together with extrapolation to the carbon ion case.
+and thigh muscle from Mizuno et al. (25) were used for head and                         Comparison of detectable decays for different beam deliv-
+paraspinal sites, respectively (Table 1).                                            ery and imaging strategies
+   To account for the competing processes of activity formation                         Irradiation and PET acquisition. Table 3 summarizes the
+(during irradiation) and physical as well as biologic decay, the basic               time parameters that have been inserted in equations (4–7) for
+equations (1) and (2) have to be modified into:                                      determination of the measurable decays from the calculated
+             X3
+                      lj                                                           isotope production.
+ Aj ðr; tÞ ¼                  Ml ðrÞKj ðrÞ 1  eðlj þlbio;l ðrÞÞt
+             l¼1 lj þ lbio;l r
+                                                                                        For in-beam PET imaging at GSI, the current acquisition
+                0 # t # ts ;                                                  ð8Þ    strategy was taken into account, which uses events decayed
+                                                                                     during the synchrotron pauses and in the 40 s immediately af-
+                                                                                   ter the end of the irradiation (11). From the clinical experi-
+               X
+               3
+                        lj
+ Aj ðr; tÞ ¼                    Ml ðrÞKj ðrÞ 1  eðlj þlbio;l ðrÞÞts              ence, the average treatment time per field was set to 10 min,
+               l¼1 lj þ lbio;l r                                                     consisting of 120 spills of 1-s duration followed by 4-s pauses.
+                eðlj þlbio;l ðrÞÞt     ts \ t \ textr;                       ð9Þ       For in-beam acquisitions at the upcoming HIT facility,
+                                                                                     90% recovery of the events decayed during the beam pulses
+where lbio,l(r) = loge(2)/T1/2,bio,l(r). It follows that for each l phase of
+biologic decay, the formulae (4–7) still hold, provided that the sub-                was assumed to be possible by implementation of the techni-
+stitutions lj/ lj + lbio,l and Kj/MlKj lj /(lj + lbio,l) are introduced.             cal solution of Crespo et al. (17). Besides standard detection
+Thus, the total number of b+-decays under consideration of biologic                  of decays in the beam pauses, the measuring time directly af-
+washout can be obtained from summation of the results individually                   ter treatment was increased to 60 s. This is a compromise be-
+calculated for the fast, medium, and slow processes, using the pro-                  tween the need for high patient throughput and the reduction
+posed modification of formulas (4–7) with the tissue-dependent pa-                   of statistics counting because of the shorter acquisition time.
+rameters shown in Table 1.                                                           The latter is caused by the more efficient use of the accelera-
+                                                                                     tor and active beam delivery system, which was taken into ac-
+                                        RESULTS
+                                                                                     count by assuming 3-min irradiation consisting in repetitions
+                        +
+Production of b -emitters                                                            of 1.5-s spills and 1.5-s pauses.
+   The MC-calculated dose distributions of individual portals                           The PET imaging of treatments delivered by continuous-
+are shown in Fig. 2 for clinical cases of skull-base and para-                       wave cyclotrons is limited more acutely from the problem
+
+
+
+
+            Fig. 2. Computed tomography (CT)–based Monte Carlo (MC) calculations of the planned proton dose for a lateral and an
+            oblique portal delivered to a skull-base (left) and a T-spine (right) tumor. The MC output was normalized to a typical frac-
+            tion dose of 1Gy (color bar in mGy). The planning CT is shown in grey scale, arbitrarily normalized for display purposes.
+                                In-beam and offline PET imaging at different ion beam facilities d K. PARODI et al.                       949
+
+
+
+
+         Fig. 3. Calculated spatial distribution of the most abundant 11C, 15O, 13N, and 10C positron emitters produced by 1-Gy
+         proton irradiation of a skull-base tumor (Fig. 2, left). Color bar displays isotope concentrations in units of 103/ml. Grey
+         scale displays arbitrarily rescaled CT numbers.
+
+
+of background production during ion extraction, making ‘‘in-                 lower (40–60% in the considered example) than that detectable
+beam’’ acquisition impossible unless the solution of Crespo                  over several minutes in offline imaging shortly after treatment.
+et al. (17) is implemented. The duration itself of the irradia-                 For the typically longer treatment times of synchrotron-
+tion, which determines the available time window for                         based facilities with active beam delivery, the number of
+‘‘in-beam’’ detection, is also typically very short. Based on                measurable decays during online imaging is comparable to
+experience from MGH (10, 12), it was set to 60 s. To inves-                  or even larger than (up to a factor of 1.7) that detectable off-
+tigate the maximum achievable signal, the calculations were                  line over a 3- to 10-fold longer acquisition window starting
+done for the ideal assumption of complete (i.e., 100%) recov-                just 5 min after end of irradiation in the proton case. This is
+ery of decays occurred during beam extraction. Prolongation                  because about 70% to 85% of the decays collected in both
+of the acquisition directly after end of irradiation was limited             in-beam and offline acquisition is caused by the main yield
+to 40 s, however, which already corresponds to 67% of the                    of 15O and 11C, respectively, which turned out to be very sim-
+beam delivery time.                                                          ilar for the considered proton treatments (Figs. 5 and 6; Table
+   For offline PET imaging, 30-min acquisition, starting 5                   2). In the case of carbon ion irradiation, the increased ratio of
+                                                                             11 15
+min after application of the treatment field, was assumed in                   C/ O production penalizes the available signal for online
+all scenarios.                                                               detection in comparison to offline PET imaging. This is espe-
+   Quantitative yield of measurable decays. The spatially in-                cially evident for the shorter irradiation times achievable at
+tegrated amount of physical (i.e., neglecting biologic consid-               the HIT facility. In the latter scenario, a ratio of 65% to
+erations) decays from the main contributing isotopes is                      75% was found between the amount of detectable decays
+separately shown in Figs. 5 and 6 for the different irradiation              during in-beam and offline PET acquisitions, against the
+and imaging modalities. The total amount from the entire iso-                value of 97% to 110% obtained for delivery of the same car-
+tope yield is summarized in Table 4.                                         bon ion treatments at the GSI synchrotron.
+   These data indicate that for an irradiation time shorter than                Changes of the integral quantitative estimates resulting
+the 2-min half-life of 15O as in the considered cyclotron case,              from biologic considerations are shown in Table 5 for proton
+even the maximum (i.e., assuming ideal full recovery of the in-              irradiation. According to these calculations, biologic clear-
+beam decays) measurable in-beam PET signal is significantly                  ance is found to reduce the measurable signal by about
+950                        I. J. Radiation Oncology d Biology d Physics       Volume 71, Number 3, 2008
+
+
+
+
+             Fig. 4. Calculated spatial distribution of the most abundant 11C, 15O, 13N, and 10C positron emitters produced by 1-Gy
+             proton single-field irradiation of a T-spine chondrosarcoma (Fig. 2, right). Interpretation of the grey/color bar is the
+             same as in Fig. 3.
+
+
+30% to 40% and by 20% to 30% for in-beam imaging of head                      time by a factor of 3.3 and the increase of the accelerator
+and paraspinal sites, respectively. The corresponding reduc-                  duty cycle from 20% to 50%. These estimations however de-
+tion for offline imaging amounts to about 55% and 45%.                        mand the recovery of a large fraction (90%) of data decayed
+This results in a less unfavorable ratio of about 70% to                      during the increased beam-on time via implementation of the
+90% (against 50–60%without biologic considerations) be-                       random suppression method of Crespo et al. (17), which is
+tween the amount of decays which can be detectable in                         currently unavailable at GSI. At the Heidelberg facility, the
+both in-beam and offline PET acquisitions at a cyclotron-                     decays during the spills are expected to contribute equally
+based proton facility. For proton synchrotron-based facilities,               to the measurable signal as those occurred during the acceler-
+a detectable signal up to a factor of 2.3 higher (vs. 1.7 without             ator pauses and in the 60 s immediately after the irradiation
+biologic considerations) is expected for in-beam PET imag-                    ends (Table 4). According to the ratio of spill and pause du-
+ing in comparison to offline acquisitions.                                    rations within each extraction cycle (Table 3), the signal de-
+   With respect to our main question on the applicability of                  tectable during the beam-on time accounts up to half of the
+in-beam PET at the more efficient HIT synchrotron, only                       entire measurable in-beam PET signal during irradiation, as
+a 20% (15% with biologic considerations) reduction of the                     opposed to the 20% potential contribution for the correspond-
+detectable in-beam signal is observed in comparison to the                    ing irradiation at GSI. Moreover an additional 20 s of acqui-
+GSI scenario, despite the decrease of the overall treatment                   sition after the end of irradiation can raise the measurable
+
+
+       Table 2. Calculated integral yield of b+-emitters produced by proton and carbon ion delivery of the treatment fields shown in Fig. 2
+                                  11               15                13                10                 14            30               38
+Ion              Site                  C             O                    N                 C                  O             P                K
+1
+ H              Head            7.7 107          9.4 107           9.4 106           1.6 106          5.5 105         6.3 105           7.4 105
+1
+ H              Spine           2.3 108          2.3 108           2.3 107           5.2 106          1.5 106         2.5 106           3.1 106
+12
+   C            Head            1.9 107          1.2 107           1.2 106           8.1 105          6.9 104         7.9 104           9.3 104
+12
+   C            Spine           5.9 107          2.8 107           2.9 106           2.6 106          1.9 105         3.1 105           3.9 105
+                                   In-beam and offline PET imaging at different ion beam facilities d K. PARODI et al.                        951
+
+
+   Table 3. Time parameters t substituted in equations 4–7 for                  of local concentrations may differ from the integral changes
+      the considered beam delivery and positron emission                        of Table 5), increasing biologic washout after isotope pro-
+                tomography imaging scenarios
+                                                                                duction further deteriorates the spatial correlation between
+                           In-beam                           Offline            activity and dose (Fig. 2). Especially in the case of head sites
+                                                                                (Figs. 7 and 8), activation of well-perfused brain tissue is al-
+Accelerator   ts (s)   tp (s)   tirr (s)   tend (s)   tdel (s)   tmeas (s)      most vanished in offline imaging. This results in a local activ-
+Cyclotron     60        0         60         40        300        1,800         ity maximum in the entrance channel because of high carbon
+Synch GSI      1        4        600         40        300        1,800         concentration in subcutaneous adipose tissue, as observed in
+Synch HIT      1.5      1.5      180         60        300        1,800         the work of Parodi et al. (12). Similar effects are found in par-
+  Abbreviations: GSI = Gesellschaft für Schwerioneneforschung                  aspinal sites (Fig. 9), where offline images again basically re-
+(Darmstadt, Germany); HIT = Heidelberg Ion-Beam Therapy                         flect the 11C activation map induced by proton treatments
+Center (Heidelberg, Germany); Synch = Synchrotron.                              (Fig. 3).
+                                                                                   For carbon ion irradiation, deformation of the activity map
+signal by a factor of about 1.4 with respect to the 40-s time                   in dependence of the imaging strategy, elemental tissue com-
+window that is currently exploited at GSI.                                      position and biologic clearance is expected to be less pro-
+   Spatial distributions of measurable decays. In terms of                      nounced than in the proton case shown. In fact, at least
+spatial distributions, the results presented in Figs. 7 to 9 for                (i.e., for in-beam) 25% to 30% contribution to the overall
+the most sensitive case of proton treatments show only a neg-                   measurable signal is attributed to the short- and long-lived
+                                                                                10
+ligible dependence on the different irradiation modality                           C and 11C projectile fragments (Table 2, Figs. 5 and 6),
+within the same in-beam or offline imaging approach. On                         which accumulate in the distal tumor region of interest for
+the contrary, a significant change of the activity map is ob-                   therapy monitoring.
+served between in-beam and offline imaging, regardless of
+whether biologic clearance is included. The former finding
+                                                                                                            DISCUSSION
+reflects the different spatial yield of activated 15O and 11C tar-
+get fragments (Figs. 3 and 4), which correlates with the ele-                     Despite the simplified assumption of constant irradiation
+mental distribution of oxygen and carbon in tissue. Besides                     parameters and the approximate extrapolation to carbon
+the reduction of the measurable signal (note that variations                    ions, this study can offer a valuable insight on the available
+
+
+
+
+         Fig. 5. Measurable physical decays from the main contributing 11C, 15O, 13N, and 10C (38K) isotopes as well as total
+         amount from all the calculated b+-emitters for in-beam (left) and offline (right) positron emission tomography (PET) imaging
+         of proton (top) and carbon ion (bottom) irradiation of a skull-base tumor (Fig. 2, left, and Table 2). Biologic considerations are
+         not included. In the left panel, in-beam contributions decayed during beam extraction (cyclotron and Heidelberg Ion-Beam
+         Therapy Centre [HIT] synchrotron), pauses (synchrotron only) and immediately after end of irradiation are separately shown
+         from bottom to top (see the sub-division of the bars into ‘‘Lego bricks’’.). GSI = Gesellschaft für Schwerioneneforschung.
+952                      I. J. Radiation Oncology d Biology d Physics     Volume 71, Number 3, 2008
+
+
+
+
+          Fig. 6. Total amount with separate individual main contributions of the measurable physical (i.e., without biologic con-
+          siderations) isotope decays during in-beam (left) and offline (right) positron emission tomography (PET) imaging of proton
+          (top) and carbon ion (bottom) treatment of a paraspinal tumor (Fig. 2, right, and Table 2). Again, different in-beam con-
+          tributions are separately shown (Fig. 5). GSI = Gesellschaft für Schwerioneneforschung.
+
+
+signal for in-beam and offline PET imaging at different ion               min after treatment. For similarly short (3 min) irradiation
+beam facilities. In particular it shows that, for very short              at the upcoming synchrotron-based HIT facility, in-beam
+(<2 min) irradiation at conventional cyclotron-based facili-              PET imaging followed by 60-s acquisition after end of irradi-
+ties, suppression of random coincidences during beam deliv-               ation can provide a stronger or at least comparable signal as
+ery, and a few minutes of acquisition time immediately after              10 times longer offline acquisition. This however requires ef-
+irradiation are essential to compete with the amount of signal,           ficient recovery of events decayed during the real ‘‘beam-on’’
+which, e.g., can be measurable offline for 30 min starting 5              time via random suppression techniques. The comparison
+
+                               Table 4. Amounts of physical decays available for imaging at various facilities
+
+                                                                                      In-beam
+
+Ion             Site             Accelerator               Spill             Pause                End               Total*             Offline
+1
+ H             Head              Cyclotron                1.7 107           —                   1.9 107             3.6 107            6.1 107
+1
+ H             Head              Synch GSI                1.7 107           6.7 107             7.4 106             7.5 107            4.5 107
+1
+ H             Head              Synch HIT                2.1 107           2.1 107             2.1 107             6.0 107            5.6 107
+12
+   C           Head              Cyclotron                2.7 106           —                   2.8 106             5.5 106            1.3 107
+12
+   C           Head              Synch GSI                2.5 106           1.0 107             1.1 106             1.1 107            1.0 107
+12
+   C           Head              Synch HIT                3.1 106           3.1 106             3.0 106             8.9 106            1.2 107
+1
+ H             Spine             Cyclotron                4.3 107           —                   4.8 107             9.1 107            1.8 108
+1
+ H             Spine             Synch GSI                4.3 107           1.7 108             1.9 107             1.9 108            1.3 108
+1
+ H             Spine             Synch HIT                5.2 107           5.2 107             5.1 107             1.5 108            1.6 108
+12
+   C           Spine             Cyclotron                7.0 106           —                   7.2 106             1.4 107            3.7 107
+12
+   C           Spine             Synch GSI                6.6 106           2.6 107             3.0 106             2.9 107            3.0 107
+12
+   C           Spine             Synch HIT                8.1 106           8.0 106             7.6 106             2.3 107            3.5 107
+
+   Abbreviations: GSI = Gesellschaft für Schwerioneneforschung (Darmstadt, Germany); HIT = Heidelberg Ion-Beam Therapy Center
+(Heidelberg, Germany); Synch = Synchrotron.
+   In-beam events during the spills, pauses, and immediately after end of irradiation are separately reported.
+   *Total amount refers to the acquisition scheme (i.e., in-spill decays are not measured at GSI, whereas a 90% and 100% recovery is assumed at
+the HIT synchrotron and at a continuous-wave cyclotron, respectively).
+                                    In-beam and offline PET imaging at different ion beam facilities d K. PARODI et al.                       953
+
+
+      Table 5. Measurable decays for in-beam and offline positron                   For clarity, the data analysis was limited to single-field ir-
+       emission tomography imaging of proton irradiation when                    radiation at a typical physical dose of 1 Gy. The results can be
+              taking biologic considerations into account
+                                                                                 scaled approximately linearly with the number of fields and
+                       (no washout vs. washout)
+                                                                                 applied dose, provided that the duration of each irradiation
+                                  In-beam                  Offline               and the time interval between the individual portals are short
+                                                                                 in comparison to the isotope half-lives and similar for the dif-
+                             No              No
+Ion     Site   Accelerator washout Washout washout Washout                       ferent facilities. For example, doubling the dose with a 2-min
+                                                                                 interval between redelivery of the same fields would increase
+1
+ H     Head    Cyclotron     3.6 107    2.4 107     6.1 107    2.7 107           the offline PET signal (physical decay) by a factor of 1.6 to
+1
+ H     Head    Synch GSI     7.5 107    4.4 107     4.5 107    1.9 107           1.8. Of course, in-beam PET imaging of multi-field irradia-
+1
+ H     Head    Synch HIT     6.0 107    3.8 107     5.6 107    2.4 107
+1
+ H     Spine   Cyclotron     9.1 107    7.2 107     1.8 108    1.0 108           tion can provide separate detection of the first field as well
+1
+ H     Spine   Synch GSI     1.9 108    1.3 108     1.3 108    7.2 107           as cumulative distribution of all the portals. The latter can
+1
+ H     Spine   Synch HIT     1.5 108    1.1 108     1.6 108    9.2 107           be obtained from co-registration and superimposition of the
+                                                                                 individual acquisitions taken in the different treatment posi-
+  Abbreviations: GSI = Gesellschaft für Schwerioneneforschung
+(Darmstadt, Germany); HIT = Heidelberg Ion-Beam Therapy                          tions. On the contrary, the offline approach can only image
+Center (Heidelberg, Germany); Synch = Synchrotron.                               the integral activation from the whole treatment. Depending
+                                                                                 on the overlap of the fields, this may result in loss of informa-
+                                                                                 tion on the distal range. Furthermore it can imply a severe
+becomes even more in favor of in-beam PET for synchrotron-                       deterioration of the signal formed by the first delivered
+based deliveries with longer irradiation times and extensive                     fields, depending on the time elapsed between irradiation
+beam pauses, as is currently the case at GSI. In all scenarios,                  and imaging (12).
+in-beam PET imaging enables detection of the significant ac-                        The data shown represent the number of decays that are
+tivity contribution from the 15O yield (Figs. 5, 6), which, in                   potentially available for detection. Assuming an attenuation
+the proton cases considered, was found to equal the 11C pro-                     of 80% and a detection efficiency of 4%, a total of 107
+duction and to have a more homogeneous distribution in tis-                      to 108 decays would correspond to 80,000 to 800,000
+sue (Figs. 3, 4).                                                                coincidences to be collected over the whole acquisition, con-
+   Furthermore, in-beam imaging is less affected by the                          sistently with the numbers quoted in Crespo et al. (18) and
+degradation of the signal resulting from washout (Table 5,                       observed in Parodi et al. (12). The achievable counting statis-
+Figs. 7–9).                                                                      tics is therefore far below the typical values of nuclear
+
+
+
+
+            Fig. 7. Spatial distribution of isotope decays available for in-beam positron emission tomography (PET) acquisitions dur-
+            ing proton irradiation of a cranial-base tumor (Fig. 2, left) at cyclotron- (left) and synchrotron-based (middle, Gesellschaft
+            für Schwerioneneforschung [GSI]; right, Heidelberg Ion-Beam Therapy Centre [HIT]) facilities. Calculations exclude (top
+            row) or take into account (bottom) biologic considerations. Color bar indicates decays concentrations in units of 103/ml.
+            Grey scale depicts arbitrarily rescaled CT numbers.
+954                     I. J. Radiation Oncology d Biology d Physics         Volume 71, Number 3, 2008
+
+
+
+
+         Fig. 8. Calculated spatial distribution of isotope decays to be detected offline after proton irradiation of a cranial base tumor
+         (Fig. 2, left) at cyclotron-based (left) and synchrotron-based (middle, Gesellschaft für Schwerioneneforschung [GSI]; right,
+         Heidelberg Ion-Beam Therapy Centre [HIT]) facilities when excluding (top row) or taking into account (bottom) biologic
+         considerations. Interpretation of grey scale and color bar is the same as for Fig. 7.
+
+
+medicine tracer imaging. Thus even a few percent reduction                   sue. However, similar to the report by Crespo et al. (17),
+of the available signal in dependence of the acquisition strat-              identification of this contribution and evaluation of its impact
+egy may have significant consequences on the quality of the                  has been omitted from this work because of lack of experi-
+reconstructed images and related usable information for the                  mental information.
+purpose of treatment verification.
+   Although attenuation and scattering of the annihilation
+                                                                                                     CONCLUSIONS
+photons in the patient are the same for all imaging strategies,
+detection efficiency and imaging performances are strongly                      We have presented a comparison of the measurable in-
+dependent on the choice of the detector system. Because of                   beam and offline PET signal for single treatment fields of
+the typically small (16 cm) axial coverage of commercial                    head-and-neck and paraspinal tumor sites, considering differ-
+scanners, large-area dedicated detectors may still be compet-                ent beam delivery and imaging approaches at cyclotron- and
+itive in terms of detection efficiency. Instead, limited-angle               synchrotron-based ion beam facilities. These data can assist
+artifacts irreversibly compromise the achievable image qual-                 other institutions in evaluating the optimal implementation
+ity almost independently from the available statistics, thus                 of PET quality assurance in ion therapy. The values must
+calling for careful design. Both aspects were exhaustively                   be interpreted taking into account the specific fractionation
+covered in the report by Crespo et al. (18) and therefore omit-              scheme and the properties of the PET imaging systems under
+ted in this study. Finally, for true in-beam acquisitions during             investigation, with particular emphasis on imaging perfor-
+the ‘‘beam-on’’ time, an ideal 100% recovery of signal was                   mances and detection efficiency.
+considered as the ‘‘best case’’ scenario at continuous-wave                     Under the assumption of the same dose delivery and com-
+cyclotrons. A more realistic value (e.g., 90%) for the MGH                   parable detector equipments, this study indicates a 15% to
+cyclotron would lower the discussed ratios between in-                       20% loss of counting statistics for in-beam imaging at an
+beam and offline measurable decays by 3% to 5%. For the                      efficient synchrotron-based facility such as HIT in compar-
+HIT synchrotron, the assumption of 90% in-beam signal re-                    ison to the current situation at GSI. Nonetheless in-beam
+covery was based on previously reported experimental data                    PET acquisition at HIT is still expected to provide a stron-
+(16, 17). In both scenarios, in-beam random suppression                      ger, or at least comparable, signal with better correlation
+techniques will also enable detection of millisecond-short–                  with the delivered dose (especially for light ions like pro-
+lived emitters (e.g., 8B, 12N), which have typically higher                  tons) in comparison to offline approaches. This estimation
+b+-endpoint and corresponding longer positron range in tis-                  however postulates prolongation of the in-beam acquisition
+                                In-beam and offline PET imaging at different ion beam facilities d K. PARODI et al.                          955
+
+
+
+
+         Fig. 9. Calculated spatial distributions of isotope decays to be detected in-beam (top) and offline (bottom) for proton
+         irradiation of a paraspinal tumor (Fig. 2, right) at the Heidelberg Ion-Beam Therapy Centre [HIT] synchrotron, excluding
+         (left) or taking into account (right) biologic considerations. Color-wash display is in units of 103/ml. Grey scale depicts
+         arbitrarily rescaled computed tomography numbers.
+
+
+by 1 min after the end of irradiation as well as implemen-                     For very short irradiation times such as those typically
+tation of an efficient method for recovery of the decays oc-                 achieved at conventional cyclotron-based facilities with pas-
+curred in the pulses of the beam delivery. In this latter                    sive beam shaping systems, a few minutes of acquisition time
+respect, experimental investigations addressing the role of                  directly after end of irradiation will be necessary for counting
+millisecond-short–lived emitters and the impact of their lon-                statistics. Thus the expected benefit of in-beam PET imaging
+ger positron range on the imaging performances will be                       has to be carefully analyzed against the penalization of effi-
+required.                                                                    cient patient throughput.
+
+
+                                                               REFERENCES
+ 1. Oelfke U, Lam GKY, Atkins MS. Proton dose monitoring with                 6. Nishio T, Sato T, Kitamura H, et al. Distributions of b+ decayed
+    PET: Quantitative studies in Lucite. Phys Med Biol 1996;41:                  nuclei generated in the CH2 and H2O targets by target nuclear
+    177–196.                                                                     fragment reaction using therapeutic MONO and SOBP proton
+ 2. Pawelke J, Enghardt W, Haberer, et al. In-beam PET imaging                   beam. Med Phys 2005;32:1070–1082.
+    for the control of heavy-ion tumor therapy. IEEE Trans Nucl               7. Hinz R. Beiträge zur Einführung der Positronen-Emissions-
+    Sci 1997;44:1492–1498.                                                       Tomographie bei der Schwerionen-Tumortherapie. For-
+ 3. Litzenberg DW, Roberts DA, Lee MY, et al. On-line monitor-
+                                                                                 schungszentrum Rossendorf Wiss Techn Ber 2000;286:
+    ing of radiotherapy beams: Experimental results with proton
+    beams. Med Phys 1999;26:992–1006.                                            52–58.
+ 4. Parodi K, Enghardt W. Potential application of PET in quality             8. Parodi K, Pönisch F, Enghardt W. Experimental study on the
+    assurance of proton therapy. Phys Med Biol 2000;45:                          feasibility of in-beam PET for accurate monitoring of proton
+    N151–N1516.                                                                  therapy. IEEE Trans Nucl Sci 2005;52:778–786.
+ 5. Parodi K, Enghardt W, Haberer T. In-beam PET measurements                 9. Nishio T, Ogino T, Nomura K, et al. Dose–volume delivery
+    of b+-radioactivity induced by proton beams. Phys Med Biol                   guided proton therapy using beam on-line PET system. Med
+    2002;47:21–36.                                                               Phys 2006;33:4190–4197.
+956                      I. J. Radiation Oncology d Biology d Physics   Volume 71, Number 3, 2008
+
+
+10. Parodi K, Paganetti H, Cascio E, et al. PET/CT imaging for          19. Parodi K, Ferrari A, Sommerer F, et al. Clinical CT-based cal-
+    treatment verification after proton therapy—a study with plastic        culations of dose and positron emitter distributions in proton
+    phantoms and metallic implants. Med Phys 2007;34:419–435.               therapy using the FLUKA Monte Carlo code. Phys Med Biol
+11. Enghardt W, Crespo P, Fiedler F, et al. Charged hadron tumour
+                                                                            2007;52:3369–3387.
+    therapy monitoring by means of PET. Nucl Instrum Methods A
+                                                                        20. Pönisch F, Parodi K, Hasch BG, et al. The description of posi-
+    2004;525:284–288.
+12. Parodi K, Paganetti H, Shih HA, et al. Patient study on in-vivo         tron emitter production and PET imaging during carbon ion
+    verification of beam delivery and range using PET/CT imaging            therapy. Phys Med Biol 2004;49:5217–5232.
+    after proton therapy. Int J Radiat Oncol Biol Phys 2007;68:         21. EXFOR/CSISRS. Experimental nuclear reaction data. 2007.
+    920–934.                                                                Available at: http://www.nndc.bnl.gov/nndc/exfor/. Accessed
+13. Enghardt W, Parodi K, Crespo, et al. Dose quantification from           March 28, 2007.
+    in-beam positron emission tomography. Radiother Oncol 2004;         22. Iljinov AS, Semenov VG, Semenova MP, et al. Production of
+    73:S96–S98.                                                             radionuclides at intermediate energies. Geneva: Springer-
+14. Llacer J, Chatterjee A, Alpen EL, et al. Imaging by injection
+                                                                            Verlag; 1991.
+    of accelerated radioactive particle beams. IEEE Trans Med
+                                                                        23. Fiedler F, Crespo P, Parodi K, et al. The feasibility of in-beam
+    Imaging 1984;3:80.
+15. Iseki Y, Mizuno H, Futami Y, et al. Positron camera for range           PET for therapeutic beams of 3He. IEEE Trans Nucl Sci 2006;
+    verification of heavy-ion radiotherapy. Nucl Instrum Methods A          53:2252–2259.
+    2003;515:840–849.                                                   24. Sihver L, Tsao CH, Silberberg R, et al. Total reaction and partial
+16. Parodi K, Crespo P, Eickhoff H, et al. Random coincidences              cross section calculation in proton-nucleus (Zt # 26) and nu-
+    during in-beam PET measurements at microbunched therapeu-               cleus–nucleus reactions (Zp and Zt # 26). Phys Rev C 1993;
+    tic ion beams. Nucl Instrum Methods A 2005;545:446–458.                 47:1225–1236.
+17. Crespo P, Barthel T, Frais-Koelbl H, et al. Suppression of ran-     25. Mizuno H, Tomitami T, Kanazawa M, et al. Washout measure-
+    dom coincidences during in-beam PET measurements at ion
+                                                                            ments of radioisotope implanted by radioactive beams in the
+    beam radiotherapy facilities. IEEE Trans Nucl Sci 2005;52:
+    980–987.                                                                rabbit. Phys Med Biol 2003;48:2269–2681.
+18. Crespo P, Shakirin G, Enghardt W. On the detector arrangement       26. Tomitami T, Pawelke J, Kanazawa M, et al. Washout studies of
+                                                                            11
+    for in-beam PET for hadron therapy monitoring. Phys Med Biol               C in rabbit thigh muscle implanted by secondary beams of
+    2006;51:2143–2163.                                                      HIMAC. Phys Med Biol 2003;48:875–889.
+

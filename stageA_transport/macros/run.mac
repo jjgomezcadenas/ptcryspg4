@@ -1,0 +1,16 @@
+# Stage A — batch production run: transport protons, capture beta+ emitters,
+# write data/emitters.csv + data/run_meta.csv.
+
+/run/numberOfThreads 18
+/run/initialize
+
+# Send the CSVs to the repo data/ dir (relative to the build/ working dir).
+/stageA/output/dir ../../data
+
+# Reproducibility: master seed (workers get deterministic per-event seeds).
+/random/setSeeds 12345 67890
+
+# 1e5 protons is a quick validation (~tens of seconds); raise to 1e6+ for
+# better per-isotope statistics.
+/run/printProgress 20000
+/run/beamOn 100000

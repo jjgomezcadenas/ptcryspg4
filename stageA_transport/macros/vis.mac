@@ -1,0 +1,45 @@
+# Stage A — interactive visualization macro.
+# Opens the Qt viewer, draws the PMMA phantom, and shoots protons at the target
+# so you can visually confirm the beam enters the cylinder and slows down.
+# Executed automatically when you run ./proton_transport with no arguments.
+#
+# Re-shoot any time from the Qt command line, e.g.:  /run/beamOn 20
+
+# Single thread keeps trajectory drawing clean and ordered for inspection.
+/run/numberOfThreads 1
+/run/initialize
+
+# --- open the viewer -------------------------------------------------------
+# This build provides ToolsSG-Qt. TSG_QT_ZB = software Z-buffer (most robust);
+# swap to TSG_QT_GLES (GPU) if you prefer smoother interaction.
+/vis/open TSG_QT_ZB
+/vis/verbose errors
+
+# --- draw geometry ---------------------------------------------------------
+/vis/drawVolume
+# Oblique 3-D view; beam runs along +z (into the cylinder).
+/vis/viewer/set/viewpointThetaPhi 70 20
+/vis/viewer/set/style surface
+/vis/viewer/set/auxiliaryEdge true
+/vis/viewer/zoom 1.3
+
+# --- trajectories ----------------------------------------------------------
+/vis/scene/add/trajectories smooth
+/vis/modeling/trajectories/create/drawByCharge
+# Accumulate events within one run, but clear between successive /run/beamOn
+# commands so each shot shows a fresh proton. (Switch endOfRunAction to
+# "accumulate" if you'd rather have shots build up.)
+/vis/scene/endOfEventAction accumulate
+/vis/scene/endOfRunAction refresh
+/tracking/storeTrajectory 2
+
+# --- annotations -----------------------------------------------------------
+/vis/scene/add/axes 0 0 0 50 mm
+/vis/scene/add/scale 50 mm z 1 0 0 manual 0 0 -130 mm
+/vis/scene/add/text 0 0 -130 mm 16 0 0 proton beam
+/vis/scene/add/frame
+/vis/viewer/flush
+
+# --- shoot one proton so the window opens with something to see ------------
+# Then fire them one by one from the Qt command box:  /run/beamOn 1
+/run/beamOn 1

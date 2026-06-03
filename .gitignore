@@ -1,0 +1,28 @@
+# Generated data (HDF5 interface files live here, never in git)
+data/*
+!data/.gitkeep
+*.h5
+
+# Build directories
+build/
+*/build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz

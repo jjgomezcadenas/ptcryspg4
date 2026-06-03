@@ -1,0 +1,485 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+\newcommand{\bplus}{\beta^{+}}
+\newcommand{\Cl}[1]{{}^{#1}\mathrm{C}}
+\newcommand{\Ox}[1]{{}^{#1}\mathrm{O}}
+\newcommand{\Nt}[1]{{}^{#1}\mathrm{N}}
+
+\title{A simulation chain to compare PET detectors for\\
+proton-therapy range verification}
+\author{Plan / working document}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We describe a simulation machinery whose goal is \emph{not} to reproduce the
+clinical study of Parodi, Bortfeld \& Haberer (\textit{Int.\ J.\ Radiat.\ Oncol.\
+Biol.\ Phys.}\ \textbf{71}, 945, 2008), but to use its physics inputs as a
+realistic context in which to \textbf{compare candidate PET detectors} for
+verification of the proton range in the \textbf{in-room} modality. The central
+design principle is to \textbf{decouple production from detection}: a single,
+detector-independent event file is generated once with Geant4 and then passed
+through the response of each candidate PET. Differences in the reconstructed
+images are therefore attributable to the detectors alone, which makes the
+comparison robust against the (imperfect) nuclear cross sections of the transport
+code. The figure of merit is the precision with which the \emph{distal fall-off}
+of the activity profile -- and hence the proton range -- is recovered at the
+photon-starved counting statistics typical of this measurement.
+\end{abstract}
+
+\section{Overview of the chain}
+\label{sec:overview}
+
+The pipeline is two Geant4 stages joined by a file, followed by an independent
+reconstruction stage. Stage~A (proton transport, the expensive part) runs
+\textbf{once} and emits a detector-independent source file. A short analytic step
+then sets how many decays are measured. Stage~B (the detector) runs \textbf{once
+per candidate PET} and emits a \textbf{coincidence list}. Reconstruction is a
+separate downstream stage that consumes only that list, so it can be swapped or
+deferred without touching the simulation.
+
+\begin{center}
+\fbox{\parbox{0.95\textwidth}{\ttfamily\small
+\textbf{[A] GEANT4 --- transport} (gun + geometry + physics) \hfill \textit{runs ONCE}\\
+\hspace*{2em}proton beam $\to$ transport in PMMA $\to$ $\bplus$ emitter produced (residual nucleus)\\
+\hspace*{4em}$\to$ $\bplus$ decay (natural lifetime) $\to$ annihilation\\
+\hspace*{2em}$\Rightarrow$ \textbf{PROD/ANH file}: per event, per isotope $j$ --- PROD $(x,y,z)$, ANH $(x',y',z')$\\
+\\
+\textbf{[B$_0$] TIME-DECAY BOOKKEEPING} (analytic, the A$\to$B handoff)\\
+\hspace*{2em}production $P_j$ $\to$ $N_j$ decays in the in-room window\\
+\hspace*{2em}$\to$ draw $N_j$ ANH events per isotope $\Rightarrow$ \textbf{sampled annihilation events}\\
+\\
+\textbf{[B] GEANT4 --- detector} ($\sigma_E,\sigma_t$, DOI, attenuation) \hfill \textit{runs PER detector}\\
+\hspace*{2em}annihilation events $\to$ detector response $\to$ coincidence sorting\\
+\hspace*{2em}$\Rightarrow$ \textbf{COINCIDENCE list} (two DOI 3-D hits, energies, times)\\
+\\
+\hspace*{2em}-------- independent boundary --------\\
+\\
+\textbf{[C] RECONSTRUCTION} (separate stage, toolkit deferred)\\
+\hspace*{2em}coincidence list $\to$ image $\to$ $\sigma(\text{range})$ vs.\ counts $\to$ compare
+}}
+\end{center}
+
+\noindent
+The key consequences:
+\begin{itemize}[nosep]
+\item \textbf{Stage~A runs once.} The expensive hadronic proton transport is not
+repeated when the detector changes.
+\item \textbf{Every candidate PET sees the identical source.} The comparison of
+Sec.~\ref{sec:compare} is then free of per-run statistical drift between detectors.
+\item \textbf{The $N_j$ sampling lives at the A$\to$B handoff.} A single monolithic
+pass would emit one annihilation per \emph{produced} isotope
+(production-proportional), not the windowed \emph{measured} number; sampling $N_j$
+per isotope there is the only place the $\Ox{15}/\Cl{11}$ mix is set correctly.
+\item \textbf{Reconstruction is decoupled.} The simulation's deliverable is the
+coincidence list; any reconstructor consumes it.
+\end{itemize}
+A high-resolution but low-sensitivity PET can lose to a coarser, high-sensitivity
+one at the low counts characteristic of in-room acquisition ($\sim\!10^{5}$--$10^{6}$
+coincidences for a \SI{1}{Gy} field), and the machinery is built to expose exactly
+that trade-off.
+
+\section{Geant4 stage A: transport --- beam, phantom, physics, and the event file}
+\label{sec:g4}
+
+This stage runs \textbf{once}, ahead of all detector studies. It requires only
+Geant4 ingredients -- a particle gun, a physics list and
+a geometry -- and produces a clean, detector-independent file that is the input
+to everything downstream. The primary launched by the gun is the \textbf{proton};
+the positron emitters are \emph{products} of its nuclear interactions in the
+phantom.
+
+\subsection{Beam (the gun)}
+\label{sec:beam}
+We adopt mainstream scanned-proton parameters. The clean baseline is a single
+mono-energetic pencil beam, which produces a one-dimensional depth--activity
+profile that is the ideal range-verification testbed; a spread-out configuration
+is a later extension.
+
+\begin{table}[h]
+\centering
+\caption{Baseline beam. Ranges are approximate continuous-slowing-down values in
+water. The macroscopic time structure is \emph{not} used by the gun; it enters
+only the time-decay bookkeeping of Sec.~\ref{sec:timedecay} (Table~\ref{tab:time}).}
+\label{tab:beam}
+\begin{tabular}{ll}
+\toprule
+Species          & proton (${}^{1}$H) \\
+Energy (baseline)& \SI{100}{MeV} ($R\approx\SI{7.7}{cm}$); cross-check \SI{150}{MeV} ($R\approx\SI{15.8}{cm}$) \\
+Lateral profile  & Gaussian pencil, $\sigma\approx\SI{3}{}$--$\SI{5}{mm}$ at entrance \\
+Direction        & along the phantom (cylinder) axis \\
+Fluence          & normalised to \SI{1}{Gy} at the target, \emph{or} fixed $N_p$ with dose reported \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Phantom (the geometry)}
+\label{sec:phantom}
+A right circular cylinder of homogeneous, constant-density material, axis along
+the beam. A homogeneous phantom is deliberate: it provides \textbf{ground truth}
+and isolates the detector from tissue-heterogeneity and washout effects.
+
+\paragraph{Material: PMMA as baseline.}
+We choose \textbf{PMMA} ($\mathrm{C_5H_8O_2}$, $\rho=\SI{1.18}{g/cm^3}$) because
+(i) it contains both carbon and oxygen, producing the clinically relevant
+$\Cl{11}+\Ox{15}$ mixture -- two isotopes with very different half-lives
+\emph{and} positron ranges, which is exactly what stresses a detector; (ii) it is
+the de-facto standard solid phantom for proton-PET benchmarking; (iii) it is
+reproducible. \textbf{Water} is kept as an optional cross-check: with no carbon it
+yields an almost single-isotope ($\Ox{15}$) source, a clean limiting case for the
+longest positron range.
+
+\paragraph{Geometry (suggested).}
+Diameter \SI{20}{cm}, length \SI{20}{cm} (enough to stop the baseline beams and to
+act as a realistic attenuator of the \SI{511}{keV} photons). The cylinder must be
+present as a passive attenuator in \emph{every} detector geometry of
+Sec.~\ref{sec:detector}, so that attenuation and scatter are treated consistently.
+
+\subsection{Physics list}
+\label{sec:physics}
+A hadronic list suited to proton-induced isotope production, e.g.\
+\texttt{QGSP\_BIC\_HP} (or \texttt{QGSP\_BERT\_HP}), with electromagnetic physics
+and radioactive decay enabled (the latter at natural lifetime, see
+Sec.~\ref{sec:production}).
+\emph{Caveat:} Geant4's isotope-production cross sections are less tuned than
+data-driven approaches (FLUKA, or analytic models built on EXFOR). This biases the
+\emph{absolute} yields and somewhat the production-profile \emph{shape} -- but,
+per Sec.~\ref{sec:compare}, it is common-mode across detectors and cancels in the
+ranking. The file can later be regenerated from a FLUKA or measured map with no
+change to the downstream blocks.
+
+\subsection{Production of the \texorpdfstring{$\bplus$}{beta+} emitters and the event file}
+\label{sec:production}
+As each proton slows down in the PMMA it loses energy electromagnetically and,
+with a probability set by the inelastic nuclear cross sections, undergoes a
+nuclear reaction with a $\Cl{12}$ or $\Ox{16}$ nucleus of the medium. Such a
+reaction leaves a \textbf{residual nucleus}; in a fraction of cases that residual
+is one of the $\bplus$ emitters of Table~\ref{tab:iso} (e.g.\
+$\Cl{12}(p,pn)\Cl{11}$, $\Ox{16}(p,pn)\Ox{15}$), created essentially at rest at
+the reaction point.
+
+We let the emitter decay through Geant4's \textbf{standard radioactive-decay
+process at its natural lifetime} -- no prompt-decay override, which would be an
+unnecessary intervention. Geant4 emits the positron with the correct $\bplus$
+spectrum of the species; the neutrino escapes and the (stable) daughter recoils
+only $\sim\!\si{\micro m}$. The positron is transported through its
+(sub-millimetre) range and annihilates. Geant4 decays \emph{every} produced
+emitter exactly once, so the file is \textbf{production-proportional} (one
+annihilation per emitter, 1:1); the measured number $N_j$ and the acquisition
+timing are set only later, by the bookkeeping of Sec.~\ref{sec:timedecay}. For
+each such emitter we write \textbf{two records}:
+\begin{center}
+\begin{tabular}{llll}
+\texttt{mode=PROD} & \texttt{isotope=}$j$ & $x,y,z$    & $t=0$  \\
+\texttt{mode=ANH}  & \texttt{isotope=}$j$ & $x',y',z'$ & $t'$   \\
+\end{tabular}
+\end{center}
+The PROD point is the production/decay point (the recoil moved $\sim\!\si{\micro m}$);
+the ANH point is where the two \SI{511}{keV} photons are born. Three properties of
+this file matter:
+\begin{itemize}[nosep]
+\item \textbf{PROD is the truth} activity map $P_j(\mathbf{r})$, the reference
+against which a reconstruction's range is judged.
+\item \textbf{ANH is the detector source}, fed to Sec.~\ref{sec:detector}.
+\item \textbf{The displacement} $|\text{ANH}-\text{PROD}|$ \textbf{is the positron
+range}, per event -- the resolution floor comes out of the same physics, with no
+separate kernel needed.
+\end{itemize}
+
+\paragraph{On the time stamps.}
+With natural decay, $t'$ is the physically sampled decay time (seconds to
+minutes) plus the positron's $\sim\!\si{ps}$ flight time. It carries no
+acquisition-time information for this study and is \textbf{not stored} -- the
+event file records only the two space points. This is by design: \textbf{Geant4
+owns space (the two points); the time-decay bookkeeping of
+Sec.~\ref{sec:timedecay} owns number and acquisition timing.} Because an isotope
+does not move between production and decay, \emph{where} it annihilates is
+independent of \emph{when} it decays, so the spatial file is complete on its own
+and the decay time can be dropped.
+
+\paragraph{Backgrounds discarded here (small, noted).}
+$\Cl{10}$ and $\Ox{14}$ emit a prompt de-excitation $\gamma$ in coincidence with
+the $\bplus$; killing all but the positron removes it. It is a minor, genuine
+background, and these isotopes are largely gone at the in-room delay, so it is
+acceptable for a first cut. Prompt neutrons from the proton shower can cause
+secondary activation; killing them for speed loses a small contribution to
+$P_j(\mathbf{r})$.
+
+\paragraph{Equivalent alternative.}
+One may instead write only the PROD record (no decay at all) and add the
+positron-range blur downstream by convolving $P_j(\mathbf{r})$ with a precomputed
+isotope-specific kernel. This is equivalent but strictly less informative -- the
+two-point file already contains the per-event range -- so we adopt the two-point
+scheme as baseline.
+
+\subsection{Normalisation to dose}
+\label{sec:norm}
+Score the deposited dose in the phantom in the same run. Geant4 then yields both
+the production per primary, $P_j/N_p$ (PROD records / protons simulated), and the
+dose per primary, $D/N_p$. Scaling to a clinical \SI{1}{Gy} field fixes the
+physical proton number $N_p(\SI{1}{Gy}) = \SI{1}{Gy}\,/(D/N_p)$ and hence the
+integral production $P_j = (P_j/N_p)\,N_p(\SI{1}{Gy})$ that the bookkeeping of
+Sec.~\ref{sec:timedecay} consumes. This is the bridge between the (arbitrary)
+number of simulated primaries and the absolute count budget.
+
+\section{Time-decay bookkeeping}
+\label{sec:timedecay}
+
+This block is analytic. It takes the integral production $P_j$ from
+Sec.~\ref{sec:norm} and returns $N_j$, the number of decays of species $j$ that
+fall inside the chosen acquisition window for a given beam time structure. Each
+species has decay constant $\lambda_j=\ln 2/T_{1/2,j}$ and is assumed to decay
+$100\%$ by $\bplus$ emission. The model is that of Parodi et al.\ (their
+Eqs.~1--7).
+
+\begin{table}[h]
+\centering
+\caption{Positron emitters considered, with half-lives and the dominant
+production channel in the phantom media. The $\bplus$ endpoint energy governs the
+positron range. Values are nominal; adopt tabulated nuclear data in the
+implementation.}
+\label{tab:iso}
+\begin{tabular}{lccl}
+\toprule
+Isotope & $T_{1/2}$ & $\bplus$ endpoint (MeV) & Dominant channel \\
+\midrule
+$\Ox{15}$ & \SI{122}{s}   & 1.74 & $\Ox{16}(p,pn)\Ox{15}$ \\
+$\Cl{11}$ & \SI{1223}{s}  & 0.96 & $\Cl{12}(p,pn)\Cl{11}$ \\
+$\Nt{13}$ & \SI{598}{s}   & 1.19 & on O / N \\
+$\Cl{10}$ & \SI{19.3}{s}  & 1.91 & $\Cl{12}(p,pn n)$; \textit{prompt $\gamma$ \SI{718}{keV}} \\
+$\Ox{14}$ & \SI{70.6}{s}  & 1.81 & on O; \textit{prompt $\gamma$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Production rate.}
+For a delivery of $S$ spills of duration $t_s$, with the constant-activation
+approximation, $K_j = P_j/(S\,t_s)$.
+
+\paragraph{Activity within and between spills (synchrotron).}
+With extraction period $t_{\mathrm{extr}}=t_s+t_p$ (spill $+$ pause),
+\begin{align}
+A_j(t) &= K_j\left(1-e^{-\lambda_j t}\right), & 0\le t\le t_s, \\
+A_j(t) &= K_j\left(1-e^{-\lambda_j t_s}\right)e^{-\lambda_j (t-t_s)}, & t_s < t < t_{\mathrm{extr}},
+\end{align}
+and the number of decays in an interval $\Delta t$ starting at $t$ is
+$N_j(t,\Delta t)=\int_t^{t+\Delta t} A_j(t')\,dt'$.
+
+\paragraph{In-beam decays (retained for completeness).}
+\begin{align}
+N_{j,\mathrm{spill}} &= S\,\Delta_{\mathrm{spill}}
+  + \frac{K_j}{\lambda_j}\left(1-e^{-\lambda_j t_s}\right)^2 e^{-\lambda_j t_p}
+    \sum_{i=1}^{S-1}(S-i)\,e^{-(i-1)\lambda_j t_{\mathrm{extr}}},
+    \label{eq:spill}\\[2pt]
+\Delta_{\mathrm{spill}} &= K_j t_s - \frac{K_j}{\lambda_j}\left(1-e^{-\lambda_j t_s}\right),\\[4pt]
+N_{j,\mathrm{pause}} &= \frac{K_j}{\lambda_j}\left(1-e^{-\lambda_j t_s}\right)\left(1-e^{-\lambda_j t_p}\right)
+    \sum_{i=1}^{S-1}(S-i)\,e^{-(i-1)\lambda_j t_{\mathrm{extr}}},
+    \label{eq:pause}\\[4pt]
+N_{j,\mathrm{end}} &= \frac{K_j}{\lambda_j}\left(1-e^{-\lambda_j t_s}\right)\left(1-e^{-\lambda_j t_{\mathrm{end}}}\right)
+    \sum_{i=0}^{S-1} e^{-i\lambda_j t_{\mathrm{extr}}}. \label{eq:end}
+\end{align}
+
+\paragraph{The measured (in-room) window.}
+A window $t_{\mathrm{meas}}$ starting a delay $t_{\mathrm{del}}$ after the end of
+irradiation collects
+\begin{equation}
+N_{j,\mathrm{meas}} = \frac{K_j}{\lambda_j}\left(1-e^{-\lambda_j t_s}\right) e^{-\lambda_j t_{\mathrm{del}}}\left(1-e^{-\lambda_j t_{\mathrm{meas}}}\right)
+    \sum_{i=0}^{S-1} e^{-i\lambda_j t_{\mathrm{extr}}}. \label{eq:off}
+\end{equation}
+
+\paragraph{Cyclotron (continuous) limit.}
+A continuous delivery is the single-spill case: $S=1$ and
+$t_{\mathrm{extr}}=t_s=t_{\mathrm{irr}}$; the recursive sums collapse
+($\sum_{i=1}^{0}\!\equiv 0$, $\sum_{i=0}^{0}\!\equiv 1$).
+
+\paragraph{In-room scope.}
+This study targets the \textbf{in-room} modality: a stand-alone full-ring scanner
+in the treatment room imaging the patient on the couch a short delay after
+irradiation, without repositioning. The defining parameter is a \emph{short}
+delay; the minimum is $t_{\mathrm{del}}\approx\SI{120}{s}$ (the MGH in-room mean
+was $\approx\SI{2.5}{min}$), and larger delays are part of the study via the
+dependence on $t_{\mathrm{del}}$. The count budget is Eq.~\eqref{eq:off} at this
+short delay. The physical consequence that drives the detector study: at such a
+short delay the short-lived $\Ox{15}$ ($T_{1/2}=\SI{122}{s}$) is still abundant
+and \emph{dominates} over $\Cl{11}$ ($T_{1/2}=\SI{1223}{s}$). Since $\Ox{15}$ has
+the longest positron range of the relevant emitters, the positron-range floor is
+a genuine contributor (captured automatically by the PROD$\to$ANH displacement of
+Sec.~\ref{sec:production}). In-beam and offline modalities are out of scope.
+
+\paragraph{Simplification for a phantom.}
+The paper's washout terms (fast/medium/slow tissue components) are \textbf{dropped}:
+an inert PMMA or water phantom has no biologic clearance, so only physical decay
+applies -- physically exact for our target.
+
+\begin{table}[h]
+\centering
+\caption{Beam time structures (Parodi et al., their Table~3). The tabulated
+$t_{\mathrm{del}}$ and $t_{\mathrm{meas}}$ are the paper's offline values; for the
+in-room scope we use a short delay $t_{\mathrm{del}}\gtrsim\SI{120}{s}$, keeping
+the accelerator $t_s,t_p,t_{\mathrm{irr}}$ columns.}
+\label{tab:time}
+\begin{tabular}{lcccccc}
+\toprule
+Accelerator & $t_s$ (s) & $t_p$ (s) & $t_{\mathrm{irr}}$ (s) & $t_{\mathrm{end}}$ (s) & $t_{\mathrm{del}}$ (s) & $t_{\mathrm{meas}}$ (s)\\
+\midrule
+Cyclotron  & 60  & 0   & 60  & 40 & 300 & 1800 \\
+Synch.\ GSI & 1   & 4   & 600 & 40 & 300 & 1800 \\
+Synch.\ HIT & 1.5 & 1.5 & 180 & 60 & 300 & 1800 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The A$\to$B handoff.}
+This is where stage~A meets stage~B, and it is the only place the bookkeeping
+touches the simulation. For the chosen scenario, Eq.~\eqref{eq:off} gives $N_j$ for
+each species; we then \textbf{draw $N_j$ ANH events from species $j$'s list} in the
+PROD/ANH file (with replacement -- the list encodes the \emph{shape}
+$P_j(\mathbf{r})$ at high statistics). Because $N_j$ is sampled per isotope, the
+measured $\Ox{15}/\Cl{11}$ mixture comes out correct automatically, without any
+reweighting. Drawing $N_j$ as a Poisson variate across $M$ realisations supplies
+the noise for the $\sigma(\text{range})$ metric of Sec.~\ref{sec:compare}. The
+result is the \textbf{sampled annihilation events} fed to stage~B; from each ANH
+point, two \SI{511}{keV} photons are emitted back-to-back with acollinearity
+($\sim\!0.5^\circ$ FWHM).
+
+\section{Geant4 stage B: detector --- from annihilation events to the coincidence list}
+\label{sec:detector}
+
+This stage runs \textbf{once per candidate PET}. It reads the \emph{same} sampled
+annihilation events and produces a \textbf{coincidence list} -- the deliverable of
+the simulation and the sole input to reconstruction (Sec.~\ref{sec:recon}):
+\begin{enumerate}[nosep]
+\item \textbf{Detector simulation (Geant4):} the two \SI{511}{keV} photons
+propagate through the phantom (attenuation, Compton scatter) and into the
+detector; model intercrystal scatter, depth-of-interaction, energy resolution
+$\sigma_E$ and time resolution $\sigma_t$.
+\item \textbf{Coincidence sorting:} energy window, coincidence time window;
+classify true/scatter/random. In the in-room scenario the in-beam
+prompt-$\gamma$/neutron background is absent; the relevant backgrounds are random
+and patient-scattered coincidences, plus -- for a LYSO candidate -- the intrinsic
+${}^{176}\mathrm{Lu}$ singles floor, injected as a volumetric source in the
+crystals (Sec.~\ref{sec:compare}).
+\item \textbf{Coincidence list (the output).} Each accepted coincidence is written
+with everything a list-mode reconstructor needs:
+\begin{center}
+the two \textbf{DOI-resolved 3-D hit positions} (or crystal IDs + a known geometry),
+the two \textbf{energies}, and the two \textbf{timestamps} (for TOF).
+\end{center}
+Truth flags (true/scatter/random) may be appended for our own analysis; the
+reconstructor does not require them.
+\end{enumerate}
+
+\section{Reconstruction (independent stage)}
+\label{sec:recon}
+
+Reconstruction is deliberately \textbf{decoupled} from the simulation: it consumes
+only the coincidence list, so the toolkit (a list-mode MLEM/OSEM of our own, or an
+external package such as CASToR or STIR) can be chosen or replaced later without
+touching stages~A or~B. For the present plan it suffices to fix the requirements:
+\begin{itemize}[nosep]
+\item \textbf{List-mode} (not sinogram-binned): the measurement is photon-starved
+and time-resolved (per-frame isotope separation), and the events carry per-event
+DOI.
+\item \textbf{DOI in the system model:} oblique lines of response are exactly where
+it prevents parallax blur, so the reconstructor must use the 3-D hit positions, not
+a fixed crystal-face radius.
+\item \textbf{TOF-aware} when the timing axis is being compared.
+\end{itemize}
+The output is the 3-D activity image and, in particular, the 1-D depth profile
+along the beam axis. Reconstruction must always be performed (not merely a
+projection-space comparison), since the resolution, scatter-rejection and parallax
+differences between detectors only fully manifest in the image.
+
+\section{Comparing the detectors}
+\label{sec:compare}
+
+\paragraph{Same source, different responses.}
+Every candidate PET is fed the identical annihilation events. Any difference in
+the reconstructed images therefore comes from the detector (geometry, sensitivity,
+$\sigma_E$, $\sigma_t$, DOI), not from the source. This is what makes the Geant4
+cross-section weakness irrelevant to the \emph{ranking}: a systematic error in
+$P_j(\mathbf{r})$ is common to all detectors and cancels. The file can later be
+regenerated from a better production map without re-running any detector
+simulation.
+
+\paragraph{Figure of merit: range precision.}
+The clinically meaningful quantity is the position of the activity distal
+fall-off, which tracks the proton range (it sits a few mm \emph{proximal} to the
+Bragg peak, because production needs above-threshold protons). For each detector:
+\begin{enumerate}[nosep]
+\item fix the count budget from Eq.~\eqref{eq:off} at $t_{\mathrm{del}}\approx\SI{120}{s}$;
+for a single \SI{1}{Gy} field this is the photon-starved regime of $10^{7}$--$10^{8}$
+decays, i.e.\ only $\sim\!10^{5}$--$10^{6}$ collected coincidences after attenuation
+and efficiency;
+\item generate $M$ independent Poisson realisations at that budget;
+\item reconstruct each, fit the distal fall-off, and report the spread
+$\sigma(\text{range})$ in mm.
+\end{enumerate}
+The headline plot is $\sigma(\text{range})$ \textbf{vs.\ counts} (equivalently vs.\
+dose, or vs.\ delay $t_{\mathrm{del}}$, which sets how much $\Ox{15}$ survives) per
+detector. Secondary metrics: recovered axial/lateral resolution, scatter fraction
+retained inside the energy window, and parallax blur at large axial angle.
+
+\paragraph{What to keep fixed vs.\ vary.}
+Fixed across detectors: the annihilation-event source, the phantom, the count
+budget, and the reconstruction algorithm family. Varied: only the detector. The
+discriminators that matter for in-room range verification of this photon-starved,
+scatter-dominated, $\Ox{15}$-rich signal -- and which the matrix is built to
+exercise -- are:
+\begin{itemize}[nosep]
+\item \textbf{Solid-angle sensitivity (AFOV).} The leading requirement. Sweep the
+axial length $L$; the geometric acceptance for a centred source scales roughly as
+$L/\sqrt{L^2+R^2}$, the dominant lever on how many of the scarce pairs are
+collected.
+\item \textbf{Energy resolution $\sigma_E$.} Sets how tightly the \SI{511}{keV}
+window can be drawn, hence how much patient scatter is rejected on the
+\emph{oblique} coincidences a long AFOV adds. Compare e.g.\ $\sim\!6\%$ (cryogenic
+CsI) vs.\ $\sim\!10\%$ (LYSO) vs.\ poor (BGO).
+\item \textbf{Depth-of-interaction.} Controls parallax on those same oblique LORs.
+Compare DOI-capable monolithic crystals against fixed-depth pixels.
+\item \textbf{Intrinsic radioactivity.} Inject the ${}^{176}\mathrm{Lu}$ singles
+floor for the LYSO arm (none for CsI/BGO); at sub-MBq signal it raises randoms and
+competes with the signal, so it is part of the comparison, not a detail.
+\item \textbf{Timing / TOF.} Treated as a \emph{low-value} axis here: include a
+TOF-on variant to demonstrate diminishing returns for a one-dimensional
+distal-edge task, rather than as a discriminator the candidate relies on.
+\end{itemize}
+\textbf{Candidate set:} cryogenic monolithic CsI (the CRYSP baseline) against
+conventional LYSO and BGO scanners, plus the CRYSP variants -- room-temperature
+CsI(Tl), cryogenic BGO, and the BGO-core/CsI-wing hybrid -- each represented by its
+$(\text{geometry},\,\sigma_E,\,\text{DOI resolution},\,\text{intrinsic background})$.
+Since all see the identical source, the resulting $\sigma(\text{range})$ vs.\
+counts curves isolate exactly these detector properties.
+
+\section{Scope and honest caveats}
+\label{sec:scope}
+
+\begin{itemize}[nosep]
+\item \textbf{Homogeneous phantom} omits tissue heterogeneity, hence no
+$\Ox{15}/\Cl{11}$ spatial split and no washout (deliberate; this is a detector
+study). A two-region phantom (e.g.\ a bone-like insert) can be added later to
+probe density-interface artifacts.
+\item \textbf{Geant4 cross sections} bias absolute counts and the production
+shape; the relative comparison is robust, the absolute range precision is
+indicative.
+\item \textbf{In-room scope.} Only the in-room modality is treated (full-ring
+scanner, $t_{\mathrm{del}}\gtrsim\SI{120}{s}$); in-beam and offline are out of
+scope. At this short delay the source is $\Ox{15}$-dominated.
+\item \textbf{Positron range} ($\Ox{15}$, $\Cl{10}$) sets a physical resolution
+floor; a high-performance PET may saturate against it -- a result to report, not
+to hide. It is captured by the PROD$\to$ANH displacement.
+\item \textbf{Discarded prompt $\gamma$ / secondary neutrons} (Sec.~\ref{sec:production})
+are small omissions, acceptable for a first cut and listed here for honesty.
+\end{itemize}
+
+\end{document}

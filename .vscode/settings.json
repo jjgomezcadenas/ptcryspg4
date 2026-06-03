@@ -1,0 +1,8 @@
+{
+  // Feed C++ IntelliSense from CMake Tools (include paths, defines, std).
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  // Fallback: read the compiler database we generate in the build dir.
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/stageA_transport/build/compile_commands.json",
+  "cmake.sourceDirectory": "${workspaceFolder}/stageA_transport",
+  "cmake.buildDirectory": "${workspaceFolder}/stageA_transport/build"
+}
