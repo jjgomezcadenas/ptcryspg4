@@ -2,6 +2,11 @@
 # write data/emitters.csv + data/run_meta.csv.
 
 /run/numberOfThreads 18
+
+# Phantom material (must precede /run/initialize). Soft tissue is the clinically
+# representative, 15O-dominated source; swap for G4_PLEXIGLASS (PMMA, carbon-rich
+# benchmark) or G4_WATER (pure-15O extreme).
+/stageA/phantom/material G4_TISSUE_SOFT_ICRP
 /run/initialize
 
 # Send the CSVs to the repo data/ dir (relative to the build/ working dir).

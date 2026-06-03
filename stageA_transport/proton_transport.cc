@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
   auto* runManager =
       G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
 
+  // The three mandatory user initializations the run manager takes ownership of:
+  // geometry (what), physics (how particles interact), actions (what we record).
   auto* det = new DetectorConstruction;
   runManager->SetUserInitialization(det);
   runManager->SetUserInitialization(new QGSP_BIC_HP);

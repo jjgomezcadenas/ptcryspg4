@@ -25,8 +25,13 @@ RunAction::RunAction(G4bool onMaster, const DetectorConstruction* det)
 
 RunAction::~RunAction() { delete fMessenger; }
 
+// Called by the run manager (on master and on each worker) to create the run
+// object. Returning our subclass is how we attach custom per-run accumulators.
 G4Run* RunAction::GenerateRun() { return new StageARun; }
 
+// Called when a run finishes. In MT each worker's EndOfRunAction fires first,
+// then G4 merges the worker runs into the master's run and calls this on the
+// master — so only the master holds the complete data and writes the output.
 void RunAction::EndOfRunAction(const G4Run* run) {
   if (!IsMaster()) return;  // only the merged master run has all the data
   const auto* stRun = static_cast<const StageARun*>(run);
@@ -37,6 +42,7 @@ void RunAction::EndOfRunAction(const G4Run* run) {
   PrintSummary(stRun);
 }
 
+// One row per captured β⁺ emitter: event_id, isotope, prod point, anh point.
 void RunAction::WriteEmittersCsv(const StageARun* run) const {
   const auto& e = run->Emitters();
   const std::string path = fOutputDir + "/emitters.csv";
@@ -58,6 +64,8 @@ void RunAction::WriteEmittersCsv(const StageARun* run) const {
   G4cout << "[Stage A] wrote " << e.size() << " emitters -> " << path << G4endl;
 }
 
+// One wide row of run-level metadata (the would-be HDF5 root attributes):
+// beam, phantom, dose, provenance. Dose = total edep / phantom mass.
 void RunAction::WriteMetaCsv(const StageARun* run) const {
   const G4long nProtons = run->GetNumberOfEvent();
   const G4double edepMeV = run->EdepTotal() / MeV;
@@ -79,7 +87,7 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
        "phantom_diameter_mm,phantom_length_mm,phantom_mass_g,edep_total_MeV,"
        "dose_total_Gy,geant4_version,physics_list,random_seed\n";
   f << std::setprecision(7) << nProtons << ',' << stageA::kBeamEnergyMeV << ','
-    << stageA::kBeamSigmaMM << ',' << stageA::kPhantomMaterial << ','
+    << stageA::kBeamSigmaMM << ',' << fDet->MaterialName() << ','
     << stageA::kPhantomDiameterMM << ',' << stageA::kPhantomLengthMM << ','
     << (mass / g) << ',' << edepMeV << ',' << doseGy << ',' << major << '.'
     << minor << '.' << patch << ',' << stageA::kPhysicsList << ','
@@ -87,6 +95,8 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   G4cout << "[Stage A] wrote run metadata -> " << path << G4endl;
 }
 
+// The Bragg profile: energy deposited per 1 mm z-bin, total and primary-only,
+// with the z column as bin centres.
 void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
   const auto& tot = run->EdepZTotal();
   const auto& prim = run->EdepZPrimary();
@@ -109,6 +119,8 @@ void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
   G4cout << "[Stage A] wrote depth-dose profile -> " << path << G4endl;
 }
 
+// Human-readable stdout digest for an at-a-glance sanity check (yields per
+// isotope, dose, primary/secondary split); the real analysis is the Python.
 void RunAction::PrintSummary(const StageARun* run) const {
   const auto& e = run->Emitters();
   const G4long nProtons = run->GetNumberOfEvent();

@@ -19,6 +19,9 @@ constexpr G4double kBinW = stageA::kPhantomLengthMM / StageARun::kNZBins;  // mm
 
 StageARun::StageARun() = default;
 
+// Called by the run manager for every event (after EndOfEventAction). We use it
+// to pull the per-event scorer result; emitter rows and depth-dose are filled
+// separately by EventAction / SteppingAction.
 void StageARun::RecordEvent(const G4Event* event) {
   // Sum the phantom energy-deposit scorer for this event.
   if (fCollID < 0) {
@@ -71,6 +74,9 @@ void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
   }
 }
 
+// Called on the master once per worker run at end of run: fold that worker's
+// accumulators into the master's. This is the *only* cross-thread combine, so
+// no locking is needed anywhere in the per-event hot path.
 void StageARun::Merge(const G4Run* aRun) {
   const auto* local = static_cast<const StageARun*>(aRun);
   fEmitters.append(local->fEmitters);

@@ -27,6 +27,8 @@ struct EmitterData {
     anh_xyz.clear();
   }
 
+  // Append one captured emitter, keeping all columns in lock-step (row i of
+  // every vector belongs to the same emitter).
   void add(std::int64_t ev, std::int8_t id, const std::array<float, 3>& prod,
            const std::array<float, 3>& anh) {
     event_id.push_back(ev);

@@ -15,7 +15,10 @@ inline constexpr double kBeamSigmaMM = 3.0;
 // Phantom (spec sec 2.2)
 inline constexpr double kPhantomDiameterMM = 200.0;
 inline constexpr double kPhantomLengthMM = 200.0;
-inline constexpr const char* kPhantomMaterial = "G4_PLEXIGLASS";  // PMMA
+// Oxygen-rich soft tissue (ICRP): 15O-dominated production, the clinically
+// representative source. Alternatives: "G4_PLEXIGLASS" (PMMA, carbon-rich
+// benchmark), "G4_WATER" (pure-15O extreme).
+inline constexpr const char* kPhantomMaterial = "G4_TISSUE_SOFT_ICRP";
 
 // Physics
 inline constexpr const char* kPhysicsList = "QGSP_BIC_HP";

@@ -8,17 +8,20 @@ class RunAction;
 class G4UIdirectory;
 class G4UIcmdWithAString;
 
-// Exposes /stageA/output/dir <path> so the macro can send the CSVs to data/.
+// Messenger exposing
+//     /stageA/output/dir <path>
+// so a macro can send the CSV outputs (emitters / run_meta / depth_dose) to the
+// repo data/ dir. The shared "/stageA/" root is created by DetectorMessenger.
 class OutputMessenger : public G4UImessenger {
  public:
   explicit OutputMessenger(RunAction* runAction);
   ~OutputMessenger() override;
 
+  // The UI manager calls this on command entry; we route the path to RunAction.
   void SetNewValue(G4UIcommand* command, G4String newValue) override;
 
  private:
   RunAction* fRunAction = nullptr;
-  G4UIdirectory* fDirStageA = nullptr;
   G4UIdirectory* fDirOutput = nullptr;
   G4UIcmdWithAString* fDirCmd = nullptr;
 };

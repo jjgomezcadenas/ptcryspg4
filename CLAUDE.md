@@ -117,20 +117,43 @@ column suffixes.)
 
 ## Fixed parameters
 
-**Beam (gun):** proton; baseline **100 MeV** (range ≈ 7.7 cm in water),
-cross-check **150 MeV**; Gaussian pencil σ ≈ 3–5 mm; along cylinder axis;
-fluence normalized to **1 Gy** at target (or fixed N_p with dose reported).
+**Beam (gun):** proton; baseline **100 MeV** (range ≈ 7.7 cm in water; clean
+testbed within the Donostia 70–230 MeV clinical range), cross-check **150 MeV**;
+Gaussian pencil σ ≈ 3–5 mm; along cylinder axis; fluence normalized to **2 Gy**
+at target (Donostia default; sets P_j) or fixed N_p with dose reported.
 
-**Phantom (geometry):** **PMMA** C₅H₈O₂, ρ = 1.18 g/cm³; cylinder **Ø20 cm ×
-20 cm**, axis along beam; present as passive attenuator in **every** Stage-B
-geometry. Water (pure ¹⁵O source) is an optional cross-check.
+**Phantom (geometry):** cylinder **Ø20 cm × 20 cm**, axis along beam; present as
+a passive attenuator in **every** Stage-B geometry. Material is **macro-selectable**
+(`/stageA/phantom/material <NIST name>`, before `/run/initialize`):
+- **`G4_TISSUE_SOFT_ICRP`** — *default*; oxygen-rich, **¹⁵O-dominated**,
+  clinically representative → correct positron-range floor.
+- **`G4_PLEXIGLASS`** (PMMA, C₅H₈O₂, ρ=1.19) — carbon-rich, ¹¹C-leaning;
+  reproducible benchmark / two-isotope stress.
+- **`G4_WATER`** — pure-¹⁵O extreme (max floor).
+
+Production O15/C11 ≈ **1.7** (tissue) vs **0.6** (PMMA): the measured mix is
+computed from the **MC P_j**, never assumed.
 
 **Isotopes / half-lives:** ¹⁵O 122 s, ¹¹C 1223 s, ¹³N 598 s, ¹⁰C 19.3 s,
 ¹⁴O 70.6 s (100 % β⁺ assumed).
 
-**In-room acquisition:** delay **t_del ≳ 120 s** (MGH mean ≈ 150 s); window from
-the measured-window equation (spec §3). At this delay the source is
-**¹⁵O-dominated** → positron-range floor matters.
+**In-room acquisition (Donostia operating point, from `crysp_for_ht.tex` §3).**
+**Continuous / cyclotron limit** — acquisition is entirely post-beam, so the
+pulsed S2C2 time structure is irrelevant to the count budget and the synchrotron
+spill/pause sums collapse. The measured decays per species follow the
+**three-factor expression — the *only* handoff equation:**
+
+```
+N_j = P_j · (1−e^(−λ_j·t_irr))/(λ_j·t_irr) · e^(−λ_j·t_del) · (1−e^(−λ_j·t_meas))
+           └──── build-up ────┘              └ transport ┘   └──── window ────┘
+```
+
+Defaults: **t_irr = t_del = 120 s**, **t_meas = 1200 s** (20 min). Survival
+factors (build-up·transport·window): ¹⁵O 0.73·0.51·1.00, ¹³N 0.93·0.87·0.75,
+¹¹C 0.97·0.93·0.49; ¹⁰C/¹⁴O are crushed by transport (e^(−λ t_del) ≈ 0.013 /
+0.31). **The ¹⁵O/¹¹C mix is computed from the MC P_j, not assumed** — carbon-rich
+PMMA makes relatively more ¹¹C, so the source is less ¹⁵O-dominated than the
+soft-tissue ~4×. The positron-range floor (¹⁵O longest) still matters.
 
 **CRYSP baseline detector** (from `crysp_for_ht.tex` / Soleti 2024): ring Ø
 77.4 cm, AFOV 102.4 cm, monolithic crystals 48×48×37 mm, **6.3 % FWHM** energy
