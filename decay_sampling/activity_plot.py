@@ -36,17 +36,20 @@ def main():
     ap.add_argument("--t-del", type=float, default=120.0, help="transport delay [s]")
     ap.add_argument("--t-meas", type=float, default=1200.0, help="acquisition window [s]")
     ap.add_argument("--t-max", type=float, default=45.0, help="plot range [min]")
+    ap.add_argument("--yscale", choices=("log", "linear"), default="log")
     args = ap.parse_args()
 
     emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
     meta = pd.read_csv(os.path.join(args.data_dir, "run_meta.csv")).iloc[0]
     t_dose = float(meta["target_dose_Gy"])
     counts = emit["isotope_id"].value_counts()
+    # 10C (T1/2 19 s) has decayed away before the acquisition window — drop it.
+    ids = [i for i in sorted(ISOTOPES) if ISOTOPES[i].name != "C10"]
 
     t = np.linspace(0.0, args.t_max * 60.0, 2000)  # s after end of beam
     fig, ax = plt.subplots(figsize=(8, 5))
     total = np.zeros_like(t)
-    for iid in sorted(ISOTOPES):
+    for iid in ids:
         iso = ISOTOPES[iid]
         lam = iso.lam
         Pj = counts.get(iid, 0) * args.dose / t_dose            # produced decays
@@ -63,7 +66,12 @@ def main():
 
     ax.set(xlabel="time after irradiation [min]", ylabel="activity [MBq]",
            title=f"Induced activity ({meta['phantom_material']}, {args.dose:g} Gy)")
-    ax.set_ylim(bottom=0)
+    ax.set_xlim(0.0, args.t_max)
+    if args.yscale == "log":
+        ax.set_yscale("log")
+        ax.set_ylim(max(total.max() / 1e3, 1e-3), total.max() * 1.8)
+    else:
+        ax.set_ylim(bottom=0)
     ax.legend()
     fig.tight_layout()
     out = os.path.join(args.data_dir, "activity.png")
@@ -71,12 +79,12 @@ def main():
 
     # Quick numeric readout at a few times (cf. the paper's table).
     print(f"\nactivity [MBq] ({meta['phantom_material']}, {args.dose:g} Gy):")
-    print(f"{'t[min]':>7} " + " ".join(f"{ISOTOPES[i].name:>7}" for i in sorted(ISOTOPES))
+    print(f"{'t[min]':>7} " + " ".join(f"{ISOTOPES[i].name:>7}" for i in ids)
           + f"{'total':>8}")
     for tmin in (0, 2, 10, 20):
         row = []
         tot = 0.0
-        for iid in sorted(ISOTOPES):
+        for iid in ids:
             lam = ISOTOPES[iid].lam
             Pj = counts.get(iid, 0) * args.dose / t_dose
             a0 = (Pj / args.t_irr) * (1 - np.exp(-lam * args.t_irr)) / 1e6
