@@ -1,6 +1,7 @@
 #include "SteppingAction.hh"
 
 #include "StageARun.hh"
+#include "DetectorConstruction.hh"
 
 #include "G4Step.hh"
 #include "G4StepPoint.hh"
@@ -13,17 +14,28 @@
 void SteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
 
-  // --- depth-binned dose (only steps that deposit energy) -------------------
+  // --- depth-binned dose + target-box dose (steps that deposit energy) ------
   const G4double edep = step->GetTotalEnergyDeposit();
   if (edep > 0.) {
-    // Distribute the step's edep across the z-bins it spans (pre -> post).
-    const G4double z1 = step->GetPreStepPoint()->GetPosition().z();
-    const G4double z2 = step->GetPostStepPoint()->GetPosition().z();
+    const auto& pre = step->GetPreStepPoint()->GetPosition();
+    const auto& post = step->GetPostStepPoint()->GetPosition();
     const bool primary = (track->GetParentID() == 0);
 
     auto* run = static_cast<StageARun*>(
         G4RunManager::GetRunManager()->GetNonConstCurrentRun());
-    run->AddEdepAlongStep(z1 / mm, z2 / mm, edep / MeV, primary);
+
+    // Depth-dose: distribute edep across the z-bins the step spans.
+    run->AddEdepAlongStep(pre.z() / mm, post.z() / mm, edep / MeV, primary);
+
+    // Target-box dose: add edep if the step midpoint is inside the target
+    // (cylinder: target z-range and radius from DetectorConstruction).
+    const G4double zmid = 0.5 * (pre.z() + post.z());
+    const G4double rmid =
+        0.5 * (pre.perp() + post.perp());  // transverse radius sqrt(x^2+y^2)
+    if (zmid >= fDet->TargetProxZ() && zmid <= fDet->TargetDistZ() &&
+        rmid <= fDet->TargetRadius()) {
+      run->AddTargetEdep(edep);
+    }
   }
 
   // --- kill positrons that escape the phantom into air ----------------------

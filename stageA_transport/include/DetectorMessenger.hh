@@ -7,13 +7,14 @@
 class DetectorConstruction;
 class G4UIdirectory;
 class G4UIcmdWithAString;
+class G4UIcmdWithADoubleAndUnit;
 
 // A "messenger" is Geant4's bridge between typed UI/macro commands and C++
-// objects. This one exposes
-//     /stageA/phantom/material <NIST name>
-// so the phantom material (G4_TISSUE_SOFT_ICRP / G4_PLEXIGLASS / G4_WATER …)
-// can be chosen from a macro without recompiling. Must be issued before
-// /run/initialize, since the geometry is built then.
+// objects. This one exposes the phantom material
+//     /stageA/phantom/material <NIST name>     (before /run/initialize)
+// and the target box for dose normalization
+//     /stageA/target/radius|proximal|distal <length>
+// so geometry/target parameters can be set from a macro without recompiling.
 class DetectorMessenger : public G4UImessenger {
  public:
   explicit DetectorMessenger(DetectorConstruction* det);
@@ -27,7 +28,11 @@ class DetectorMessenger : public G4UImessenger {
   DetectorConstruction* fDet = nullptr;
   G4UIdirectory* fDirStageA = nullptr;    // "/stageA/" (shared root)
   G4UIdirectory* fDirPhantom = nullptr;   // "/stageA/phantom/"
+  G4UIdirectory* fDirTarget = nullptr;    // "/stageA/target/"
   G4UIcmdWithAString* fMatCmd = nullptr;  // "/stageA/phantom/material"
+  G4UIcmdWithADoubleAndUnit* fTRadiusCmd = nullptr;
+  G4UIcmdWithADoubleAndUnit* fTProxCmd = nullptr;
+  G4UIcmdWithADoubleAndUnit* fTDistCmd = nullptr;
 };
 
 #endif  // STAGEA_DETECTORMESSENGER_HH

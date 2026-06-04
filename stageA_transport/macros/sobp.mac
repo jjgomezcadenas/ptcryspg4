@@ -10,6 +10,10 @@
 /stageA/beam/layers ../../data/sobp_layers.csv
 # Lateral fluence: uniform disk over the target cross-section (Ø6 cm).
 /stageA/beam/disk 30 mm
+# Target box for dose normalization (Ø6 cm × 5 cm at 5.5-10.5 cm depth).
+/stageA/target/radius 30 mm
+/stageA/target/proximal 55 mm
+/stageA/target/distal 105 mm
 /run/initialize
 
 /stageA/output/dir ../../data

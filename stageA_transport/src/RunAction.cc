@@ -72,6 +72,13 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   const G4double mass = fDet->PhantomMass();
   const G4double doseGy = (mass > 0.) ? (run->EdepTotal() / mass) / gray : 0.;
 
+  // Target-box dose (the normalization): D_sim = target edep / target mass.
+  const G4double tMass = fDet->TargetMass();
+  const G4double tDoseGy = (tMass > 0.) ? (run->TargetEdep() / tMass) / gray : 0.;
+  const G4double npPerGy = (tDoseGy > 0.) ? nProtons / tDoseGy : 0.;
+  const G4double tProxDepth = fDet->TargetProxZ() + fDet->PhantomHalfLength();
+  const G4double tDistDepth = fDet->TargetDistZ() + fDet->PhantomHalfLength();
+
   const int major = G4VERSION_NUMBER / 100;
   const int minor = (G4VERSION_NUMBER / 10) % 10;
   const int patch = G4VERSION_NUMBER % 10;
@@ -85,13 +92,17 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   }
   f << "n_protons,beam_energy_MeV,beam_sigma_mm,phantom_material,"
        "phantom_diameter_mm,phantom_length_mm,phantom_mass_g,edep_total_MeV,"
-       "dose_total_Gy,geant4_version,physics_list,random_seed\n";
+       "dose_total_Gy,target_dose_Gy,target_mass_g,target_radius_mm,"
+       "target_prox_depth_mm,target_dist_depth_mm,Np_per_Gy,"
+       "geant4_version,physics_list,random_seed\n";
   f << std::setprecision(7) << nProtons << ',' << stageA::kBeamEnergyMeV << ','
     << stageA::kBeamSigmaMM << ',' << fDet->MaterialName() << ','
     << stageA::kPhantomDiameterMM << ',' << stageA::kPhantomLengthMM << ','
-    << (mass / g) << ',' << edepMeV << ',' << doseGy << ',' << major << '.'
-    << minor << '.' << patch << ',' << stageA::kPhysicsList << ','
-    << G4Random::getTheSeed() << '\n';
+    << (mass / g) << ',' << edepMeV << ',' << doseGy << ',' << tDoseGy << ','
+    << (tMass / g) << ',' << (fDet->TargetRadius() / mm) << ','
+    << (tProxDepth / mm) << ',' << (tDistDepth / mm) << ',' << npPerGy << ','
+    << major << '.' << minor << '.' << patch << ',' << stageA::kPhysicsList
+    << ',' << G4Random::getTheSeed() << '\n';
   G4cout << "[Stage A] wrote run metadata -> " << path << G4endl;
 }
 
@@ -155,8 +166,14 @@ void RunAction::PrintSummary(const StageARun* run) const {
 
   G4cout << "  edep total        : " << edepMeV << " MeV";
   if (nProtons > 0) G4cout << "   (" << edepMeV / nProtons << " MeV/proton)";
+  const G4double tMass = fDet->TargetMass();
+  const G4double tDoseGy = (tMass > 0.) ? (run->TargetEdep() / tMass) / gray : 0.;
+  const G4double npPerGy = (tDoseGy > 0.) ? nProtons / tDoseGy : 0.;
+
   G4cout << "\n  dose (whole phantom): " << doseGy << " Gy";
   if (nProtons > 0) G4cout << "   (" << doseGy / nProtons << " Gy/proton)";
+  G4cout << "\n  dose (target box)   : " << tDoseGy << " Gy   -> N_p(1 Gy) = "
+         << npPerGy;
   G4cout << "\n  primary proton edep : " << 100. * primFrac
          << " %   (secondaries " << 100. * (1. - primFrac) << " %)";
   G4cout << "\n=====================================\n" << G4endl;

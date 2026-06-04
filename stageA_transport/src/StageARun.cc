@@ -81,6 +81,7 @@ void StageARun::Merge(const G4Run* aRun) {
   const auto* local = static_cast<const StageARun*>(aRun);
   fEmitters.append(local->fEmitters);
   fEdep += local->fEdep;
+  fTargetEdep += local->fTargetEdep;
   for (int i = 0; i < kNZBins; ++i) {
     fEdepZTotal[i] += local->fEdepZTotal[i];
     fEdepZPrimary[i] += local->fEdepZPrimary[i];

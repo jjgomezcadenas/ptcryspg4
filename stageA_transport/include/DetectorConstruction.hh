@@ -35,11 +35,26 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   // Phantom mass (ρ·V), for the dose normalization. Valid only after Construct().
   G4double PhantomMass() const;
 
+  // Target (tumour) box for dose normalization. It is NOT a geometry volume — it
+  // is a scoring region the SteppingAction tests each step against (transparent,
+  // no carving). Depths are from the entrance face; settable by card
+  // (/stageA/target/...), defaults from StageAConfig.
+  void SetTargetRadius(G4double r) { fTargetRadius = r; }
+  void SetTargetProxDepth(G4double d) { fTargetProxDepth = d; }
+  void SetTargetDistDepth(G4double d) { fTargetDistDepth = d; }
+  G4double TargetRadius() const { return fTargetRadius; }
+  G4double TargetProxZ() const { return -fHalfZ + fTargetProxDepth; }  // beam at -fHalfZ
+  G4double TargetDistZ() const { return -fHalfZ + fTargetDistDepth; }
+  G4double TargetMass() const;  // π·r²·L·ρ (ρ from the phantom material)
+
  private:
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)
   G4LogicalVolume* fPhantomLV = nullptr;  // kept for the scorer + mass query
   G4String fMaterialName;                 // NIST name; default set in the ctor
+  G4double fTargetRadius = 0.;            // target box, defaults set in the ctor
+  G4double fTargetProxDepth = 0.;
+  G4double fTargetDistDepth = 0.;
   DetectorMessenger* fMessenger = nullptr;
 };
 

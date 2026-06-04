@@ -3,15 +3,21 @@
 
 #include "G4UserSteppingAction.hh"
 
-// Bins each step's energy deposit by depth z into the thread's StageARun,
-// separating the primary proton's contribution (parentID==0) from everything
-// else, so the depth-dose curve and the secondary contribution can be compared.
+class DetectorConstruction;
+
+// Per-step bookkeeping: bins each step's energy deposit by depth z (the
+// depth-dose), accumulates the part that falls inside the target box (the
+// transparent dose-scoring region, bounds from DetectorConstruction), and kills
+// positrons that escape the phantom into air.
 class SteppingAction : public G4UserSteppingAction {
  public:
-  SteppingAction() = default;
+  explicit SteppingAction(const DetectorConstruction* det) : fDet(det) {}
   ~SteppingAction() override = default;
 
   void UserSteppingAction(const G4Step* step) override;
+
+ private:
+  const DetectorConstruction* fDet = nullptr;
 };
 
 #endif  // STAGEA_STEPPINGACTION_HH

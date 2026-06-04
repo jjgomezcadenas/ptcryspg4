@@ -18,6 +18,6 @@ void ActionInitialization::Build() const {
   auto* eventAction = new EventAction;
   SetUserAction(eventAction);
   SetUserAction(new TrackingAction(eventAction));
-  SetUserAction(new SteppingAction);
+  SetUserAction(new SteppingAction(fDet));
   SetUserAction(new RunAction(/*onMaster=*/false, fDet));
 }

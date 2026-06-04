@@ -31,14 +31,20 @@ class StageARun : public G4Run {
   void AddEdepAlongStep(G4double z1_mm, G4double z2_mm, G4double edep_MeV,
                         bool primary);
 
+  // Accumulate a step's energy deposit that falls inside the target box
+  // (SteppingAction decides; G4 internal energy units) -> the dose normalization.
+  void AddTargetEdep(G4double edep) { fTargetEdep += edep; }
+
   const ptcrysp::EmitterData& Emitters() const { return fEmitters; }
   G4double EdepTotal() const { return fEdep; }  // G4 internal energy units
+  G4double TargetEdep() const { return fTargetEdep; }
   const std::vector<G4double>& EdepZTotal() const { return fEdepZTotal; }
   const std::vector<G4double>& EdepZPrimary() const { return fEdepZPrimary; }
 
  private:
   ptcrysp::EmitterData fEmitters;
   G4double fEdep = 0.;
+  G4double fTargetEdep = 0.;  // energy deposited inside the target box
   G4int fCollID = -1;  // cached scorer collection ID
   std::vector<G4double> fEdepZTotal{std::vector<G4double>(kNZBins, 0.)};
   std::vector<G4double> fEdepZPrimary{std::vector<G4double>(kNZBins, 0.)};

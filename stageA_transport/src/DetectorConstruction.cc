@@ -15,9 +15,13 @@
 #include "G4SDManager.hh"
 #include "G4MultiFunctionalDetector.hh"
 #include "G4PSEnergyDeposit.hh"
+#include "G4PhysicalConstants.hh"
 
 DetectorConstruction::DetectorConstruction()
-    : fMaterialName(stageA::kPhantomMaterial) {
+    : fMaterialName(stageA::kPhantomMaterial),
+      fTargetRadius(stageA::kTargetRadiusMM * mm),
+      fTargetProxDepth(stageA::kTargetProxDepthMM * mm),
+      fTargetDistDepth(stageA::kTargetDistDepthMM * mm) {
   fMessenger = new DetectorMessenger(this);
 }
 
@@ -69,4 +73,13 @@ void DetectorConstruction::ConstructSDandField() {
 G4double DetectorConstruction::PhantomMass() const {
   // G4LogicalVolume::GetMass() integrates ρ·V over the volume (and daughters).
   return fPhantomLV ? fPhantomLV->GetMass() : 0.;
+}
+
+G4double DetectorConstruction::TargetMass() const {
+  // The target box is conceptual (not a volume), so compute its mass directly
+  // from its dimensions and the phantom material density.
+  if (!fPhantomLV) return 0.;
+  const G4double length = fTargetDistDepth - fTargetProxDepth;
+  const G4double volume = pi * fTargetRadius * fTargetRadius * length;
+  return volume * fPhantomLV->GetMaterial()->GetDensity();
 }
