@@ -129,12 +129,14 @@ else (PMMA, water, single pencil, 2 Gy, spine, in-room timing) is a **variant**.
 | phantom | homogeneous **brain** (`G4_BRAIN_ICRP`), cylinder **Ø16 cm × 16 cm** | head ≈ cylinder |
 | target | box **Ø6 cm × 5 cm at ~8 cm depth** | Fig. 2a dose box |
 | dose | **1 Gy** to the target | Fig. 2 caption |
-| timing | cyclotron offline **t_irr=60, t_del=300, t_meas=1800 s** | Parodi Table 3 |
+| timing | in-room **t_irr=60, t_del=120, t_meas=1200 s** (cyclotron); t_del swept | — |
 
 **Cross-checks (proton, head, 1 Gy):**
 - *Production* — our G4 integral yields vs **Table 2**: ¹⁵O 9.4e7, ¹¹C 7.7e7,
   ¹³N 9.4e6, ¹⁰C 1.6e6, ¹⁴O 5.5e5 → total **~1.8e8 /Gy**.
-- *Measured, no washout* — handoff Eq. 1 vs **Table 4/5 offline**: total **~6.1e7**.
+- *Measured, no washout* — handoff Eq. 1 at the **offline** point (t_del=300,
+  t_meas=1800) vs **Table 4/5**: total **~6.1e7** (the offline variant; the
+  in-room baseline keeps more ¹⁵O).
 
 **Beam (gun):** standard = the SOBP above. *Variant:* single mono-energetic
 pencil (100 MeV, σ≈3 mm) — a clean range-verification testbed, but it paints a
@@ -159,9 +161,11 @@ N_j = P_j · (1−e^(−λ_j·t_irr))/(λ_j·t_irr) · e^(−λ_j·t_del) · (1�
            └──── build-up ────┘              └ transport ┘   └──── window ────┘
 ```
 
-Standard timing (Parodi offline): **t_irr=60, t_del=300, t_meas=1800 s**.
-*Variant* (Donostia in-room): t_irr=t_del=120, t_meas=1200 s — the shorter delay
-keeps more ¹⁵O. The positron-range floor (¹⁵O longest) matters at any of these.
+Baseline timing (in-room): **t_irr=60, t_del=120, t_meas=1200 s** — `t_del` is
+the key swept parameter (120 s is the fastest realistic in-room delay; longer
+delay = less ¹⁵O). *Conservative/offline variant:* t_del=300, t_meas=1800 s
+(where the Parodi Table 4 measured-decay check applies). The positron-range floor
+(¹⁵O longest) matters at any of these.
 
 **Full handoff method in `docs/handoff.tex`** — the time-decay model, absolute
 normalization `P_j(D)=count_j·D/target_dose`, the budget source sampling, and the
