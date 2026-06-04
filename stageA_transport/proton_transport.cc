@@ -9,6 +9,7 @@
 
 #include "DetectorConstruction.hh"
 #include "ActionInitialization.hh"
+#include "BeamConfig.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
@@ -35,7 +36,11 @@ int main(int argc, char** argv) {
   auto* det = new DetectorConstruction;
   runManager->SetUserInitialization(det);
   runManager->SetUserInitialization(new QGSP_BIC_HP);
-  runManager->SetUserInitialization(new ActionInitialization(det));
+
+  // Shared beam config: owns the /stageA/beam/ messenger and the SOBP layer
+  // table (loaded by macro). Created after det so "/stageA/" already exists.
+  auto* beam = new BeamConfig;
+  runManager->SetUserInitialization(new ActionInitialization(det, beam));
 
   // Visualization manager. This build has Qt + ToolsSG drivers; in batch it is
   // simply created and left idle.
@@ -57,5 +62,6 @@ int main(int argc, char** argv) {
 
   delete visManager;
   delete runManager;
+  delete beam;
   return 0;
 }

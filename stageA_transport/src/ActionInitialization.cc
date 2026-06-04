@@ -13,7 +13,7 @@ void ActionInitialization::BuildForMaster() const {
 }
 
 void ActionInitialization::Build() const {
-  SetUserAction(new PrimaryGeneratorAction(fDet));
+  SetUserAction(new PrimaryGeneratorAction(fDet, fBeam));
 
   auto* eventAction = new EventAction;
   SetUserAction(eventAction);

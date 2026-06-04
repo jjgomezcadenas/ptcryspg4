@@ -38,30 +38,35 @@ def energy_for_range(R_cm, rho_rel):
     return (R_water / ALPHA) ** (1.0 / P)
 
 
-def design(d_prox, d_dist, n_layers, rho_rel):
+def design(d_prox, d_dist, n_layers, rho_rel, mu):
     """Return per-layer ranges [cm], energies [MeV] and normalized weights."""
     R = np.linspace(d_prox, d_dist, n_layers)   # peak ranges, proximal->distal
     Rd = d_dist
     delta = (d_dist - d_prox) / (n_layers - 1)
-    # Integrate Phi(R) ∝ (Rd-R)^(1/p-1) over each range bin; clip at the distal
-    # edge (no peaks beyond Rd) so the deepest bin stays finite.
+    # Flat plateau requires fluence Phi(R) ∝ (Rd-R)^(-1/p) (Abel inversion of
+    # D(z)=const); integrated over each range bin -> exponent (1 - 1/p). Clip at
+    # the distal edge (no peaks beyond Rd) so the deepest bin stays finite.
     hi = np.clip(Rd - R + delta / 2, 0.0, None)
     lo = np.clip(Rd - R - delta / 2, 0.0, None)
-    # Flat plateau requires fluence Phi(R) ∝ (Rd-R)^(-1/p) (Abel inversion of
-    # D(z)=const); integrated over each range bin -> exponent (1 - 1/p).
     e = 1.0 - 1.0 / P
     w = hi ** e - lo ** e
+    # Compensate the proximal->distal droop of the *delivered* field: protons
+    # are lost (mainly to nuclear reactions) on the way in, so deeper layers
+    # arrive depleted. Boost each layer by exp(mu*R) (mu [1/cm] tuned against the
+    # simulated plateau).
+    w *= np.exp(mu * R)
     w /= w.sum()
     E = energy_for_range(R, rho_rel)
     return R, E, w
 
 
-def analytic_depth_dose(z, R, w, rho_rel):
-    """Idealized SOBP depth-dose on grid z [cm], smeared by range straggling."""
+def analytic_depth_dose(z, R, w, mu):
+    """Idealized SOBP depth-dose on grid z [cm]: peaks + attenuation, smeared."""
     D = np.zeros_like(z)
     for Ri, wi in zip(R, w):
         m = z < Ri
         D[m] += wi * (Ri - z[m]) ** (1.0 / P - 1.0)
+    D *= np.exp(-mu * z)   # beam attenuation reaching depth z (same model as above)
     # Range straggling ~1.2% of the distal range -> smooth the cusps.
     dz = z[1] - z[0]
     sigma = 0.012 * R[-1] / dz
@@ -76,10 +81,12 @@ def main():
     ap.add_argument("--n-layers", type=int, default=20)
     ap.add_argument("--rho-rel", type=float, default=1.04,
                     help="material density relative to water (brain=1.04)")
+    ap.add_argument("--mu", type=float, default=0.025,
+                    help="attenuation-correction coefficient [1/cm], tuned to flatten")
     ap.add_argument("--out", default=os.path.join(_HERE, "..", "data", "sobp_layers.csv"))
     args = ap.parse_args()
 
-    R, E, w = design(args.d_prox, args.d_dist, args.n_layers, args.rho_rel)
+    R, E, w = design(args.d_prox, args.d_dist, args.n_layers, args.rho_rel, args.mu)
 
     # --- write the layer table for the Geant4 gun -----------------------------
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
@@ -93,7 +100,7 @@ def main():
 
     # --- sanity plot: weights + analytic SOBP ---------------------------------
     z = np.linspace(0, args.d_dist * 1.15, 800)
-    D = analytic_depth_dose(z, R, w, args.rho_rel)
+    D = analytic_depth_dose(z, R, w, args.mu)
     # Flatness over the plateau, excluding the inherent distal falloff (~last
     # 0.5 cm, where any SOBP must drop to zero).
     falloff_cm = 0.5
