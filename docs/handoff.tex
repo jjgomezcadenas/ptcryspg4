@@ -13,160 +13,102 @@
 
 \title{The A$\to$B handoff:\\
 time-decay bookkeeping, source sampling, and $\sigma(\text{range})$}
-\author{Method note for review}
+\author{Method note}
 \date{\today}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This note documents the handoff (Stage~B0, \texttt{decay\_sampling/}) that turns
-the Stage-A \emph{production} of $\beta^{+}$ emitters into the \emph{measured}
-annihilation source seen by a detector, and explains the Monte-Carlo definition
-of the figure of merit $\sigma(\text{range})$. Three ideas: (i) the detector
-does not see production --- it sees the decays that fall inside its acquisition
-window, after a delay, scaled to a clinical dose; (ii) the source is delivered
-as a \emph{budget} (how many decays of each isotope, plus a seed), not a
-materialised event list; (iii) $\sigma(\text{range})$ is the spread of the
-recovered range over many Poisson-noisy repeats of the same measurement --- the
-error bar on the single real measurement.
+The handoff (Stage~B0, \texttt{decay\_sampling/}) converts the Stage-A production
+of $\beta^{+}$ emitters into the annihilation source measured by a detector. It
+scales the production to a clinical dose, applies radioactive decay and the
+acquisition timing to obtain the measured number of decays per isotope, and
+delivers the source as a budget. The figure of merit $\sigma(\text{range})$ is
+the spread of the recovered proton range over Poisson realisations of that
+budget.
 \end{abstract}
 
-\section{Role in the chain}
+\section{Role}
 
-Stage~A produced \texttt{emitters.csv}: one row per produced emitter, carrying
-its annihilation point and isotope. This is the production \emph{shape}
-$P_j(\mathbf r)$ at the statistics of the (arbitrary) number of protons we chose
-to simulate. The detector (Stage~B) needs a list of annihilation \emph{events}
-to fire 511\,keV pairs from. We cannot feed \texttt{emitters.csv} directly,
-for two reasons:
-\begin{itemize}[nosep]
-\item \textbf{Wrong absolute number.} Our file holds the emitters of $\sim10^6$
-simulated protons; a clinical $1$\,Gy field is $\sim10^{10}$ protons.
-\item \textbf{Wrong isotope mix.} The detector sees only the decays inside its
-acquisition window, which starts a delay after irradiation; by then short-lived
-$^{15}$O has largely decayed, so the \emph{measured} mix $\neq$ the
-\emph{produced} mix.
-\end{itemize}
-The handoff fixes both: scale to a clinical dose (Sec.~\ref{sec:norm}), then
-apply radioactive decay and the acquisition timing (Sec.~\ref{sec:decay}).
+Stage~A wrote \texttt{emitters.csv}: one row per produced emitter with its
+annihilation point and isotope, i.e.\ the production shape $P_j(\mathbf r)$ at
+the statistics of the simulated protons. The detector measures a different
+quantity. The handoff applies two transforms: an absolute scale to a clinical
+dose (Sec.~\ref{sec:norm}), and the decay-plus-window selection that yields the
+measured decays (Sec.~\ref{sec:decay}).
 
 \section{Time-decay model}
 \label{sec:decay}
 
-Each species $j$ has decay constant $\lambda_j=\ln2/T_{1/2,j}$ and is assumed to
-decay $100\%$ by $\beta^{+}$. For a delivery of duration $\tirr$ at constant
-production rate $K_j=P_j/\tirr$, the activity is
+Species $j$ has decay constant $\lambda_j=\ln2/T_{1/2,j}$ and decays $100\%$ by
+$\beta^{+}$. For constant production over $\tirr$ at rate $K_j=P_j/\tirr$, the
+activity is
 \begin{align}
-A_j(t) &= K_j\bigl(1-e^{-\lambda_j t}\bigr), & 0\le t\le \tirr
-       &\quad\text{(build-up)},\\
+A_j(t) &= K_j\bigl(1-e^{-\lambda_j t}\bigr), & 0\le t\le \tirr,\\
 A_j(t) &= K_j\bigl(1-e^{-\lambda_j \tirr}\bigr)\,e^{-\lambda_j (t-\tirr)},
-       & t>\tirr &\quad\text{(decay)}.
+       & t>\tirr.
 \end{align}
-A scanner acquires over the window $[t_0,t_1]$ with $t_0=\tirr+\tdel$ and
-$t_1=t_0+\tmeas$. The number of decays collected is
-$N_j=\int_{t_0}^{t_1}A_j(t)\,dt$, which evaluates to the \textbf{three-factor
-expression} (continuous / cyclotron limit, the relevant case --- post-beam
-acquisition makes the pulse structure irrelevant):
+The scanner acquires over $[t_0,t_1]$ with $t_0=\tirr+\tdel$ and
+$t_1=t_0+\tmeas$. The collected decays $N_j=\int_{t_0}^{t_1}A_j(t)\,dt$ evaluate
+to the three-factor expression (continuous / cyclotron limit; acquisition is
+post-beam, so the pulse structure does not enter):
 \begin{equation}
-\boxed{\;
 N_j = P_j\;
-\underbrace{\frac{1-e^{-\lambda_j \tirr}}{\lambda_j \tirr}}_{\text{build-up}}\;
-\underbrace{e^{-\lambda_j \tdel}}_{\text{transport}}\;
-\underbrace{\bigl(1-e^{-\lambda_j \tmeas}\bigr)}_{\text{window}}\;}
+\frac{1-e^{-\lambda_j \tirr}}{\lambda_j \tirr}\;
+e^{-\lambda_j \tdel}\;
+\bigl(1-e^{-\lambda_j \tmeas}\bigr).
 \label{eq:nmeas}
 \end{equation}
-The factors are: how many nuclei survive to the end of beam (production and
-decay during $\tirr$); decay during the transport delay $\tdel$; the fraction of
-survivors that decay during the acquisition $\tmeas$.
+The three factors are the survival to the end of beam, the decay during the
+transport delay $\tdel$, and the fraction of survivors that decay during the
+acquisition $\tmeas$.
 
-\paragraph{Operating point (Parodi standard).} $\tirr=\SI{60}{s}$,
-$\tdel=\SI{300}{s}$, $\tmeas=\SI{1800}{s}$ (cyclotron, offline). All are
-parameters.
-
-\paragraph{Activity curves --- a required output.} Plotting $A_j(t)$ per isotope
-from $t=0$ through the acquisition window, with the window shaded, reproduces the
-classic activity-vs-time picture (CRYSP paper Fig.~1 / Parodi): build-up during
-$\tirr$, then isotope-specific decay. It shows visually why a short delay is
-decisive --- at $\tdel\sim$ a few minutes $^{15}$O ($T_{1/2}=\SI{122}{s}$) is
-still abundant, whereas at offline delays only $^{11}$C remains. The handoff
-emits this plot.
+Operating point (Parodi standard): $\tirr=\SI{60}{s}$, $\tdel=\SI{300}{s}$,
+$\tmeas=\SI{1800}{s}$ (cyclotron, offline); all are parameters.
 
 \section{Absolute normalisation}
 \label{sec:norm}
 
-Stage~A also scores the dose in the target box, $D_{\mathrm{sim}}$, for the same
-$N_{\mathrm{sim}}$ protons (\texttt{run\_meta.csv}: \texttt{target\_dose\_Gy}).
-The production for a clinical dose $D$ is then
+Stage~A scores the target-box dose $D_{\mathrm{sim}}$ for the $N_{\mathrm{sim}}$
+simulated protons (\texttt{run\_meta.csv}). The production for a clinical dose
+$D$ is
 \begin{equation}
-P_j(D) = \mathrm{count}_j \,\frac{D}{D_{\mathrm{sim}}},
+P_j(D) = \mathrm{count}_j\,\frac{D}{D_{\mathrm{sim}}}.
 \label{eq:pj}
 \end{equation}
-i.e.\ $P_j(\SI{1}{Gy})=\mathrm{count}_j/D_{\mathrm{sim}}$ (Sec.~\ref{sec:norm}
-closes the loop with the Parodi Table~2 cross-check,
-\texttt{analysis\_transport/parodi\_cross\_check.py}). Substituting
-Eq.~\eqref{eq:pj} into Eq.~\eqref{eq:nmeas} gives the measured decays $N_j$ for a
-$D$-Gy field. For the standard scenario the totals are $N\sim10^{7}$--$10^{8}$.
+The Parodi Table~2 cross-check
+(\texttt{analysis\_transport/parodi\_cross\_check.py}) validates
+$P_j(\SI{1}{Gy})=\mathrm{count}_j/D_{\mathrm{sim}}$. With
+Eqs.~\eqref{eq:pj},\eqref{eq:nmeas} the measured totals are
+$N\sim10^{7}$--$10^{8}$.
 
-\section{The detector source: sampling}
+\section{Source sampling}
 \label{sec:source}
 
-Stage~B needs $N_j$ annihilation \emph{points} per isotope. The file holds only
-$\sim10^4$ points per isotope (the shape); we obtain $N_j$ of them by
-\textbf{sampling with replacement} --- drawing points at random (repeats
-allowed). Drawing $N_j$ times reproduces the shape $P_j(\mathbf r)$ at the
-required count.
+The detector requires $N_j$ annihilation points per isotope. They are drawn from
+\texttt{emitters.csv} by sampling with replacement, reproducing the shape
+$P_j(\mathbf r)$ at the required count. The handoff delivers a budget: the counts
+$N_j$, the Poisson draws (Sec.~\ref{sec:sigma}), the operating point, and a seed.
+Stage~B performs the sampling. The same file, budget, and seed yield an identical
+source for every detector.
 
-\paragraph{Budget, not materialised events.} Writing all $\sim10^{8}$ sampled
-points to disk would be GB-scale per realisation. Instead the handoff writes a
-\textbf{budget}: the per-isotope counts $N_j$ (and the Poisson draws below) plus
-a random seed and the operating point. Stage~B does the sampling \emph{on the
-fly} from \texttt{emitters.csv}. With the same file, budget and seed the drawn
-set is identical and reproducible, so \textbf{every detector consumes the
-identical source} --- guaranteed by determinism, not by sharing a large file.
-
-\section{The figure of merit: $\sigma(\text{range})$}
+\section{Figure of merit}
 \label{sec:sigma}
 
-\paragraph{What it is.} The precision with which the measurement recovers the
-proton range --- one number in mm. It is the \emph{error bar} on the single real
-measurement: a clinic scans once and gets a range, but that value is one draw
-from a distribution whose width is $\sigma(\text{range})$. You cannot read the
-error bar off one number, so we characterise it by simulation.
-
-\paragraph{Why Poisson.} The measurement counts independent rare events
-(detected decays), so the realised integer count of species $j$ fluctuates as
-Poisson about the expectation $N_j$ (variance $N_j$). The expectation $N_j$
-(Eq.~\eqref{eq:nmeas}) is deterministic; any one acquisition is a Poisson draw
-$M_j\sim\mathrm{Poisson}(N_j)$.
-
-\paragraph{The $Z$ realisations.} We repeat the \emph{whole} measurement $Z$
-($\sim100$) times. Each realisation $z$:
-\begin{enumerate}[nosep]
-\item draws $M_j^{(z)}\sim\mathrm{Poisson}(N_j)$ for \emph{every} isotope, with
-its own seed;
-\item forms the source (those $M_j^{(z)}$ sampled points), runs the detector and
-reconstruction;
-\item fits the distal fall-off $\to$ a range estimate $R_z$.
-\end{enumerate}
-After $Z$ realisations, $\{R_1,\dots,R_Z\}$ are independent estimates from
-independent noisy draws; their
+$\sigma(\text{range})$ is the precision of the recovered proton range --- the
+error bar on a single measurement. The realised count of species $j$ is
+$M_j\sim\mathrm{Poisson}(N_j)$ about the expectation $N_j$ of
+Eq.~\eqref{eq:nmeas}. One realisation $z$ draws $M_j^{(z)}$ for every isotope,
+forms the source, runs the detector and the reconstruction, and fits the distal
+fall-off to a range estimate $R_z$. Over $Z\sim100$ realisations,
 \begin{equation}
-\sigma(\text{range}) = \operatorname{std}\{R_z\}
+\sigma(\text{range}) = \operatorname{std}\{R_1,\dots,R_Z\}.
 \end{equation}
-is the precision. (Analogy: a scale's precision is characterised once by
-repeated tests; thereafter every single weighing carries that $\pm$.) The real
-treatment happens once, but between hypothetical repeats only the counting noise
-changes --- which we can simulate --- so the spread over $Z$ draws is the
-uncertainty on the one real outcome. The detector with the smallest
-$\sigma(\text{range})$ at a fixed budget wins.
-
-\paragraph{Tractability (Stage B/C detail).} We do \emph{not} run the Geant4
-detector $Z$ times ($Z\times10^{8}$ would be $\sim10^{10}$ pairs). The detector
-is simulated \textbf{once} on the full source $\to$ a master coincidence list;
-each realisation is a Poisson-sized \emph{resample} of that list, and only the
-cheap reconstruction runs $Z$ times. The exact resampling scheme is fixed when
-Stage~B is built.
+The detector with the smallest $\sigma(\text{range})$ at a fixed budget is
+preferred. The detector is simulated once to a master coincidence list; the $Z$
+realisations are Poisson resamples of that list and only the reconstruction
+repeats (Stage~B/C).
 
 \section{Implementation (\texttt{decay\_sampling/})}
 
@@ -175,10 +117,8 @@ Stage~B is built.
 $D,\tirr,\tdel,\tmeas,Z$, seed.
 \item $\lambda_j$ from \texttt{common/isotopes.py}; $N_j$ from
 Eqs.~\eqref{eq:pj},\eqref{eq:nmeas}; $M_j^{(z)}\sim\mathrm{Poisson}(N_j)$.
-\item Output: \texttt{sampling\_budget\_<scenario>.csv} --- per isotope
-$N_j$ and the $Z$ Poisson draws, plus the operating point and seeds (the budget,
-Sec.~\ref{sec:source}).
-\item A script emitting the activity-vs-time plot $A_j(t)$ (Sec.~\ref{sec:decay}).
+\item Output: \texttt{sampling\_budget\_<scenario>.csv} --- per isotope $N_j$ and
+the $Z$ Poisson draws, the operating point, and the seeds.
 \end{itemize}
 
 \end{document}

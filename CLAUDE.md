@@ -163,10 +163,9 @@ Standard timing (Parodi offline): **t_irr=60, t_del=300, t_meas=1800 s**.
 *Variant* (Donostia in-room): t_irr=t_del=120, t_meas=1200 s — the shorter delay
 keeps more ¹⁵O. The positron-range floor (¹⁵O longest) matters at any of these.
 
-**Full handoff method in `docs/handoff.tex`** — the time-decay model + activity
-curves, absolute normalization `P_j(D)=count_j·D/target_dose`, source sampling
-(budget-only, not materialized), and the σ(range) figure of merit (Poisson
-realizations as the error bar on the single measurement).
+**Full handoff method in `docs/handoff.tex`** — the time-decay model, absolute
+normalization `P_j(D)=count_j·D/target_dose`, the budget source sampling, and the
+σ(range) figure of merit (Poisson realizations).
 
 **CRYSP baseline detector** (from `crysp_for_ht.tex` / Soleti 2024): ring Ø
 77.4 cm, AFOV 102.4 cm, monolithic crystals 48×48×37 mm, **6.3 % FWHM** energy
