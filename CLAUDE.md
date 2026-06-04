@@ -117,43 +117,51 @@ column suffixes.)
 
 ## Fixed parameters
 
-**Beam (gun):** proton; baseline **100 MeV** (range ≈ 7.7 cm in water; clean
-testbed within the Donostia 70–230 MeV clinical range), cross-check **150 MeV**;
-Gaussian pencil σ ≈ 3–5 mm; along cylinder axis; fluence normalized to **2 Gy**
-at target (Donostia default; sets P_j) or fixed N_p with dose reported.
+**Standard scenario — Parodi skull-base reference.** The reference case is
+Parodi et al. 2008 (`docs/proton-therapy-ptet-doses-mc.pdf`, Fig. 2a / Table 2):
+a proton **SOBP** field delivering **1 Gy** to a target inside a head, so our
+absolute β⁺ yields are **checkable against their published numbers**. Everything
+else (PMMA, water, single pencil, 2 Gy, spine, in-room timing) is a **variant**.
 
-**Phantom (geometry):** cylinder **Ø20 cm × 20 cm**, axis along beam; present as
-a passive attenuator in **every** Stage-B geometry. Material is **macro-selectable**
-(`/stageA/phantom/material <NIST name>`, before `/run/initialize`):
-- **`G4_TISSUE_SOFT_ICRP`** — *default*; oxygen-rich, **¹⁵O-dominated**,
-  clinically representative → correct positron-range floor.
-- **`G4_PLEXIGLASS`** (PMMA, C₅H₈O₂, ρ=1.19) — carbon-rich, ¹¹C-leaning;
-  reproducible benchmark / two-isotope stress.
-- **`G4_WATER`** — pure-¹⁵O extreme (max floor).
+| element | standard value | source |
+|---|---|---|
+| site / beam | skull-base, proton **SOBP + lateral fluence** | Fig. 2a |
+| phantom | homogeneous **brain** (`G4_BRAIN_ICRP`), cylinder **Ø16 cm × 16 cm** | head ≈ cylinder |
+| target | box **Ø6 cm × 5 cm at ~8 cm depth** | Fig. 2a dose box |
+| dose | **1 Gy** to the target | Fig. 2 caption |
+| timing | cyclotron offline **t_irr=60, t_del=300, t_meas=1800 s** | Parodi Table 3 |
 
-Production O15/C11 ≈ **1.7** (tissue) vs **0.6** (PMMA): the measured mix is
-computed from the **MC P_j**, never assumed.
+**Cross-checks (proton, head, 1 Gy):**
+- *Production* — our G4 integral yields vs **Table 2**: ¹⁵O 9.4e7, ¹¹C 7.7e7,
+  ¹³N 9.4e6, ¹⁰C 1.6e6, ¹⁴O 5.5e5 → total **~1.8e8 /Gy**.
+- *Measured, no washout* — handoff Eq. 1 vs **Table 4/5 offline**: total **~6.1e7**.
+
+**Beam (gun):** standard = the SOBP above. *Variant:* single mono-energetic
+pencil (100 MeV, σ≈3 mm) — a clean range-verification testbed, but it paints a
+thin track, not a target volume, so its integral yield is unrealistically small
+→ use it for shape/detector tests, not for absolute rates.
+
+**Phantom material** is macro-selectable (`/stageA/phantom/material`, before
+`/run/initialize`): **`G4_BRAIN_ICRP`** (standard) · `G4_TISSUE_SOFT_ICRP`
+(oxygen-rich tissue) · `G4_PLEXIGLASS` (PMMA, carbon-rich benchmark) · `G4_WATER`
+(pure-¹⁵O extreme). The ¹⁵O/¹¹C mix is computed from MC P_j, never assumed
+(O15/C11 ≈ 1.2 Parodi head, ~1.7 our tissue, ~0.6 PMMA).
 
 **Isotopes / half-lives:** ¹⁵O 122 s, ¹¹C 1223 s, ¹³N 598 s, ¹⁰C 19.3 s,
-¹⁴O 70.6 s (100 % β⁺ assumed).
+¹⁴O 70.6 s (100 % β⁺ assumed in the bookkeeping).
 
-**In-room acquisition (Donostia operating point, from `crysp_for_ht.tex` §3).**
-**Continuous / cyclotron limit** — acquisition is entirely post-beam, so the
-pulsed S2C2 time structure is irrelevant to the count budget and the synchrotron
-spill/pause sums collapse. The measured decays per species follow the
-**three-factor expression — the *only* handoff equation:**
+**Acquisition / handoff (cyclotron, post-beam).** Continuous/cyclotron limit
+(post-beam → pulsed structure irrelevant), so the measured decays per species
+are the **three-factor expression — the *only* handoff equation:**
 
 ```
 N_j = P_j · (1−e^(−λ_j·t_irr))/(λ_j·t_irr) · e^(−λ_j·t_del) · (1−e^(−λ_j·t_meas))
            └──── build-up ────┘              └ transport ┘   └──── window ────┘
 ```
 
-Defaults: **t_irr = t_del = 120 s**, **t_meas = 1200 s** (20 min). Survival
-factors (build-up·transport·window): ¹⁵O 0.73·0.51·1.00, ¹³N 0.93·0.87·0.75,
-¹¹C 0.97·0.93·0.49; ¹⁰C/¹⁴O are crushed by transport (e^(−λ t_del) ≈ 0.013 /
-0.31). **The ¹⁵O/¹¹C mix is computed from the MC P_j, not assumed** — carbon-rich
-PMMA makes relatively more ¹¹C, so the source is less ¹⁵O-dominated than the
-soft-tissue ~4×. The positron-range floor (¹⁵O longest) still matters.
+Standard timing (Parodi offline): **t_irr=60, t_del=300, t_meas=1800 s**.
+*Variant* (Donostia in-room): t_irr=t_del=120, t_meas=1200 s — the shorter delay
+keeps more ¹⁵O. The positron-range floor (¹⁵O longest) matters at any of these.
 
 **CRYSP baseline detector** (from `crysp_for_ht.tex` / Soleti 2024): ring Ø
 77.4 cm, AFOV 102.4 cm, monolithic crystals 48×48×37 mm, **6.3 % FWHM** energy
