@@ -19,6 +19,13 @@ inline constexpr double kPhantomLengthMM = 160.0;
 // variants: "G4_TISSUE_SOFT_ICRP", "G4_PLEXIGLASS" (PMMA), "G4_WATER".
 inline constexpr const char* kPhantomMaterial = "G4_BRAIN_ICRP";
 
+// Target (tumour) box — Parodi standard. Used as the SOBP lateral-fluence disk
+// radius and (next step) the nested dose-scoring volume. Depths are measured
+// from the beam-entrance face (z = -kPhantomLengthMM/2).
+inline constexpr double kTargetRadiusMM = 30.0;      // Ø6 cm
+inline constexpr double kTargetProxDepthMM = 55.0;   // proximal depth
+inline constexpr double kTargetDistDepthMM = 105.0;  // distal depth (5 cm thick)
+
 // Physics
 inline constexpr const char* kPhysicsList = "QGSP_BIC_HP";
 

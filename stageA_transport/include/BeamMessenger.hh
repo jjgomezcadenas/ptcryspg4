@@ -7,6 +7,7 @@
 class BeamConfig;
 class G4UIdirectory;
 class G4UIcmdWithAString;
+class G4UIcmdWithADoubleAndUnit;
 
 // Exposes
 //     /stageA/beam/layers <file>
@@ -24,6 +25,7 @@ class BeamMessenger : public G4UImessenger {
   BeamConfig* fBeam = nullptr;
   G4UIdirectory* fDirBeam = nullptr;
   G4UIcmdWithAString* fLayersCmd = nullptr;
+  G4UIcmdWithADoubleAndUnit* fDiskCmd = nullptr;
 };
 
 #endif  // STAGEA_BEAMMESSENGER_HH

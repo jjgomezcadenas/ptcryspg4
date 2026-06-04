@@ -25,9 +25,17 @@ class BeamConfig {
   // calling worker thread's RNG (stochastic delivery, see docs/sobp.tex).
   G4double SampleEnergyMeV() const;
 
+  // Lateral profile: a uniform disk of this radius (G4 internal length units,
+  // = the target cross-section) when > 0, else the Gaussian pencil of
+  // StageAConfig. Set by /stageA/beam/disk.
+  void SetDiskRadius(G4double r) { fDiskRadius = r; }
+  G4double DiskRadius() const { return fDiskRadius; }
+  bool DiskMode() const { return fDiskRadius > 0.; }
+
  private:
   std::vector<G4double> fEnergyMeV;
   std::vector<G4double> fCumWeight;  // cumulative weights, normalized to 1
+  G4double fDiskRadius = 0.;         // 0 -> pencil
   BeamMessenger* fMessenger = nullptr;
 };
 

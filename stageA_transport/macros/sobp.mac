@@ -8,6 +8,8 @@
 # SOBP energy layers (from field_design/sobp.py). Without this the gun is a
 # single-energy pencil.
 /stageA/beam/layers ../../data/sobp_layers.csv
+# Lateral fluence: uniform disk over the target cross-section (Ø6 cm).
+/stageA/beam/disk 30 mm
 /run/initialize
 
 /stageA/output/dir ../../data
