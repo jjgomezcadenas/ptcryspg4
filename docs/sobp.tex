@@ -100,19 +100,20 @@ range as continuous with fluence density $\Phi(R)$, Eq.~\eqref{eq:super} with
 \begin{equation}
 D(z)=\int_z^{\Rd}\Phi(R)\,(R-z)^{1/p-1}\,\mathrm dR \stackrel{!}{=}\text{const}.
 \end{equation}
-Its solution---the classic result of Bortfeld \& Schlegel~\cite{bortfeld1996}---is
+This is an Abel (right-sided fractional) integral equation of order $a=1/p$;
+inverting it for a constant left-hand side gives
 \begin{equation}
-\boxed{\;\Phi(R)\ \propto\ (\Rd-R)^{\,1/p-1}\;}\qquad R\in[\Rp,\Rd],
+\boxed{\;\Phi(R)\ \propto\ (\Rd-R)^{-1/p}\;}\qquad R\in[\Rp,\Rd],
 \label{eq:phi}
 \end{equation}
 plus a finite reinforcement at the proximal edge $R=\Rp$ that fills the proximal
-corner of the plateau. Since $1/p-1\approx-0.435<0$, the weight rises towards the
+corner of the plateau. Since $-1/p\approx-0.565<0$, the weight rises towards the
 \emph{distal} peak (which no deeper peak reinforces) and diverges integrably at
 $R=\Rd$. Integrating Eq.~\eqref{eq:phi} over each range bin
 $[R_i-\tfrac{\Delta}{2},\,R_i+\tfrac{\Delta}{2}]$ (with $\Delta=(\Rd-\Rp)/N$)
 gives the finite discrete weights actually used,
 \begin{equation}
-w_i\ \propto\ (\Rd-R_i+\tfrac{\Delta}{2})^{1/p}-(\Rd-R_i-\tfrac{\Delta}{2})^{1/p},
+w_i\ \propto\ (\Rd-R_i+\tfrac{\Delta}{2})^{1-1/p}-(\Rd-R_i-\tfrac{\Delta}{2})^{1-1/p},
 \label{eq:wi}
 \end{equation}
 with the distal bin truncated at $\Rd$ and an added proximal term for $i=0$.
