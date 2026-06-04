@@ -1,0 +1,17 @@
+# Stage A — SOBP run: load the energy-layer table and transport.
+# Generate the layers first:  python3 field_design/sobp.py [--mu 0.025]
+
+/run/numberOfThreads 18
+
+# Phantom material (must precede /run/initialize). Brain = Parodi standard.
+/stageA/phantom/material G4_BRAIN_ICRP
+# SOBP energy layers (from field_design/sobp.py). Without this the gun is a
+# single-energy pencil.
+/stageA/beam/layers ../../data/sobp_layers.csv
+/run/initialize
+
+/stageA/output/dir ../../data
+/random/setSeeds 12345 67890
+
+/run/printProgress 200000
+/run/beamOn 1000000

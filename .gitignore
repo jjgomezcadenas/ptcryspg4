@@ -26,3 +26,6 @@ venv/
 *.log
 *.out
 *.synctex.gz
+# Generated PDFs from our own .tex; keep the reference papers
+docs/*.pdf
+!docs/proton-therapy-ptet-doses-mc.pdf

@@ -202,14 +202,31 @@ Poisson realizations — vs. counts (or dose, or t_del).
 
 ```
 stageA_transport/    # Geant4 C++: protons → emitters.csv + run_meta.csv
+field_design/        # Python: SOBP beam design (sobp.py) + depth-dose plots
 decay_sampling/      # Python: time-decay bookkeeping + N_j sampling (Stage B0)
 stageB_detector/     # Geant4 C++: annihilation events → coincidences_*.csv
 reconstruction/      # deferred (Stage C)
 analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
 common/              # shared schema defs, units, isotope table
-docs/                # spec (simulate_pt_pet.tex) + references
+docs/                # spec (simulate_pt_pet.tex), sobp.tex, references
 data/                # generated CSV (gitignored)
 ```
+
+## Beam: SOBP field (`field_design/`, method in `docs/sobp.tex`)
+
+The standard scenario uses a **Spread-Out Bragg Peak**, not a single pencil. The
+depth field is implemented and verified:
+- `field_design/sobp.py` computes the energy-layer weights (Bortfeld range-energy
+  + Abel-inversion flattening weights + an `exp(µR)` attenuation correction,
+  `--mu` tuned) → `data/sobp_layers.csv`.
+- The gun (`BeamConfig` + `/stageA/beam/layers <file>`) samples a layer energy
+  per primary (stochastic; per-layer Poisson noise ≲0.2% at ≥10⁷ protons).
+- `field_design/plot_sobp.py` renders the realized G4 depth-dose
+  (`data/depth_dose.csv`) → `data/sobp_g4.png`. Verified flat plateau (~7%) over
+  the target depth with a sharp distal edge.
+- **Pending:** lateral fluence over the target cross-section (→ a dose *box*),
+  dose normalization to 1 Gy in the target, and the Parodi Table 2 cross-check.
+  Until then the gun is laterally a σ=3 mm pencil.
 
 ## Build / run
 
@@ -234,6 +251,15 @@ Run:
 ./proton_transport            # interactive Qt viewer; runs macros/vis.mac,
                               #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
 ./proton_transport run.mac    # batch (18 threads); writes emitters/run_meta/depth_dose.csv to data/
+```
+
+SOBP run (depth field): design the layers, then load them in the macro before
+`/run/beamOn` with `/stageA/beam/layers ../../data/sobp_layers.csv`:
+
+```bash
+python3 field_design/sobp.py --mu 0.025          # -> data/sobp_layers.csv
+./proton_transport sobp.mac                      # macro loads the layer table
+python3 field_design/plot_sobp.py                # -> data/sobp_g4.png
 ```
 
 `build/compile_commands.json` (the `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` flag)
