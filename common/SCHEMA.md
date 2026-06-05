@@ -3,8 +3,8 @@
 The columns of every file shared between the stages: the isotope encoding, the
 units, and the layout of each file. The code mirrors it (`common/Isotopes.hh` for
 C++, `common/isotopes.py` for Python). If code and this file disagree, the code is
-wrong. The detector stage (Stage B) is in the separate `PTCryspMC.jl` repo; each
-frozen run carries a short copy of these formats.
+wrong. The detector stage (Stage B) is a separate downstream repo; each frozen run
+carries a short copy of these formats.
 
 Spec reference: `docs/simulate_pt_pet.tex` (§2 Stage A, §3 handoff, §4 Stage B).
 
@@ -105,8 +105,8 @@ whole-phantom; a Bragg-region "dose at target" definition is TBD (spec §2.5).
 ## File 2: handoff output — the budget (deterministic) + realizations (stochastic)
 
 The handoff is split at the **A|B seam** into a deterministic, RNG-free budget
-(this repo) and the stochastic Poisson realizations (the detector study,
-`PTCryspMC.jl`). The annihilation events are **not materialized** — the handoff
+(this repo) and the stochastic Poisson realizations (the downstream detector
+study). The annihilation events are **not materialized** — the handoff
 writes only the per-isotope counts; the detector draws that many annihilation
 points from File 1 on the fly, with seed `master_seed + realization` (so every
 detector gets the identical source). Method: `docs/handoff.tex`.
@@ -129,7 +129,7 @@ Companion `sampling_budget_<scenario>_meta.csv` (one wide row): `scenario`,
 ### File 2b: `sampling_realizations_<scenario>.csv` — stochastic Poisson draws
 
 Written by `decay_sampling/budget_gen.py` (which **reads File 2a**), and destined
-to move to `PTCryspMC.jl/py/`. All RNG lives here, never in File 2a. One row per
+to move to the downstream detector study. All RNG lives here, never in File 2a. One row per
 (realization, isotope).
 
 | column | type | meaning |
@@ -151,30 +151,8 @@ Companion `sampling_realizations_<scenario>_meta.csv` (one wide row): `scenario`
 
 ---
 
-## File 3: Stage B output — `coincidences_<config>.csv`
+## Downstream: `coincidences_<config>.csv`
 
-Written by the analytic detector MC in `PTCryspMC.jl`, one file per (detector
-config, realization). Listed here because Stage B reads File 1 + the budget; the
-detector code and this file live in that repo.
-
-### Columns — one row per accepted coincidence
-
-| column | type | meaning |
-|--------|------|---------|
-| `hit1_x_mm`, `hit1_y_mm`, `hit1_z_mm` | float32 | DOI-resolved 3-D hit position |
-| `hit2_x_mm`, `hit2_y_mm`, `hit2_z_mm` | float32 | DOI-resolved 3-D hit position |
-| `e1_keV`, `e2_keV` | float32 | deposited energies |
-| `t1_ns`, `t2_ns` | float64 | timestamps — for TOF |
-| `truth` | int8 | 0 = true, 1 = phantom scatter, 2 = random, −1 = unclassified |
-
-### Companion `coincidences_<config>_meta.csv` (one wide row)
-
-`detector_config` (e.g. `CRYSP_baseline`/`LYSO`/`BGO`), geometry params (ring Ø,
-AFOV, crystal dims, σ_E, σ_t, DOI res), `energy_window_lo_keV`,
-`energy_window_hi_keV`, `coinc_time_window_ns`, `scenario` (the source it read),
-`Nj_budget_0..4`, `realization_index`, `random_seed`, `code_version`.
-
-### Invariants
-- Reconstruction (Stage C) uses **only this file** — never the detector truth
-  (CLAUDE.md invariant 5). The `truth` column is for our diagnostics; a
-  reconstructor must work with it removed.
+The detector output (the coincidence list) is produced and documented by the
+downstream detector simulation, which reads File 1 + the budget. Its columns are
+defined in that repo, not here.

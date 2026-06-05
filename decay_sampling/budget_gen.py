@@ -3,13 +3,13 @@
 
 Reads the deterministic budget written by budget.py (N_expected per isotope) and
 draws Z independent Poisson realizations M_j^(z) ~ Poisson(N_expected). Each
-realization is one "experiment": PTCryspMC.jl samples M_j^(z) annihilation points
+realization is one "experiment": the detector study samples M_j^(z) annihilation points
 from emitters.csv (seed master_seed + realization, so every detector sees the
 identical source), reconstructs, and fits the range; the spread of the fitted
 ranges over the Z realizations is σ(range). See docs/handoff.tex.
 
 This is the stochastic, detector-side half of the old budget.py. It reads exactly
-the file PTCryspMC.jl/py/ will read, so relocating it there is a pure move.
+the file the detector study will read, so relocating it there is a pure move.
 Writes:
   data/sampling_realizations_<scenario>.csv       (realization, isotope_id, N_poisson)
   data/sampling_realizations_<scenario>_meta.csv  (n_realizations, master_seed, source)

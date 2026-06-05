@@ -1,11 +1,10 @@
-# ptcryspg4 — PET detector comparison for proton-therapy range verification
+# ptcryspg4 — proton-therapy PET source generation
 
-Simulation chain that compares candidate PET detectors (the CRYSP family vs.
-conventional LYSO/BGO) for **in-room** proton-therapy range verification. A Geant4
-proton run (this repo) produces the positron-emitter source; an analytic detector
-Monte Carlo in Julia (`PTCryspMC.jl`, a separate repo) turns it into a coincidence
-list per detector. The figure of merit is σ(range) — the precision of the
-recovered distal fall-off — at photon-starved in-room statistics.
+Produces the **positron-emitter source** for PET-based **in-room** proton-therapy
+range verification. A Geant4 proton run sends protons through a phantom and records
+where β⁺ emitters annihilate; a Python handoff turns the production into the number
+of decays a scanner would measure. The output is **detector-independent** — a
+separate downstream simulation reads it and models a PET detector.
 
 ## Documents
 
@@ -18,19 +17,15 @@ recovered distal fall-off — at photon-starved in-room statistics.
 ## Pipeline
 
 ```
-ptcryspg4 (this repo) — RUNS ONCE
-  [A]  Geant4 transport    protons → phantom → β+ emitter → annihilation
-           ⟹  data/emitters.csv + data/run_meta.csv
-  [B0] Handoff (Python)    P_j → N_j(t_del)
-           ⟹  data/sampling_budget_<scenario>.csv
-PTCryspMC.jl (separate repo) — RUNS PER DETECTOR
-  [B]  Analytic detector   events → detector response → coincidences
-           ⟹  coincidences_<config>.csv
-  [C]  Reconstruction      coincidence list → image → σ(range)     DEFERRED
+[A]  Geant4 transport    protons → phantom → β+ emitter → annihilation     RUNS ONCE
+         ⟹  data/emitters.csv + data/run_meta.csv
+[B0] Handoff (Python)    P_j → N_j(t_del)
+         ⟹  data/sampling_budget_<scenario>.csv
+       ─── frozen as a named scenario in ptcrysp-scenarios; read downstream ───
 ```
 
 Stage A output is frozen as a named scenario in the `ptcrysp-scenarios` data repo;
-`PTCryspMC.jl` reads from there.
+a downstream PET detector simulation reads the scenario.
 
 ## Layout
 
@@ -45,7 +40,7 @@ docs/                Spec + reference material
 data/                Generated CSV files (gitignored)
 ```
 
-Detector + reconstruction (Stages B, C) are in the separate `PTCryspMC.jl` repo.
+Detector + reconstruction (Stages B, C) are a separate downstream repo.
 
 ## Requirements
 

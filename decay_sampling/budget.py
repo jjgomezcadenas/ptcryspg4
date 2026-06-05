@@ -5,9 +5,9 @@ Reads the Stage-A output, scales production to a clinical dose
 (P_j(D)=count_j·D/target_dose), and applies the three-factor survival of Eq. 1 at
 the operating point to get the expected measured decays N_j. This is the
 detector-independent, RNG-free source budget — the thin quantity handed across the
-A|B seam to the detector study (PTCryspMC.jl). The stochastic Poisson realizations
+A|B seam to the downstream detector study. The stochastic Poisson realizations
 and the σ(range) figure of merit live downstream (budget_gen.py here for now;
-moves to PTCryspMC.jl/py/). Writes:
+moves there later). Writes:
   data/sampling_budget_<scenario>.csv       (isotope_id, N_expected)
   data/sampling_budget_<scenario>_meta.csv  (operating point, source)
 See docs/handoff.tex.

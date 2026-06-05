@@ -93,7 +93,7 @@ The detector requires $N_j$ annihilation points per isotope. They are drawn from
 $P_j(\mathbf r)$ at the required count. The handoff (this repo) writes only the
 deterministic budget: the per-isotope counts $N_j$ and the operating point. The
 Poisson realisations (Sec.~\ref{sec:sigma}) and the sampling of annihilation
-points are done by the detector study (\texttt{PTCryspMC.jl}). The same budget and
+points are done by the downstream detector study. The same budget and
 seed yield an identical source for every detector.
 
 \section{Figure of merit}
@@ -123,8 +123,8 @@ Output \texttt{sampling\_budget\_<scenario>.csv} --- per isotope $N_j$ and the
 operating point. No random numbers.
 \item \texttt{budget\_gen.py} (stochastic): reads the budget, draws
 $M_j^{(z)}\sim\mathrm{Poisson}(N_j)$ for $Z$ realisations with a seed; output
-\texttt{sampling\_realizations\_<scenario>.csv}. This step moves to
-\texttt{PTCryspMC.jl}.
+\texttt{sampling\_realizations\_<scenario>.csv}. This step moves to the
+downstream detector study.
 \end{itemize}
 
 \end{document}

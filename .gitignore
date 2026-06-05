@@ -25,7 +25,11 @@ venv/
 *.aux
 *.log
 *.out
+*.bbl
+*.blg
 *.synctex.gz
+*.fdb_latexmk
+*.fls
 # Generated PDFs from our own .tex; keep the reference papers
 docs/*.pdf
 !docs/proton-therapy-ptet-doses-mc.pdf
