@@ -10,7 +10,7 @@ density; flattening weights are the bin-integrated
 of the continuous fluence Phi(R) ∝ (Rd - R)^(1/p - 1). Writes
 data/sobp_layers.csv (energy_MeV, weight) for the Geant4 gun and a sanity plot
 of the analytic SOBP (idealized peaks + range straggling; the G4 depth-dose is
-the authoritative check).
+the real check).
 
 Usage:
     python field_design/sobp.py [--d-prox CM] [--d-dist CM] [--n-layers N]

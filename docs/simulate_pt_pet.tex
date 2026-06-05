@@ -81,8 +81,8 @@ Sec.~\ref{sec:compare} is then free of per-run statistical drift between detecto
 pass would emit one annihilation per \emph{produced} isotope
 (production-proportional), not the windowed \emph{measured} number; sampling $N_j$
 per isotope there is the only place the $\Ox{15}/\Cl{11}$ mix is set correctly.
-\item \textbf{Reconstruction is decoupled.} The simulation's deliverable is the
-coincidence list; any reconstructor consumes it.
+\item \textbf{Reconstruction is separate.} The simulation's output is the
+coincidence list; any reconstructor reads it.
 \end{itemize}
 A high-resolution but low-sensitivity PET can lose to a coarser, high-sensitivity
 one at the low counts characteristic of in-room acquisition ($\sim\!10^{5}$--$10^{6}$
@@ -352,17 +352,23 @@ result is the \textbf{sampled annihilation events} fed to stage~B; from each ANH
 point, two \SI{511}{keV} photons are emitted back-to-back with acollinearity
 ($\sim\!0.5^\circ$ FWHM).
 
-\section{Geant4 stage B: detector --- from annihilation events to the coincidence list}
+\section{Stage B: detector --- from annihilation events to the coincidence list}
 \label{sec:detector}
 
 This stage runs \textbf{once per candidate PET}. It reads the \emph{same} sampled
-annihilation events and produces a \textbf{coincidence list} -- the deliverable of
-the simulation and the sole input to reconstruction (Sec.~\ref{sec:recon}):
+annihilation events and produces a \textbf{coincidence list} -- the output of the
+simulation and the only input to reconstruction (Sec.~\ref{sec:recon}). It is an
+\textbf{analytic $\gamma$-transport Monte Carlo} (in Julia, the \texttt{PTCryspMC.jl}
+repository), not Geant4: the simple ring geometry and the 511\,keV physics are
+done directly, which is faster, transparent, and avoids a per-detector Geant4
+build.
 \begin{enumerate}[nosep]
-\item \textbf{Detector simulation (Geant4):} the two \SI{511}{keV} photons
-propagate through the phantom (attenuation, Compton scatter) and into the
-detector; model intercrystal scatter, depth-of-interaction, energy resolution
-$\sigma_E$ and time resolution $\sigma_t$.
+\item \textbf{Detector simulation (analytic MC):} the two \SI{511}{keV} photons
+propagate through the phantom (treated as water; attenuation and Compton scatter
+by Klein--Nishina) and into the crystal. The interaction depth in the crystal
+gives the depth-of-interaction; energy resolution $\sigma_E$, position/DOI
+resolution and time resolution $\sigma_t$ are applied to the interaction; the
+ring acceptance is a ray--cylinder intersection.
 \item \textbf{Coincidence sorting:} energy window, coincidence time window;
 classify true/scatter/random. In the in-room scenario the in-beam
 prompt-$\gamma$/neutron background is absent; the relevant backgrounds are random

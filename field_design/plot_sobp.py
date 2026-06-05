@@ -4,7 +4,7 @@
 depth_dose.csv (written by proton_transport every run) is the *realized* field:
 energy deposit per 1 mm depth bin, total and primary-proton-only. This plots it
 versus depth from the entrance face, marks the target, and reports the plateau
-flatness — the authoritative check of the SOBP design.
+flatness — the real check of the SOBP design.
 
 Usage:
     python field_design/plot_sobp.py [data_dir] [--prox CM] [--dist CM]

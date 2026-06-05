@@ -1,7 +1,7 @@
 """Isotope table for the ptcryspg4 simulation chain.
 
-MIRRORS common/SCHEMA.md (the authoritative contract) -- do not edit
-independently. The C++ mirror is common/Isotopes.hh.
+MIRRORS common/SCHEMA.md -- do not edit independently. The C++ mirror is
+common/Isotopes.hh.
 
 The handoff (Stage B0) needs isotope_id -> (name, half-life, endpoint) to
 compute the decay constants lambda_j and the measured-window counts N_j

@@ -1,43 +1,51 @@
 # ptcryspg4 — PET detector comparison for proton-therapy range verification
 
-Geant4 simulation chain that compares candidate PET detectors (the CRYSP family
-vs. conventional LYSO/BGO) for **in-room** proton-therapy range verification.
-The deliverable is a coincidence list per detector; the figure of merit is
-σ(range) — the precision of the recovered distal fall-off — at photon-starved
-in-room statistics.
+Simulation chain that compares candidate PET detectors (the CRYSP family vs.
+conventional LYSO/BGO) for **in-room** proton-therapy range verification. A Geant4
+proton run (this repo) produces the positron-emitter source; an analytic detector
+Monte Carlo in Julia (`PTCryspMC.jl`, a separate repo) turns it into a coincidence
+list per detector. The figure of merit is σ(range) — the precision of the
+recovered distal fall-off — at photon-starved in-room statistics.
 
 ## Documents
 
 | File | Role |
 |------|------|
-| `docs/simulate_pt_pet.tex` | **Authoritative spec** — physics and pipeline |
+| `docs/simulate_pt_pet.tex` | **Spec** — physics and pipeline |
 | `CLAUDE.md` | Orientation + implementation decisions |
-| `common/SCHEMA.md` | Interface contracts (CSV file formats, isotope encoding, units) |
+| `common/SCHEMA.md` | CSV file formats, isotope encoding, units |
 
 ## Pipeline
 
 ```
-[A]  Geant4 transport    protons → PMMA → β+ emitter → annihilation     RUNS ONCE
-         ⟹  data/emitters.csv + data/run_meta.csv
-[B0] Handoff (Python)    P_j → N_j(t_del); sample annihilation events
-         ⟹  data/sampled_events_*.csv
-[B]  Geant4 detector     events → detector response → coincidences      RUNS PER DETECTOR
-         ⟹  data/coincidences_<config>.csv
-[C]  Reconstruction      coincidence list → image → σ(range)            DEFERRED
+ptcryspg4 (this repo) — RUNS ONCE
+  [A]  Geant4 transport    protons → phantom → β+ emitter → annihilation
+           ⟹  data/emitters.csv + data/run_meta.csv
+  [B0] Handoff (Python)    P_j → N_j(t_del)
+           ⟹  data/sampling_budget_<scenario>.csv
+PTCryspMC.jl (separate repo) — RUNS PER DETECTOR
+  [B]  Analytic detector   events → detector response → coincidences
+           ⟹  coincidences_<config>.csv
+  [C]  Reconstruction      coincidence list → image → σ(range)     DEFERRED
 ```
+
+Stage A output is frozen as a named scenario in the `ptcrysp-scenarios` data repo;
+`PTCryspMC.jl` reads from there.
 
 ## Layout
 
 ```
 stageA_transport/    Geant4 C++: proton transport, β+ decay capture, emitters.csv writer
-decay_sampling/      Python: time-decay bookkeeping (spec §3) + N_j sampling (Stage B0)
-stageB_detector/     Geant4 C++: detector response + coincidence sorting
-reconstruction/      Stage C (deferred)
+field_design/        Python: SOBP beam design + depth-dose plots
+decay_sampling/      Python: time-decay budget (budget.py) + realizations (budget_gen.py)
 analysis_transport/  Python: validate Stage A output (dashboard + diagnostics)
-common/              Interface contracts: schemas + isotope table (C++/Python mirrors)
+tools/               snapshot_scenario.py: freeze a run into the scenarios repo
+common/              schemas + isotope table (C++/Python mirrors)
 docs/                Spec + reference material
 data/                Generated CSV files (gitignored)
 ```
+
+Detector + reconstruction (Stages B, C) are in the separate `PTCryspMC.jl` repo.
 
 ## Requirements
 

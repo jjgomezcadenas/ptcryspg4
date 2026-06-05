@@ -90,10 +90,11 @@ $N\sim10^{7}$--$10^{8}$.
 
 The detector requires $N_j$ annihilation points per isotope. They are drawn from
 \texttt{emitters.csv} by sampling with replacement, reproducing the shape
-$P_j(\mathbf r)$ at the required count. The handoff delivers a budget: the counts
-$N_j$, the Poisson draws (Sec.~\ref{sec:sigma}), the operating point, and a seed.
-Stage~B performs the sampling. The same file, budget, and seed yield an identical
-source for every detector.
+$P_j(\mathbf r)$ at the required count. The handoff (this repo) writes only the
+deterministic budget: the per-isotope counts $N_j$ and the operating point. The
+Poisson realisations (Sec.~\ref{sec:sigma}) and the sampling of annihilation
+points are done by the detector study (\texttt{PTCryspMC.jl}). The same budget and
+seed yield an identical source for every detector.
 
 \section{Figure of merit}
 \label{sec:sigma}
@@ -115,12 +116,15 @@ repeats (Stage~B/C).
 \section{Implementation (\texttt{decay\_sampling/})}
 
 \begin{itemize}[nosep]
-\item Inputs: \texttt{emitters.csv}, \texttt{run\_meta.csv}; parameters
-$D,\tirr,\tdel,\tmeas,Z$, seed.
-\item $\lambda_j$ from \texttt{common/isotopes.py}; $N_j$ from
-Eqs.~\eqref{eq:pj},\eqref{eq:nmeas}; $M_j^{(z)}\sim\mathrm{Poisson}(N_j)$.
-\item Output: \texttt{sampling\_budget\_<scenario>.csv} --- per isotope $N_j$ and
-the $Z$ Poisson draws, the operating point, and the seeds.
+\item \texttt{budget.py} (deterministic): inputs \texttt{emitters.csv},
+\texttt{run\_meta.csv}; parameters $D,\tirr,\tdel,\tmeas$. $\lambda_j$ from
+\texttt{common/isotopes.py}; $N_j$ from Eqs.~\eqref{eq:pj},\eqref{eq:nmeas}.
+Output \texttt{sampling\_budget\_<scenario>.csv} --- per isotope $N_j$ and the
+operating point. No random numbers.
+\item \texttt{budget\_gen.py} (stochastic): reads the budget, draws
+$M_j^{(z)}\sim\mathrm{Poisson}(N_j)$ for $Z$ realisations with a seed; output
+\texttt{sampling\_realizations\_<scenario>.csv}. This step moves to
+\texttt{PTCryspMC.jl}.
 \end{itemize}
 
 \end{document}

@@ -1,21 +1,20 @@
-# Interface contracts
+# File formats
 
-**This file is the authoritative contract** for everything shared between the
-stages of the simulation chain: the isotope encoding, the units convention, and
-the layout of the interface files. The code mirrors it (`common/Isotopes.hh` for
-C++, `common/isotopes.py` for Python) and every reader/writer must conform. If
-code and this file disagree, the code is wrong.
+The columns of every file shared between the stages: the isotope encoding, the
+units, and the layout of each file. The code mirrors it (`common/Isotopes.hh` for
+C++, `common/isotopes.py` for Python). If code and this file disagree, the code is
+wrong. The detector stage (Stage B) is in the separate `PTCryspMC.jl` repo; each
+frozen run carries a short copy of these formats.
 
 Spec reference: `docs/simulate_pt_pet.tex` (§2 Stage A, §3 handoff, §4 Stage B).
 
-**File format: CSV.** Interface files are flat, columnar **CSV** (one row per
-record, one scalar per column, header row, units as `_mm`/`_keV`/`_ns` column
-suffixes). Each data file has a companion `*_meta.csv` (a single wide row)
-holding run-level metadata. CSV was chosen over HDF5 because the files are small
-at realistic statistics and it needs no extra dependency (pandas-native,
-human-readable). **HDF5 is deferred** — if size or read speed ever demands it,
-switch to HighFive (C++) / h5py (Python); the columnar schema below is identical,
-so only the container changes.
+**File format: CSV.** Files are flat, columnar **CSV** (one row per record, one
+scalar per column, header row, units as `_mm`/`_keV`/`_ns` column suffixes). Each
+data file has a companion `*_meta.csv` (a single wide row) of run-level metadata.
+CSV was chosen over HDF5 because the files are small and it needs no extra
+dependency (pandas-native, readable). **HDF5 is deferred** — if size or read speed
+ever demands it, switch to HighFive (C++) / h5py (Python); the columns below are
+the same, so only the container changes.
 
 ---
 
@@ -103,39 +102,60 @@ whole-phantom; a Bragg-region "dose at target" definition is TBD (spec §2.5).
 
 ---
 
-## File 2: handoff output — `sampling_budget_<scenario>.csv`
+## File 2: handoff output — the budget (deterministic) + realizations (stochastic)
 
-Written by `decay_sampling/budget.py` (Python). The annihilation events are
-**not materialized** — the handoff writes only the per-isotope counts (the
-budget); Stage B draws that many annihilation points from File 1 on the fly,
-with seed `master_seed + realization` (so every detector gets the identical
-source). Method: `docs/handoff.tex`.
+The handoff is split at the **A|B seam** into a deterministic, RNG-free budget
+(this repo) and the stochastic Poisson realizations (the detector study,
+`PTCryspMC.jl`). The annihilation events are **not materialized** — the handoff
+writes only the per-isotope counts; the detector draws that many annihilation
+points from File 1 on the fly, with seed `master_seed + realization` (so every
+detector gets the identical source). Method: `docs/handoff.tex`.
 
-### Columns — one row per (realization, isotope)
+### File 2a: `sampling_budget_<scenario>.csv` — Stage B0 deterministic budget
+
+Written by `decay_sampling/budget.py`. The thin quantity crossing the A|B seam:
+the measured decays N_j from Eq. 1, detector-independent and seed-free. One row
+per isotope.
+
+| column | type | meaning |
+|--------|------|---------|
+| `isotope_id` | int8 | which species (encoding above) |
+| `N_expected` | float | measured decays from Eq. 1, `P_j(D)·survival_j` |
+
+Companion `sampling_budget_<scenario>_meta.csv` (one wide row): `scenario`,
+`source_file` (the `emitters.csv` drawn from), `dose_Gy`, `t_irr_s`, `t_del_s`,
+`t_meas_s`, `target_dose_Gy`.
+
+### File 2b: `sampling_realizations_<scenario>.csv` — stochastic Poisson draws
+
+Written by `decay_sampling/budget_gen.py` (which **reads File 2a**), and destined
+to move to `PTCryspMC.jl/py/`. All RNG lives here, never in File 2a. One row per
+(realization, isotope).
 
 | column | type | meaning |
 |--------|------|---------|
 | `realization` | int | realization index (0 … Z−1) |
 | `isotope_id` | int8 | which species (encoding above) |
-| `N_expected` | float | measured decays from Eq. 1, `P_j(D)·survival_j` |
 | `N_poisson` | int | this realization's draw `M_j ~ Poisson(N_expected)` |
 
-### Companion `sampling_budget_<scenario>_meta.csv` (one wide row)
-
-`scenario`, `source_file` (the `emitters.csv` drawn from), `dose_Gy`,
-`t_irr_s`, `t_del_s`, `t_meas_s`, `n_realizations` (Z), `master_seed`,
-`target_dose_Gy`.
+Companion `sampling_realizations_<scenario>_meta.csv` (one wide row): `scenario`,
+`source_budget` (the File 2a it drew from), `n_realizations` (Z), `master_seed`.
 
 ### Invariants
-- N_j sampling (the budget) is set **only here** (CLAUDE.md invariant 3).
+- N_j (the budget) is set **only** by File 2a (CLAUDE.md invariant 3); it is
+  deterministic and detector-independent.
+- All randomness lives in File 2b; changing Z or the seed never touches File 2a,
+  so the source side stays reproducible without an RNG.
 - Every detector config consumes the **identical** source — guaranteed by the
   same `emitters.csv` + budget + seed (CLAUDE.md invariant 4).
 
 ---
 
-## File 3: Stage B output — `coincidences_<config>.csv` (the deliverable)
+## File 3: Stage B output — `coincidences_<config>.csv`
 
-Written by `stageB_detector`, one file per (detector config, realization).
+Written by the analytic detector MC in `PTCryspMC.jl`, one file per (detector
+config, realization). Listed here because Stage B reads File 1 + the budget; the
+detector code and this file live in that repo.
 
 ### Columns — one row per accepted coincidence
 
@@ -151,10 +171,10 @@ Written by `stageB_detector`, one file per (detector config, realization).
 
 `detector_config` (e.g. `CRYSP_baseline`/`LYSO`/`BGO`), geometry params (ring Ø,
 AFOV, crystal dims, σ_E, σ_t, DOI res), `energy_window_lo_keV`,
-`energy_window_hi_keV`, `coinc_time_window_ns`, `source_file`, `Nj_budget_0..4`,
-`realization_index`, `random_seed`, `geant4_version`.
+`energy_window_hi_keV`, `coinc_time_window_ns`, `scenario` (the source it read),
+`Nj_budget_0..4`, `realization_index`, `random_seed`, `code_version`.
 
 ### Invariants
-- Reconstruction (Stage C) consumes **only this file** — never Geant4 truth
+- Reconstruction (Stage C) uses **only this file** — never the detector truth
   (CLAUDE.md invariant 5). The `truth` column is for our diagnostics; a
   reconstructor must work with it removed.

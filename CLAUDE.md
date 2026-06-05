@@ -5,32 +5,38 @@
 
 ## Purpose
 
-Build a **Geant4** simulation that compares candidate PET detectors (the CRYSP
-family) for **in-room** proton-therapy range verification. The deliverable of the
-simulation is a **coincidence list**; image reconstruction is a separate,
-decoupled stage. The goal is *not* to reproduce any clinical study, but to rank
-detectors on how well they recover the proton range at realistic, photon-starved
-statistics.
+Compare candidate PET detectors (the CRYSP family) for **in-room** proton-therapy
+range verification. The chain has two simulation stages: a **Geant4** proton run
+(Stage A, this repo) that produces the positron-emitter source, and an **analytic
+detector Monte Carlo in Julia** (`PTCryspMC.jl`, a separate repo) that turns that
+source into a **coincidence list**. Image reconstruction is a separate stage. The
+goal is *not* to reproduce any clinical study, but to rank detectors on how well
+they recover the proton range at realistic, photon-starved statistics.
 
-## Authoritative spec
+## The spec
 
-`docs/simulate_pt_pet.tex` is the **source of truth** for the physics and the
-pipeline. Read it first. If code and spec disagree, the spec wins unless a
-decision here supersedes it. This file records implementation decisions; the spec
-records the method.
+`docs/simulate_pt_pet.tex` describes the physics and the pipeline. Read it first.
+If code and spec disagree, the spec wins unless a decision here supersedes it.
+This file records implementation decisions; the spec records the method.
 
-## Architecture — three stages joined by CSV files
+## Architecture — stages joined by CSV files
 
 ```
-[A] Geant4 transport      protons → PMMA → β+ emitter → annihilation    RUNS ONCE
-        ⟹  emitters.csv + run_meta.csv   (detector-independent source)
-[B0] Time-decay bookkeeping (Python, analytic)   P_j → N_j(t_del)
-        ⟹  sampled annihilation events (draw N_j per isotope)
-[B] Geant4 detector       annihilation events → detector → coincidences  RUNS PER DETECTOR
-        ⟹  coincidences_<config>.csv
-        ───────── independent boundary ─────────
-[C] Reconstruction        coincidence list → image → σ(range)            TOOLKIT DEFERRED
+ptcryspg4 (this repo) — Geant4 + Python, RUNS ONCE
+  [A]  Geant4 transport    protons → phantom → β+ emitter → annihilation
+          ⟹  emitters.csv + run_meta.csv   (detector-independent source)
+  [B0] Time-decay handoff (Python)   P_j → N_j(t_del)
+          ⟹  sampling_budget_<scenario>.csv   (measured decays per isotope)
+        ─────── frozen and passed via the ptcrysp-scenarios data repo ───────
+PTCryspMC.jl (separate repo) — Julia + Python, RUNS PER DETECTOR
+  [B]  Analytic detector MC   annihilation events → detector → coincidences
+          ⟹  coincidences_<config>.csv
+  [C]  Reconstruction         coincidence list → image → σ(range)   DEFERRED
 ```
+
+Stage A runs once; its output is frozen as a named scenario in the
+`ptcrysp-scenarios` data repo (`tools/snapshot_scenario.py`). `PTCryspMC.jl` reads
+a scenario from there and runs the per-detector study.
 
 ## Invariants — do not violate these
 
@@ -45,33 +51,35 @@ records the method.
    global-time stamp is physically real but carries no acquisition meaning and is
    never written — `emitters.csv` has no time column.
 2. **Stage A runs once.** Never re-run proton transport when the detector changes.
-3. **N_j sampling happens only at the A→B handoff.** Raw produced counts are
-   *production*-proportional; the measured ¹⁵O/¹¹C mix is set only by drawing
-   `N_j` per isotope from the source file. Do not use raw counts as the budget.
+3. **The measured count N_j is set only at the handoff.** Raw produced counts are
+   *production*-proportional; the measured ¹⁵O/¹¹C mix comes from the per-isotope
+   budget N_j (`budget.py`, deterministic), not from raw counts. The Poisson
+   realizations of N_j are drawn later, in `PTCryspMC.jl`.
 4. **Every detector config consumes the identical source** (same `emitters.csv`,
    same sampled-event set per realization) — otherwise the ranking is polluted by
    per-run statistical drift.
-5. **Reconstruction consumes only the coincidence list.** Keep it decoupled; no
-   reconstruction code may depend on Geant4 truth.
+5. **Reconstruction uses only the coincidence list** — never the Geant4 truth or
+   the detector's internal state.
 
 ## Tech stack (decided)
 
-- **Stage A & B:** C++ / **Geant4** (11.4.x; CMake).
-- **File format:** **CSV** (flat, columnar) for the interface files, each with a
-  companion `*_meta.csv` for run-level metadata. Chosen over HDF5: files are
-  small at realistic statistics, no extra dependency, pandas-native and
-  human-readable. **HDF5 is deferred** — revisit (HighFive in C++ / h5py in
-  Python) only if file size or read speed demands it; the columnar schema is
-  identical, so the switch is cheap.
-- **Stage B0 (bookkeeping/sampling) + analysis:** **Python** (`numpy`, `scipy`,
-  `pandas`).
-- **Reconstruction (Stage C):** **deferred.** Candidates: custom list-mode
-  MLEM/OSEM, or CASToR, or STIR. Must be list-mode, DOI-aware, optionally TOF.
-- **Stage A starting point:** the Geant4 advanced example **`hadrontherapy`**
-  (proton beam + phantom + dose scoring + isotope production already wired);
-  add the prod/anh writer. Radioactive decay is already active in
-  `QGSP_BIC_HP` — no prompt-decay override. *(Superseded — we built a minimal
-  custom app, `stageA_transport/`, rather than stripping the example.)*
+- **Stage A:** C++ / **Geant4** (11.4.x; CMake) — proton transport only.
+- **Stage B0 (handoff) + analysis:** **Python** (`numpy`, `scipy`, `pandas`).
+- **Stage B (detector) + C (reconstruction):** **Julia**, in the separate repo
+  `PTCryspMC.jl`. The detector is an **analytic γ-transport Monte Carlo** (adapted
+  from LXeMC), not Geant4: 511 keV photons are tracked through the phantom (treated
+  as water) and the crystal by Klein–Nishina Compton + photoelectric, and the ring
+  acceptance is a ray–cylinder test. Geant4 was dropped here because the geometry
+  is simple, the same physics is easy to do analytically, and it avoids a
+  per-detector Geant4 build. Reconstruction is **deferred** (list-mode MLEM/OSEM,
+  or CASToR, or STIR; must be list-mode, DOI-aware, optionally TOF).
+- **File format:** **CSV** (flat, columnar), each with a companion `*_meta.csv` for
+  run-level metadata. Chosen over HDF5: files are small, no extra dependency,
+  pandas-native and readable. **HDF5 is deferred** — revisit (HighFive / h5py) only
+  if size or read speed demands it; the columns are the same, so the switch is cheap.
+- **Stage A starting point:** we built a minimal custom app, `stageA_transport/`,
+  rather than stripping the Geant4 `hadrontherapy` example. Radioactive decay is
+  active in `QGSP_BIC_HP` — no prompt-decay override.
 
 ## Units convention
 
@@ -79,9 +87,9 @@ Positions **mm**, energies **keV** (beam energy **MeV**), times **ns**, dose
 **Gy**. State units as column-name suffixes (e.g. `prod_x_mm`) and in the
 companion `*_meta.csv`.
 
-## File schemas (the interface contracts)
+## File formats
 
-`common/SCHEMA.md` is the authoritative contract; this is the summary.
+`common/SCHEMA.md` has the full column list; this is the summary.
 
 ### `emitters.csv` — Stage A output (one row per β⁺ emitter)
 Flat columns:
@@ -99,7 +107,7 @@ Flat columns:
 > `Pj_per_proton` is derivable as per-isotope count / `n_protons`. Stage A also
 > writes `depth_dose.csv` (the Bragg profile).
 
-### `coincidences_<config>.csv` — Stage B output (one row per accepted coincidence)
+### `coincidences_<config>.csv` — Stage B output (PTCryspMC.jl; one row per accepted coincidence)
 Flat columns:
 
 | field      | type       | meaning                          |
@@ -168,8 +176,9 @@ delay = less ¹⁵O). *Conservative/offline variant:* t_del=300, t_meas=1800 s
 (¹⁵O longest) matters at any of these.
 
 **Full handoff method in `docs/handoff.tex`** — the time-decay model, absolute
-normalization `P_j(D)=count_j·D/target_dose`, the budget source sampling, and the
-σ(range) figure of merit (Poisson realizations).
+normalization `P_j(D)=count_j·D/target_dose`, and the σ(range) figure of merit.
+The measured budget N_j is computed here (`decay_sampling/budget.py`); the Poisson
+realizations and σ(range) are computed in `PTCryspMC.jl`.
 
 **CRYSP baseline detector** (from `crysp_for_ht.tex` / Soleti 2024): ring Ø
 77.4 cm, AFOV 102.4 cm, monolithic crystals 48×48×37 mm, **6.3 % FWHM** energy
@@ -211,14 +220,17 @@ Poisson realizations — vs. counts (or dose, or t_del).
 ```
 stageA_transport/    # Geant4 C++: protons → emitters.csv + run_meta.csv
 field_design/        # Python: SOBP beam design (sobp.py) + depth-dose plots
-decay_sampling/      # Python: time-decay bookkeeping + N_j sampling (Stage B0)
-stageB_detector/     # Geant4 C++: annihilation events → coincidences_*.csv
-reconstruction/      # deferred (Stage C)
+decay_sampling/      # Python: time-decay budget (budget.py) + realizations (budget_gen.py)
 analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
-common/              # shared schema defs, units, isotope table
+tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
+common/              # shared schema, units, isotope table
 docs/                # spec (simulate_pt_pet.tex), sobp.tex, handoff.tex, refs
 data/                # generated CSV (gitignored)
 ```
+
+The detector and reconstruction (Stages B, C) live in the separate `PTCryspMC.jl`
+repo. Frozen Stage-A runs live in the `ptcrysp-scenarios` data repo, one named
+directory per scenario; `PTCryspMC.jl` reads from there.
 
 ## Beam: SOBP field (`field_design/`, method in `docs/sobp.tex`)
 
@@ -286,18 +298,31 @@ python3 analysis_transport/validate_transport.py   # -> data/transport_validatio
 Deps listed in `analysis_transport/requirements.txt` and
 `decay_sampling/requirements.txt` (numpy, scipy, pandas).
 
+### Handoff + snapshot
+
+```bash
+python3 decay_sampling/budget.py                 # -> data/sampling_budget_inroom.csv (measured N_j)
+python3 decay_sampling/budget_gen.py             # -> data/sampling_realizations_inroom.csv (Poisson draws)
+python3 tools/snapshot_scenario.py head_sobp_1e7 # freeze data/ into ../ptcrysp-scenarios
+```
+
+`budget.py` writes the per-isotope measured count N_j (no random numbers).
+`budget_gen.py` draws the Poisson realizations of N_j — this step will move to
+`PTCryspMC.jl`. `snapshot_scenario.py` copies a finished run into the
+`ptcrysp-scenarios` repo as a named scenario.
+
 ## First-session checklist
 
-**Status:** steps 1–3 done — the custom Stage-A app (`stageA_transport/`, not
-hadrontherapy) builds, runs MT on 18 threads, writes `emitters.csv` +
-`run_meta.csv` + `depth_dose.csv`, and is validated (yields sane, Bragg curve,
-endpoint-ordered positron ranges). **Next: step 4** (the Python handoff).
+**Status:** Stage A is done and validated (custom `stageA_transport/`, MT on 18
+threads; `emitters.csv` + `run_meta.csv` + `depth_dose.csv`; yields sane, Bragg
+curve, endpoint-ordered positron ranges). The handoff is done (`budget.py` +
+`budget_gen.py`). The standard run (`head_sobp_1e7`, 10⁷ protons) is frozen in the
+`ptcrysp-scenarios` repo. **Next: the detector study in `PTCryspMC.jl`.**
 
 1. Read `docs/simulate_pt_pet.tex` end to end.
-2. Stand up the Stage-A app; confirm proton range and dose in the PMMA cylinder.
-3. Add the `emitters.csv` writer (+ `run_meta.csv` metadata); rely on standard
-   radioactive decay (no prompt-decay override); validate yields-per-proton
-   against literature order-of-magnitude.
-4. Implement the Python A→B handoff (Eqs. of spec §3) and verify the ¹⁵O/¹¹C mix
-   vs. t_del.
-5. Only then start Stage B (detector geometry + coincidence list).
+2. Stand up the Stage-A app; confirm proton range and dose in the phantom.
+3. Write `emitters.csv` (+ `run_meta.csv`); rely on standard radioactive decay
+   (no prompt-decay override); check yields-per-proton against the literature.
+4. Compute the A→B handoff (`budget.py`, spec §3) and check the ¹⁵O/¹¹C mix vs t_del.
+5. Build the analytic detector (`PTCryspMC.jl`): annihilation events → detector
+   response → coincidence list → σ(range).
