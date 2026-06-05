@@ -15,11 +15,14 @@ The output — `emitters.csv` (annihilation points) + `run_meta.csv` (normalizat
 detector, ring, or PET design. A separate downstream simulation reads it and models
 a detector. This repo stops at the source.
 
-## The spec
+## The user guide
 
-`docs/simulate_pt_pet.tex` describes the physics and the pipeline. Read it first.
-If code and spec disagree, the spec wins unless a decision here supersedes it.
-This file records implementation decisions; the spec records the method.
+`docs/simulate_pt_pet.tex` is the user guide: it explains the physics (induced
+activity and its time evolution, the decay kinetics that set the measured counts,
+and what the generated source looks like, with figures) and how to run the pipeline.
+Read it first. This file records the implementation decisions, parameters, and
+build/run details a coding session needs, and refers to the guide for the physics
+rather than repeating it.
 
 ## Architecture — stages joined by CSV files
 
@@ -139,9 +142,8 @@ thin track, not a target volume, so its integral yield is unrealistically small
 **Isotopes / half-lives:** ¹⁵O 122 s, ¹¹C 1223 s, ¹³N 598 s, ¹⁰C 19.3 s,
 ¹⁴O 70.6 s (100 % β⁺ assumed in the handoff).
 
-**Acquisition / handoff (cyclotron, post-beam).** Continuous/cyclotron limit
-(post-beam → pulsed structure irrelevant), so the measured decays per species
-are the **three-factor expression — the *only* handoff equation:**
+**Acquisition / handoff (cyclotron, post-beam).** The measured decays per species
+are the three-factor expression:
 
 ```
 N_j = P_j · (1−e^(−λ_j·t_irr))/(λ_j·t_irr) · e^(−λ_j·t_del) · (1−e^(−λ_j·t_meas))
@@ -154,9 +156,10 @@ delay = less ¹⁵O). *Conservative/offline variant:* t_del=300, t_meas=1800 s
 (where the Parodi Table 4 measured-decay check applies). The positron-range floor
 (¹⁵O longest) matters at any of these.
 
-**Full handoff method in `docs/handoff.tex`** — the time-decay model and the
-absolute normalization `P_j(D)=count_j·D/target_dose`. The measured budget N_j is
-computed by `decay_sampling/budget.py`.
+The factors are explained in the user guide (§decay kinetics); the full
+derivation, including pulsed deliveries, is in `docs/handoff.tex`. Absolute
+normalization `P_j(D)=count_j·D/target_dose`; the budget N_j is computed by
+`decay_sampling/budget.py`.
 
 ## Reference material
 
@@ -180,7 +183,7 @@ decay_sampling/      # Python: time-decay budget (budget.py) + realizations (bud
 analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
 tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
 common/              # shared schema, units, isotope table
-docs/                # spec (simulate_pt_pet.tex), sobp.tex, handoff.tex, refs
+docs/                # user guide (simulate_pt_pet.tex), sobp.tex, handoff.tex, refs
 data/                # generated CSV (gitignored)
 ```
 
@@ -271,9 +274,10 @@ curve, endpoint-ordered positron ranges). The handoff is done (`budget.py` +
 `ptcrysp-scenarios` repo. The source side is complete; the detector study is a
 separate downstream repo.
 
-1. Read `docs/simulate_pt_pet.tex` end to end.
+1. Read the user guide `docs/simulate_pt_pet.tex` end to end.
 2. Stand up the Stage-A app; confirm proton range and dose in the phantom.
 3. Write `emitters.csv` (+ `run_meta.csv`); rely on standard radioactive decay
    (no prompt-decay override); check yields-per-proton against the literature.
-4. Compute the A→B handoff (`budget.py`, spec §3) and check the ¹⁵O/¹¹C mix vs t_del.
+4. Compute the A→B handoff (`budget.py`; see the user guide) and check the
+   ¹⁵O/¹¹C mix vs t_del.
 5. Freeze a run into `ptcrysp-scenarios` with `tools/snapshot_scenario.py`.
