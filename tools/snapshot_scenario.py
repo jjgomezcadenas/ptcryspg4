@@ -2,9 +2,13 @@
 """Freeze a finished Stage-A run in data/ into a scenario snapshot.
 
 Copies the run's source files and figures into <dest>/scenarios/<name>/, writes
-isotopes.csv (from common/isotopes.py), the file-format note (SCHEMA.md), and a
-scenario README with the run's numbers filled in. Each snapshot is standalone:
-it carries everything needed to read it without the rest of this repo.
+isotopes.csv (from common/isotopes.py), the file-format note (SCHEMA.md), the
+documentation PDFs (from latex/, into docs/), and a scenario README with the
+run's numbers filled in. Each snapshot is standalone: it carries everything
+needed to read it without the rest of this repo.
+
+The doc PDFs are copied, not built: run `python latex/build_latex.py` first so
+they exist in latex/. A missing PDF is warned about, not fatal.
 
 Usage:
     python tools/snapshot_scenario.py <name> [--data-dir DIR] [--dest DIR]
@@ -34,6 +38,14 @@ DATA_FILES = [
     "sobp_layers.csv",
 ]
 FIGURES = ["sobp_g4.png", "transport_validation.png", "activity.png"]
+
+# Documentation PDFs copied from latex/ into the snapshot's docs/ (build first
+# with latex/build_latex.py). The full doc set travels with the frozen scenario.
+LATEX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "latex")
+DOC_PDFS = [
+    "01_user_guide.pdf", "02_beam_design.pdf",
+    "03_decay_kinetics.pdf", "04_source_reference.pdf",
+]
 
 
 def write_isotopes_csv(path):
@@ -129,7 +141,8 @@ source (emitters.csv) is shared. N_expected is for 1 Gy.
 emitters.csv, run_meta.csv, sampling_budget_{{inroom,fast,offline}}.csv (+ _meta),
 sobp_layers.csv, phantom_material_*.csv (+ _meta: composition, density, mu at
 511 keV for gamma transport + attenuation correction), figures/. Columns in
-SCHEMA.md, isotope codes in isotopes.csv.
+SCHEMA.md, isotope codes in isotopes.csv. The full documentation (user guide,
+beam design, decay kinetics, source reference) is in docs/ as PDFs.
 """
     with open(path, "w") as f:
         f.write(text)
@@ -172,7 +185,20 @@ def main():
         print(f"WARNING: phantom_material '{mat_name}' not in the registry; "
               f"no phantom_material_*.csv written (add it to common/phantom_material.py).")
 
-    n = len(DATA_FILES) + len(FIGURES) + 3 + n_mat
+    # Documentation PDFs (built separately by latex/build_latex.py) -> docs/.
+    docdir = os.path.join(out, "docs")
+    os.makedirs(docdir, exist_ok=True)
+    n_pdf = 0
+    for fn in DOC_PDFS:
+        src = os.path.join(LATEX_DIR, fn)
+        if os.path.exists(src):
+            shutil.copy2(src, os.path.join(docdir, fn))
+            n_pdf += 1
+        else:
+            print(f"WARNING: {fn} not found in latex/; run "
+                  f"`python latex/build_latex.py` first to include it.")
+
+    n = len(DATA_FILES) + len(FIGURES) + n_pdf + 3 + n_mat
     print(f"snapshot '{args.name}': wrote {n} files -> {out}")
 
 
