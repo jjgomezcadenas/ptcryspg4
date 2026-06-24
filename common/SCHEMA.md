@@ -87,6 +87,21 @@ that would escape the phantom into air are killed at the boundary, so their
 `Pj_per_proton` is derivable as per-isotope count / `n_protons`. Dose is
 whole-phantom; a Bragg-region "dose at target" definition is TBD (spec §2.5).
 
+**Medium / attenuation map.** The source is detector-independent, but **not
+medium-independent**: the downstream sim must propagate the 511 keV annihilation
+photons through the phantom (attenuation + scatter) and again needs μ(511 keV)
+for reconstruction attenuation correction. For the standard scenario this is
+fully specified by the three `run_meta.csv` scalars — `phantom_material` (a NIST
+name that resolves to exact composition + density) and `phantom_diameter_mm` /
+`phantom_length_mm` (a homogeneous cylinder on the +z axis, centred at origin,
+sharing the `emitters.csv` frame). No voxel map is needed while the phantom is
+homogeneous. **Heterogeneous phantoms are deferred** — a voxelized patient
+(lung, bone, cavities) cannot be described by those scalars; supporting it means
+freezing a companion voxel material/density map (the attenuation map, or the
+GDML geometry) into the scenario snapshot and adding a pointer column to
+`run_meta.csv`. Until then this schema is homogeneous-phantom-only by
+construction.
+
 ### `depth_dose.csv` — Bragg profile (1 mm z-bins)
 
 | column | type | meaning |
