@@ -2,6 +2,15 @@
 
 Orientation for any Claude Code session on this repo.
 
+## Working style
+
+Do **not** present "shopping lists" — the rigid, multiple-choice
+question-with-fixed-options format (the `AskUserQuestion` tool). The user finds
+them frozen and impersonal. Instead, when a decision needs the user's input,
+talk it through in prose: lay out the options and trade-offs conversationally,
+give a recommendation, and ask one question at a time. Options are welcome;
+canned option menus are not.
+
 ## Purpose
 
 Produce the **positron-emitter source** that a PET detector simulation needs for
@@ -23,6 +32,11 @@ and what the generated source looks like, with figures) and how to run the pipel
 Read it first. This file records the implementation decisions, parameters, and
 build/run details a coding session needs, and refers to the guide for the physics
 rather than repeating it.
+
+`docs/scenario_format.tex` is the downstream-consumer interface contract: the
+scenario data product (files, columns, metadata, coordinate frame) and the recipe
+for turning it into a PET acquisition, with the head/brain case worked through.
+It is the canonical, annotated form of the per-snapshot `SCHEMA.md`.
 
 ## Architecture — stages joined by CSV files
 
@@ -183,7 +197,7 @@ decay_sampling/      # Python: time-decay budget (budget.py) + realizations (bud
 analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
 tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
 common/              # shared schema, units, isotope table
-docs/                # user guide (simulate_pt_pet.tex), sobp.tex, handoff.tex, refs
+docs/                # user guide (simulate_pt_pet.tex), scenario_format.tex, sobp.tex, handoff.tex, refs
 data/                # generated CSV (gitignored)
 ```
 
