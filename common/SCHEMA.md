@@ -100,7 +100,8 @@ homogeneous. **Heterogeneous phantoms are deferred** — a voxelized patient
 freezing a companion voxel material/density map (the attenuation map, or the
 GDML geometry) into the scenario snapshot and adding a pointer column to
 `run_meta.csv`. Until then this schema is homogeneous-phantom-only by
-construction.
+construction. The composition + μ are materialized into File 3 (below) by
+`common/phantom_material.py` and frozen into every scenario snapshot.
 
 ### `depth_dose.csv` — Bragg profile (1 mm z-bins)
 
@@ -163,6 +164,42 @@ Companion `sampling_realizations_<scenario>_meta.csv` (one wide row): `scenario`
   so the source side stays reproducible without an RNG.
 - Every detector config consumes the **identical** source — guaranteed by the
   same `emitters.csv` + budget + seed (CLAUDE.md invariant 4).
+
+---
+
+## File 3: phantom medium — `phantom_material_<name>.csv` (+ `_meta.csv`)
+
+Written by `common/phantom_material.py` (and emitted into every snapshot by
+`tools/snapshot_scenario.py`). The 511 keV photon-transport / attenuation-
+correction data for the homogeneous phantom — the medium the source implies but
+`emitters.csv` does not carry (see the "Medium / attenuation map" note above).
+`<name>` is the `run_meta.csv` `phantom_material`, lower-cased and sanitized
+(e.g. `g4_brain_icrp`). Compositions are the authoritative Geant4 NIST
+definitions; `μ` is Compton/Klein-Nishina (coherent + photoelectric ~1–2 %, not
+included).
+
+### `phantom_material_<name>.csv` — one row per element
+
+| column | type | meaning |
+|--------|------|---------|
+| `element` | string | element symbol (H, C, N, O, …) |
+| `Z` | int | atomic number |
+| `A_g_mol` | float | standard atomic weight |
+| `mass_fraction` | float | fraction by mass (rows sum to 1) |
+
+### `phantom_material_<name>_meta.csv` — one wide row
+
+| column | type | meaning |
+|--------|------|---------|
+| `material` | string | Geant4 NIST name (e.g. `G4_BRAIN_ICRP`) |
+| `energy_keV` | float | photon energy the μ is for (511, annihilation) |
+| `density_g_cm3` | float | mass density ρ |
+| `mean_excitation_eV` | float | Geant4 Imean (diagnostic; not used for μ) |
+| `mu_rho_cm2_g` | float | mass attenuation coefficient μ/ρ |
+| `mu_cm_inv` | float | linear attenuation coefficient μ |
+| `mu_mm_inv` | float | μ in mm⁻¹ |
+| `mean_free_path_cm` | float | 1/μ |
+| `note` | string | short material description |
 
 ---
 
