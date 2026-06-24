@@ -91,6 +91,22 @@ MATERIALS: dict[str, Material] = {
         },
         note="Reference medium; mu/rho here matches the canonical PET 0.096 cm^2/g.",
     ),
+    # Oxygen-rich generic soft tissue -- read verbatim from the 11.4.1 dump.
+    "G4_TISSUE_SOFT_ICRP": Material(
+        name="G4_TISSUE_SOFT_ICRP", density_g_cm3=1.030, mean_excitation_eV=72.3,
+        composition={
+            "H":  Element(1,  1.008,  0.105),
+            "C":  Element(6,  12.011, 0.256),
+            "N":  Element(7,  14.007, 0.027),
+            "O":  Element(8,  15.999, 0.602),
+            "Na": Element(11, 22.990, 0.001),
+            "P":  Element(15, 30.974, 0.002),
+            "S":  Element(16, 32.066, 0.003),
+            "Cl": Element(17, 35.453, 0.002),
+            "K":  Element(19, 39.098, 0.002),
+        },
+        note="ICRP soft tissue; oxygen-rich (15O-rich) variant.",
+    ),
     # Carbon-rich PMMA benchmark, stoichiometry C5H8O2.
     "G4_PLEXIGLASS": Material(
         name="G4_PLEXIGLASS", density_g_cm3=1.190, mean_excitation_eV=74.0,
