@@ -42,6 +42,13 @@ holds only reference papers (`.pdf`, `.txt`). Build any of them with `pdflatex`.
   recipe for turning it into a PET acquisition, with the head/brain case worked
   through. The canonical, annotated form of the per-snapshot `SCHEMA.md`.
 
+> **Terminology — "decay kinetics" = "the handoff".** The decay-kinetics step
+> (doc `03_decay_kinetics`, code `decay_sampling/`) is exactly what the
+> architecture diagram below and the rest of this file call **the handoff**
+> (Stage B0): the radioactive-decay + acquisition-timing model that turns
+> produced emitters `P_j` into measured decays `N_j`. The two names are
+> interchangeable; the doc was renamed for clarity, the concept kept its name.
+
 This file (CLAUDE.md) records the implementation decisions, parameters, and
 build/run details a coding session needs, and refers to the guide for the physics
 rather than repeating it.
