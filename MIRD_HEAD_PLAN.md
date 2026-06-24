@@ -42,11 +42,15 @@ class framework. Frame in the example: `x` = left-right, `y` = anterior-posterio
 
 | region | solid | semi-axes (cm) | our material |
 |---|---|---|---|
-| Head (outer) | elliptical tube ∪ ellipsoid cap | 7 × 10 × 7.75 (tube) | `G4_TISSUE_SOFT_ICRP` |
+| Head (outer) | single scalp ellipsoid (skull-outer + ~0.4 cm) | 7.2 × 10.2 × 8.7 | `G4_TISSUE_SOFT_ICRP` |
 | Skull | ellipsoid(6.8×9.8×8.3) − ellipsoid(6×9×6.5) | ~0.8 cm cranium shell | `G4_BONE_CORTICAL_ICRP` |
-| Brain | ellipsoid | 6 × 9 × 6.5 | `G4_BRAIN_ICRP` |
+| Brain | ellipsoid (+1 cm crown offset) | 6 × 9 × 6.5 | `G4_BRAIN_ICRP` |
 
-Full head ≈ 14 (L-R) × 20 (A-P) × 16 (S-I) cm. Lateral path ≈ 14 cm.
+The MIRD **face/neck (elliptical tube) is dropped**: the lateral cranial field
+never crosses it (≈0 emitters there), and it only served to enclose the lower
+skull — so the outer head is a single soft-tissue scalp ellipsoid enclosing the
+whole cranium. Skull and brain stay the verbatim MIRD ellipsoids. Concentric
+scalp ⊃ skull ⊃ brain, the beam crossing scalp → skull → brain (~14 cm).
 
 ## Phased plan
 

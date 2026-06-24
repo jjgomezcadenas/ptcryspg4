@@ -36,27 +36,26 @@ inline constexpr const char* kGeometryCylinder = "cylinder";
 inline constexpr const char* kGeometryMirdHead = "mird_head";
 inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
 
-// Outer head: elliptical tube (face/vault) unioned with an ellipsoid cap.
-inline constexpr double kHeadTubeAxMM = 70.0;   // x semi (L-R)
-inline constexpr double kHeadTubeByMM = 100.0;  // y semi (A-P)
-inline constexpr double kHeadTubeDzMM = 77.5;   // z half-height (tube)
-inline constexpr double kHeadCapAxMM = 70.0;
-inline constexpr double kHeadCapByMM = 100.0;
-inline constexpr double kHeadCapCzMM = 85.0;
-inline constexpr double kHeadCapDzMM = 77.5;    // cap union offset (+z)
-// Skull cranium shell = outer ellipsoid minus inner ellipsoid (offset +10 mm z).
+// Head-local frame origin = skull/scalp centre; the brain sits +kBrainOffsetZMM
+// toward the crown (the MIRD cranium cavity offset). The face/neck of the full
+// MIRD head is dropped: the lateral cranial field never traverses it, so the
+// outer head is a single soft-tissue scalp ellipsoid enclosing the skull.
+// Scalp = skull-outer semi-axes + ~4 mm.
+inline constexpr double kScalpAxMM = 72.0;
+inline constexpr double kScalpByMM = 102.0;
+inline constexpr double kScalpCzMM = 87.0;
+// Skull cranium shell = outer ellipsoid minus inner cavity (offset by the brain).
 inline constexpr double kSkullOutAxMM = 68.0;
 inline constexpr double kSkullOutByMM = 98.0;
 inline constexpr double kSkullOutCzMM = 83.0;
 inline constexpr double kSkullInAxMM = 60.0;
 inline constexpr double kSkullInByMM = 90.0;
 inline constexpr double kSkullInCzMM = 65.0;
-inline constexpr double kSkullPosZMM = 77.5;    // skull placement in head frame
-// Brain ellipsoid (fills the cranium cavity).
+// Brain ellipsoid (fills the cranium cavity), offset from the skull centre.
 inline constexpr double kBrainAxMM = 60.0;
 inline constexpr double kBrainByMM = 90.0;
 inline constexpr double kBrainCzMM = 65.0;
-inline constexpr double kBrainPosZMM = 87.5;    // brain placement in head frame
+inline constexpr double kBrainOffsetZMM = 10.0;  // brain centre vs skull centre
 // Materials (NIST). Brain matches the cylinder reference.
 inline constexpr const char* kScalpMaterial = "G4_TISSUE_SOFT_ICRP";
 inline constexpr const char* kSkullMaterial = "G4_BONE_CORTICAL_ICRP";
