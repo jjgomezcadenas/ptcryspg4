@@ -6,7 +6,7 @@ draws Z independent Poisson realizations M_j^(z) ~ Poisson(N_expected). Each
 realization is one "experiment": the detector study samples M_j^(z) annihilation points
 from emitters.csv (seed master_seed + realization, so every detector sees the
 identical source), reconstructs, and fits the range; the spread of the fitted
-ranges over the Z realizations is σ(range). See docs/handoff.tex.
+ranges over the Z realizations is σ(range). See latex/03_decay_kinetics.tex.
 
 This is the stochastic, detector-side half of the old budget.py. It reads exactly
 the file the detector study will read, so relocating it there is a pure move.

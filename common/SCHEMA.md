@@ -6,7 +6,7 @@ C++, `common/isotopes.py` for Python). If code and this file disagree, the code 
 wrong. The detector stage (Stage B) is a separate downstream repo; each frozen run
 carries a short copy of these formats.
 
-Spec reference: `docs/simulate_pt_pet.tex` (§2 Stage A, §3 handoff, §4 Stage B).
+Spec reference: `latex/01_user_guide.tex` (§2 Stage A, §3 handoff, §4 Stage B).
 
 **File format: CSV.** Files are flat, columnar **CSV** (one row per record, one
 scalar per column, header row, units as `_mm`/`_keV`/`_ns` column suffixes). Each
@@ -140,7 +140,7 @@ The handoff is split at the **A|B seam** into a deterministic, RNG-free budget
 study). The annihilation events are **not materialized** — the handoff
 writes only the per-isotope counts; the detector draws that many annihilation
 points from File 1 on the fly, with seed `master_seed + realization` (so every
-detector gets the identical source). Method: `docs/handoff.tex`.
+detector gets the identical source). Method: `latex/03_decay_kinetics.tex`.
 
 ### File 2a: `sampling_budget_<scenario>.csv` — Stage B0 deterministic budget
 

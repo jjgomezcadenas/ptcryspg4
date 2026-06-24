@@ -31,5 +31,6 @@ venv/
 *.fdb_latexmk
 *.fls
 # Generated PDFs from our own .tex; keep the reference papers
+latex/*.pdf
 docs/*.pdf
 !docs/proton-therapy-ptet-doses-mc.pdf

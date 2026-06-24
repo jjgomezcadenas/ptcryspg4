@@ -12,7 +12,7 @@ class BeamConfig;
 // Proton pencil beam (spec sec 2.1), directed along +z into the phantom face.
 // Energy: a single fixed value by default, or — if an SOBP layer table has been
 // loaded into BeamConfig — sampled per primary from the layers (Spread-Out
-// Bragg Peak, see docs/sobp.tex). Transverse profile is a Gaussian pencil
+// Bragg Peak, see latex/02_beam_design.tex). Transverse profile is a Gaussian pencil
 // (lateral spreading over the target is a later step).
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
  public:

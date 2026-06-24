@@ -10,7 +10,7 @@ separate downstream simulation reads it and models a PET detector.
 
 | File | Role |
 |------|------|
-| `docs/simulate_pt_pet.tex` | **Spec** — physics and pipeline |
+| `latex/01_user_guide.tex` | **Spec** — physics and pipeline |
 | `CLAUDE.md` | Orientation + implementation decisions |
 | `common/SCHEMA.md` | CSV file formats, isotope encoding, units |
 

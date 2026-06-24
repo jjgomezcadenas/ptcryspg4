@@ -22,7 +22,7 @@ class BeamConfig {
   bool SobpEnabled() const { return !fEnergyMeV.empty(); }
 
   // Sample one layer's energy [MeV] in proportion to its weight, using the
-  // calling worker thread's RNG (stochastic delivery, see docs/sobp.tex).
+  // calling worker thread's RNG (stochastic delivery, see latex/02_beam_design.tex).
   G4double SampleEnergyMeV() const;
 
   // Lateral profile: a uniform disk of this radius (G4 internal length units,

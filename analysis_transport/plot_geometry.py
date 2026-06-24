@@ -6,7 +6,7 @@ geometry, with a subsample of the emitters.csv annihilation points overlaid so
 the source cloud is shown sitting inside the medium. This is the figure a
 downstream consumer needs to co-register the source with the phantom: the
 phantom is centred at the origin, its axis is +z (the beam direction), and the
-beam enters at the z = -L/2 face. Used in docs/scenario_format.tex.
+beam enters at the z = -L/2 face. Used in latex/04_source_reference.tex.
 
 Usage:
     python analysis_transport/plot_geometry.py [data_dir] [--out PNG] [--n N]

@@ -4,7 +4,7 @@
 A_j(t) = A_peak_j · exp(-lambda_j·t), where t is the time after the end of the
 beam and A_peak_j = (P_j/t_irr)(1 - exp(-lambda_j·t_irr)) is the activity at beam
 end. The absolute production is P_j(D) = count_j · D / target_dose_Gy from the
-Stage-A run (docs/handoff.tex). The integral of A_j over the acquisition window
+Stage-A run (latex/03_decay_kinetics.tex). The integral of A_j over the acquisition window
 equals the measured decays N_j of Eq. 1.
 
 Usage:

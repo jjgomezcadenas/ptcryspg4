@@ -24,19 +24,27 @@ The output — `emitters.csv` (annihilation points) + `run_meta.csv` (normalizat
 detector, ring, or PET design. A separate downstream simulation reads it and models
 a detector. This repo stops at the source.
 
-## The user guide
+## The documentation (`latex/`)
 
-`docs/simulate_pt_pet.tex` is the user guide: it explains the physics (induced
-activity and its time evolution, the decay kinetics that set the measured counts,
-and what the generated source looks like, with figures) and how to run the pipeline.
-Read it first. This file records the implementation decisions, parameters, and
+Our LaTeX documentation lives in `latex/`, numbered in reading order; `docs/`
+holds only reference papers (`.pdf`, `.txt`). Build any of them with `pdflatex`.
+
+- `latex/01_user_guide.tex` — the user guide: the physics (induced activity and
+  its time evolution, the decay kinetics that set the measured counts, what the
+  generated source looks like, with figures) and how to run the pipeline. **Read
+  it first.**
+- `latex/02_beam_design.tex` — how the SOBP depth field is designed
+  (Bortfeld + Abel-inversion weights + attenuation correction), as built.
+- `latex/03_decay_kinetics.tex` — the decay-plus-timing model that turns produced
+  emitters into measured decays, and the σ(range) figure of merit.
+- `latex/04_source_reference.tex` — the downstream-consumer interface contract:
+  the scenario data product (files, columns, metadata, coordinate frame) and the
+  recipe for turning it into a PET acquisition, with the head/brain case worked
+  through. The canonical, annotated form of the per-snapshot `SCHEMA.md`.
+
+This file (CLAUDE.md) records the implementation decisions, parameters, and
 build/run details a coding session needs, and refers to the guide for the physics
 rather than repeating it.
-
-`docs/scenario_format.tex` is the downstream-consumer interface contract: the
-scenario data product (files, columns, metadata, coordinate frame) and the recipe
-for turning it into a PET acquisition, with the head/brain case worked through.
-It is the canonical, annotated form of the per-snapshot `SCHEMA.md`.
 
 ## Architecture — stages joined by CSV files
 
@@ -171,7 +179,7 @@ delay = less ¹⁵O). *Conservative/offline variant:* t_del=300, t_meas=1800 s
 (¹⁵O longest) matters at any of these.
 
 The factors are explained in the user guide (§decay kinetics); the full
-derivation, including pulsed deliveries, is in `docs/handoff.tex`. Absolute
+derivation, including pulsed deliveries, is in `latex/03_decay_kinetics.tex`. Absolute
 normalization `P_j(D)=count_j·D/target_dose`; the budget N_j is computed by
 `decay_sampling/budget.py`.
 
@@ -197,14 +205,15 @@ decay_sampling/      # Python: time-decay budget (budget.py) + realizations (bud
 analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
 tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
 common/              # shared schema, units, isotope table
-docs/                # user guide (simulate_pt_pet.tex), scenario_format.tex, sobp.tex, handoff.tex, refs
+latex/               # our LaTeX docs (01_user_guide … 04_source_reference) + figures + biblio
+docs/                # reference papers only (.pdf, .txt)
 data/                # generated CSV (gitignored)
 ```
 
 Frozen Stage-A runs live in the `ptcrysp-scenarios` data repo, one named directory
 per scenario; the downstream detector simulation reads from there.
 
-## Beam: SOBP field (`field_design/`, method in `docs/sobp.tex`)
+## Beam: SOBP field (`field_design/`, method in `latex/02_beam_design.tex`)
 
 The standard scenario uses a **Spread-Out Bragg Peak**, not a single pencil. The
 depth field is implemented and verified:
@@ -288,7 +297,7 @@ curve, endpoint-ordered positron ranges). The handoff is done (`budget.py` +
 `ptcrysp-scenarios` repo. The source side is complete; the detector study is a
 separate downstream repo.
 
-1. Read the user guide `docs/simulate_pt_pet.tex` end to end.
+1. Read the user guide `latex/01_user_guide.tex` end to end.
 2. Stand up the Stage-A app; confirm proton range and dose in the phantom.
 3. Write `emitters.csv` (+ `run_meta.csv`); rely on standard radioactive decay
    (no prompt-decay override); check yields-per-proton against the literature.

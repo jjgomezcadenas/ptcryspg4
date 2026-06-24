@@ -11,8 +11,8 @@
 \newcommand{\tdel}{t_{\mathrm{del}}}
 \newcommand{\tmeas}{t_{\mathrm{meas}}}
 
-\title{The handoff:\\
-time-decay bookkeeping, source sampling, and $\sigma(\text{range})$}
+\title{Decay kinetics:\\
+from produced emitters to measured decays, and $\sigma(\text{range})$}
 \author{Method note}
 \date{\today}
 
@@ -20,7 +20,7 @@ time-decay bookkeeping, source sampling, and $\sigma(\text{range})$}
 \maketitle
 
 \begin{abstract}
-The handoff (\texttt{decay\_sampling/}) converts the proton run's production
+This note (\texttt{decay\_sampling/}) converts the proton run's production
 of $\beta^{+}$ emitters into the annihilation source measured by a detector. It
 scales the production to a clinical dose, applies radioactive decay and the
 acquisition timing to obtain the measured number of decays per isotope, and
@@ -34,7 +34,7 @@ budget.
 The proton run wrote \texttt{emitters.csv}: one row per produced emitter with its
 annihilation point and isotope, i.e.\ the production shape $P_j(\mathbf r)$ at
 the statistics of the simulated protons. The detector measures a different
-quantity. The handoff applies two transforms: an absolute scale to a clinical
+quantity. This step applies two transforms: an absolute scale to a clinical
 dose (Sec.~\ref{sec:norm}), and the decay-plus-window selection that yields the
 measured decays (Sec.~\ref{sec:decay}).
 

@@ -10,7 +10,7 @@ and the σ(range) figure of merit live downstream (budget_gen.py here for now;
 moves there later). Writes:
   data/sampling_budget_<scenario>.csv       (isotope_id, N_expected)
   data/sampling_budget_<scenario>_meta.csv  (operating point, source)
-See docs/handoff.tex.
+See latex/03_decay_kinetics.tex.
 
 Usage:
     python decay_sampling/budget.py [data_dir] [--scenario NAME] [--dose GY]

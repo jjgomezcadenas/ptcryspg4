@@ -31,8 +31,8 @@ build an acquisition from it --- so that a scenario directory can be used from
 its own contents alone. The format is generic; the standard skull-base case
 (\file{head\_sobp\_1e7}: a brain-filled head cylinder) is worked through as a
 running example in Sec.~\ref{sec:example}. The physics behind the source is in
-the user guide (\file{simulate\_pt\_pet.tex}) and the decay bookkeeping in
-\file{handoff.tex}; this note is the consumer-facing interface contract.
+the user guide (\file{01\_user\_guide.tex}) and the decay bookkeeping in
+\file{03\_decay\_kinetics.tex}; this note is the consumer-facing interface contract.
 \end{abstract}
 
 \section{What a scenario is}
@@ -176,7 +176,7 @@ column & type & meaning \\
 The companion \file{*\_meta.csv} carries \file{scenario}, \file{source\_file},
 \file{dose\_Gy}, and the acquisition timing \file{t\_irr\_s}, \file{t\_del\_s},
 \file{t\_meas\_s}. The measured decays follow the three-factor expression
-(\file{handoff.tex}, Eq.~1)
+(\file{03\_decay\_kinetics.tex}, Eq.~1)
 \begin{equation}
   N_j = P_j(D)\cdot
         \underbrace{\frac{1-e^{-\lambda_j \tirr}}{\lambda_j \tirr}}_{\text{build-up}}\cdot
@@ -240,7 +240,7 @@ The scenario gives the source; the detector study realizes it. The recipe:
 All randomness (the Poisson draw, the emission directions) lives in the consumer;
 the scenario itself is deterministic and seed-free, so the source is reproducible
 across studies. The spread of the recovered proton range over realizations,
-$\sigma(\text{range})$, is the figure of merit (\file{handoff.tex}).
+$\sigma(\text{range})$, is the figure of merit (\file{03\_decay\_kinetics.tex}).
 
 \section{Worked example: \file{head\_sobp\_1e7}}
 \label{sec:example}
