@@ -29,6 +29,7 @@ ANNIHILATION_keV = 511.0
 DATA_FILES = [
     "emitters.csv", "run_meta.csv",
     "sampling_budget_inroom.csv", "sampling_budget_inroom_meta.csv",
+    "sampling_budget_fast.csv", "sampling_budget_fast_meta.csv",
     "sampling_budget_offline.csv", "sampling_budget_offline_meta.csv",
     "sobp_layers.csv",
 ]
@@ -82,7 +83,7 @@ Proton SOBP on {m['phantom_material']}, {int(m['n_protons']):g} protons, scaled 
 Parodi 2008 Table 2 comparison: about 2.2x overall.
 
 ## Files
-emitters.csv, run_meta.csv, sampling_budget_{{inroom,offline}}.csv (+ _meta),
+emitters.csv, run_meta.csv, sampling_budget_{{inroom,fast,offline}}.csv (+ _meta),
 sobp_layers.csv, phantom_material_*.csv (+ _meta: composition, density, mu at
 511 keV for gamma transport + attenuation correction), figures/. Columns in
 SCHEMA.md, isotope codes in isotopes.csv.
