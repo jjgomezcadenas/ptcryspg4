@@ -11,7 +11,7 @@
 \newcommand{\tdel}{t_{\mathrm{del}}}
 \newcommand{\tmeas}{t_{\mathrm{meas}}}
 
-\title{The A$\to$B handoff:\\
+\title{The handoff:\\
 time-decay bookkeeping, source sampling, and $\sigma(\text{range})$}
 \author{Method note}
 \date{\today}
@@ -20,7 +20,7 @@ time-decay bookkeeping, source sampling, and $\sigma(\text{range})$}
 \maketitle
 
 \begin{abstract}
-The handoff (Stage~B0, \texttt{decay\_sampling/}) converts the Stage-A production
+The handoff (\texttt{decay\_sampling/}) converts the proton run's production
 of $\beta^{+}$ emitters into the annihilation source measured by a detector. It
 scales the production to a clinical dose, applies radioactive decay and the
 acquisition timing to obtain the measured number of decays per isotope, and
@@ -31,7 +31,7 @@ budget.
 
 \section{Role}
 
-Stage~A wrote \texttt{emitters.csv}: one row per produced emitter with its
+The proton run wrote \texttt{emitters.csv}: one row per produced emitter with its
 annihilation point and isotope, i.e.\ the production shape $P_j(\mathbf r)$ at
 the statistics of the simulated protons. The detector measures a different
 quantity. The handoff applies two transforms: an absolute scale to a clinical
@@ -66,13 +66,13 @@ acquisition $\tmeas$.
 
 Operating point (in-room baseline): $\tirr=\SI{60}{s}$, $\tdel=\SI{120}{s}$,
 $\tmeas=\SI{1200}{s}$ (cyclotron); all are parameters. $\tdel$ is the key swept
-variable (it sets the surviving $^{15}$O); $\tdel=\SI{300}{s}$ is a conservative
-offline point.
+variable (it sets the surviving $^{15}$O); $\tdel=\SI{300}{s}$,
+$\tmeas=\SI{1800}{s}$ is a conservative offline point.
 
 \section{Absolute normalisation}
 \label{sec:norm}
 
-Stage~A scores the target-box dose $D_{\mathrm{sim}}$ for the $N_{\mathrm{sim}}$
+The proton run scores the target-box dose $D_{\mathrm{sim}}$ for the $N_{\mathrm{sim}}$
 simulated protons (\texttt{run\_meta.csv}). The production for a clinical dose
 $D$ is
 \begin{equation}
@@ -111,7 +111,7 @@ fall-off to a range estimate $R_z$. Over $Z\sim100$ realisations,
 The detector with the smallest $\sigma(\text{range})$ at a fixed budget is
 preferred. The detector is simulated once to a master coincidence list; the $Z$
 realisations are Poisson resamples of that list and only the reconstruction
-repeats (Stage~B/C).
+repeats (downstream detector study).
 
 \section{Implementation (\texttt{decay\_sampling/})}
 
