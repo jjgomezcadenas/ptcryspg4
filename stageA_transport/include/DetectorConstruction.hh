@@ -29,9 +29,19 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   void SetMaterialName(const G4String& name) { fMaterialName = name; }
   const G4String& MaterialName() const { return fMaterialName; }
 
+  // Geometry selector: "cylinder" (default) or "mird_head". Set from a macro
+  // before /run/initialize. The label written to run_meta.csv is the NIST
+  // material for the cylinder, or "MIRD_head" for the head.
+  void SetGeometry(const G4String& name) { fGeometry = name; }
+  const G4String& Geometry() const { return fGeometry; }
+  G4String PhantomLabel() const;
+
   // Beam placement helpers, read by the primary generator.
   G4double PhantomHalfLength() const { return fHalfZ; }
   G4double PhantomRadius() const { return fRadius; }
+  // Half-extent of the phantom along the beam axis (+z): the gun starts just
+  // upstream of this. Cylinder → half-length; MIRD head → its L-R semi-axis.
+  G4double BeamAxisHalfExtent() const { return fBeamHalfExtent; }
   // Phantom mass (ρ·V), for the dose normalization. Valid only after Construct().
   G4double PhantomMass() const;
 
@@ -48,10 +58,17 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double TargetMass() const;  // π·r²·L·ρ (ρ from the phantom material)
 
  private:
+  // Build the homogeneous cylinder (default) or the MIRD head into worldLV; each
+  // sets fPhantomLV (the scoring volume) and fBeamHalfExtent.
+  void BuildCylinder(G4LogicalVolume* worldLV);
+  void BuildMirdHead(G4LogicalVolume* worldLV);
+
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)
-  G4LogicalVolume* fPhantomLV = nullptr;  // kept for the scorer + mass query
+  G4double fBeamHalfExtent = 0.;          // phantom half-extent along +z
+  G4LogicalVolume* fPhantomLV = nullptr;  // scoring volume (cylinder or head)
   G4String fMaterialName;                 // NIST name; default set in the ctor
+  G4String fGeometry;                     // "cylinder" | "mird_head"
   G4double fTargetRadius = 0.;            // target box, defaults set in the ctor
   G4double fTargetProxDepth = 0.;
   G4double fTargetDistDepth = 0.;

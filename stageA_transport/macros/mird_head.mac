@@ -1,0 +1,18 @@
+# Stage A — MIRD-head geometry proof (Phase 1).
+# Heterogeneous stylized head (soft-tissue scalp/face ⊃ bone skull ⊃ brain),
+# replicated from advanced/human_phantom. A single proton pencil enters
+# laterally (the head's L-R axis is along the beam), crossing scalp → skull →
+# brain. Writes data/emitters.csv + data/run_meta.csv + data/depth_dose.csv.
+
+/run/numberOfThreads 18
+
+# Select the head geometry (must precede /run/initialize). Cylinder is default.
+/stageA/phantom/geometry mird_head
+/run/initialize
+
+/stageA/output/dir ../../data
+/random/setSeeds 12345 67890
+
+# 1e5 protons: a quick geometry/shape proof (single 100 MeV pencil).
+/run/printProgress 20000
+/run/beamOn 100000

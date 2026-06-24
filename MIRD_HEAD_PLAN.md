@@ -52,21 +52,47 @@ Full head ≈ 14 (L-R) × 20 (A-P) × 16 (S-I) cm. Lateral path ≈ 14 cm.
 
 ### Phase 1 — branch `geometry-proof`
 Geometry only; prove it works and is more realistic; **no schema changes**.
-- [ ] Replicate the 3-region MIRD head (head/skull/brain) in
-      `DetectorConstruction`, re-centered at origin, oriented for a lateral beam.
-- [ ] NIST materials (brain/skull/scalp as above); confirm the bone choice.
-- [ ] Make geometry selectable: `/stageA/phantom/geometry cylinder|mird_head`
-      (cylinder default). New messenger command.
-- [ ] Single pencil beam, lateral entry.
-- [ ] Run; verify activity sits in brain + skull, the bone changes the local mix,
-      yields are sane, no overlaps/crashes.
-- Files: `DetectorConstruction.{cc,hh}`, `DetectorMessenger.{cc,hh}`,
-  `StageAConfig.hh` (head dims/material constants), `PrimaryGeneratorAction`
-  (entry point for the head extent).
-- Keep `run_meta.csv` columns unchanged (label the geometry; full per-region
-  medium is Phase 2). Do **not** touch `phantom_material.py` / `SCHEMA.md`.
-- Acceptance: builds, runs, `emitters.csv` shows production inside the head;
-  TrackingAction (Z,A capture) is geometry-independent so should just work.
+
+Confirmed defaults: bone = `G4_BONE_CORTICAL_ICRP`; edep scorer attached to the
+**head** LV (real skull-base target + dose normalization deferred to Phase 3);
+**faithfully replicate** the example's relative solid placements (re-centered +
+rotated), not idealized concentric ellipsoids.
+
+- [ ] Replicate the 3-region MIRD head in `DetectorConstruction`:
+      Head `EllipticalTube(7,10,7.75)∪Ellipsoid(7,10,8.5)` = `G4_TISSUE_SOFT_ICRP`;
+      Skull `Ellipsoid(6.8,9.8,8.3)−Ellipsoid(6,9,6.5)` = `G4_BONE_CORTICAL_ICRP`;
+      Brain `Ellipsoid(6,9,6.5)` = `G4_BRAIN_ICRP`. Re-center at origin (drop the
+      +77.75 cm body offset); keep relative skull/brain placements; rely on G4
+      overlap checking.
+- [ ] Lateral orientation: rotate the head so its L-R axis (±7 cm) aligns with
+      the beam `+z` (`rotateY(90°)`), so the pencil crosses skull→brain→skull.
+- [ ] Geometry selectable: `/stageA/phantom/geometry cylinder|mird_head`
+      (PreInit, cylinder default). `Construct()` branches into
+      `BuildCylinder()` / `BuildMirdHead()`.
+- [ ] Single pencil, lateral entry. Generalize the detector's beam-axis
+      half-extent (cylinder→`fHalfZ`; head→outer L-R semi-axis) so the gun starts
+      1 mm upstream for either geometry.
+- [ ] Scorer on the head LV (`fPhantomLV` → head) so the existing edep scorer +
+      `PhantomMass()` work unchanged.
+- [ ] `emitters.csv` is the deliverable; `TrackingAction` (Z,A capture) is
+      geometry-independent so it just works.
+- [ ] **Detailed plots** — `analysis_transport/plot_mird_head.py` rendering:
+      (1) the phantom (3 nested regions in two orthogonal cross-sections),
+      (2) the beam (lateral pencil entry + path), and
+      (3) the emitter paths (production + annihilation points and the prod→anh
+      segments from `emitters.csv`, coloured by isotope / region).
+      Mirrors the `StageAConfig` ellipsoid constants for now (Phase 2 writes them
+      into `run_meta.csv`). This is the Phase-1 verification artifact.
+- Files: `StageAConfig.hh` (head semi-axes + 3 materials + default geometry),
+  `DetectorConstruction.{cc,hh}`, `DetectorMessenger.{cc,hh}`,
+  `PrimaryGeneratorAction.cc`, `macros/mird_head.mac`,
+  `analysis_transport/plot_mird_head.py`.
+- Keep `run_meta.csv` columns unchanged (set `phantom_material="MIRD_head"`,
+  provisional bounding dims; full per-region medium is Phase 2). Do **not** touch
+  `phantom_material.py` / `SCHEMA.md`.
+- Acceptance: builds; runs `mird_head.mac` (~10⁵ protons) with no overlap
+  warnings; the plots show activity tracking the proton path through the head,
+  with a visible skull-vs-brain isotope-mix difference.
 
 ### Phase 2 — branch `heterogeneous-medium`
 Make the heterogeneous medium first-class (the deferred "multi-material /
@@ -106,7 +132,7 @@ Realistic field through the heterogeneous head, then freeze the scenario.
 
 | phase | branch | status |
 |---|---|---|
-| 1 | `geometry-proof` | not started |
+| 1 | `geometry-proof` | done — pending review (builds, no overlaps; 1.8k emitters, all in-head; skull O15/C11=1.76 vs brain 2.46) |
 | 2 | `heterogeneous-medium` | not started |
 | 3 | `SOBP` | not started |
 

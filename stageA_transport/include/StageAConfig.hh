@@ -26,6 +26,42 @@ inline constexpr double kTargetRadiusMM = 30.0;      // Ø6 cm
 inline constexpr double kTargetProxDepthMM = 55.0;   // proximal depth
 inline constexpr double kTargetDistDepthMM = 105.0;  // distal depth (5 cm thick)
 
+// --- MIRD-head variant (Phase 1) ------------------------------------------
+// A heterogeneous stylized head: brain inside a skull shell inside a soft-tissue
+// outer head, replicated from the Geant4 advanced/human_phantom MIRD model.
+// Semi-axes [mm], in the head-local frame (x = left-right, y = anterior-
+// posterior, z = superior-inferior). Selected by /stageA/phantom/geometry
+// mird_head; the cylinder above remains the default.
+inline constexpr const char* kGeometryCylinder = "cylinder";
+inline constexpr const char* kGeometryMirdHead = "mird_head";
+inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
+
+// Outer head: elliptical tube (face/vault) unioned with an ellipsoid cap.
+inline constexpr double kHeadTubeAxMM = 70.0;   // x semi (L-R)
+inline constexpr double kHeadTubeByMM = 100.0;  // y semi (A-P)
+inline constexpr double kHeadTubeDzMM = 77.5;   // z half-height (tube)
+inline constexpr double kHeadCapAxMM = 70.0;
+inline constexpr double kHeadCapByMM = 100.0;
+inline constexpr double kHeadCapCzMM = 85.0;
+inline constexpr double kHeadCapDzMM = 77.5;    // cap union offset (+z)
+// Skull cranium shell = outer ellipsoid minus inner ellipsoid (offset +10 mm z).
+inline constexpr double kSkullOutAxMM = 68.0;
+inline constexpr double kSkullOutByMM = 98.0;
+inline constexpr double kSkullOutCzMM = 83.0;
+inline constexpr double kSkullInAxMM = 60.0;
+inline constexpr double kSkullInByMM = 90.0;
+inline constexpr double kSkullInCzMM = 65.0;
+inline constexpr double kSkullPosZMM = 77.5;    // skull placement in head frame
+// Brain ellipsoid (fills the cranium cavity).
+inline constexpr double kBrainAxMM = 60.0;
+inline constexpr double kBrainByMM = 90.0;
+inline constexpr double kBrainCzMM = 65.0;
+inline constexpr double kBrainPosZMM = 87.5;    // brain placement in head frame
+// Materials (NIST). Brain matches the cylinder reference.
+inline constexpr const char* kScalpMaterial = "G4_TISSUE_SOFT_ICRP";
+inline constexpr const char* kSkullMaterial = "G4_BONE_CORTICAL_ICRP";
+inline constexpr const char* kBrainMaterial = "G4_BRAIN_ICRP";
+
 // Physics
 inline constexpr const char* kPhysicsList = "QGSP_BIC_HP";
 

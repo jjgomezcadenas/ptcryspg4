@@ -51,8 +51,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
     y = G4RandGauss::shoot(0., fSigmaXY);
   }
 
-  // Start just upstream of the phantom entrance face, on the -z side.
-  const G4double z0 = -fDet->PhantomHalfLength() - 1. * mm;
+  // Start just upstream of the phantom entrance face, on the -z side. The
+  // half-extent is geometry-aware (cylinder half-length, or the head's L-R
+  // semi-axis), so the pencil always begins in air ahead of the phantom.
+  const G4double z0 = -fDet->BeamAxisHalfExtent() - 1. * mm;
   fGun->SetParticlePosition({x, y, z0});
   fGun->GeneratePrimaryVertex(event);
 }
