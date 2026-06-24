@@ -20,6 +20,10 @@ import pandas as pd
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "..", "common"))
 from isotopes import ISOTOPES  # noqa: E402
+from phantom_material import MATERIALS, write_material_csv  # noqa: E402
+
+# Annihilation energy [keV] -- the energy the downstream mu/attenuation is for.
+ANNIHILATION_keV = 511.0
 
 # Files copied verbatim from data/ into the snapshot.
 DATA_FILES = [
@@ -79,7 +83,9 @@ Parodi 2008 Table 2 comparison: about 2.2x overall.
 
 ## Files
 emitters.csv, run_meta.csv, sampling_budget_{{inroom,offline}}.csv (+ _meta),
-sobp_layers.csv, figures/. Columns in SCHEMA.md, isotope codes in isotopes.csv.
+sobp_layers.csv, phantom_material_*.csv (+ _meta: composition, density, mu at
+511 keV for gamma transport + attenuation correction), figures/. Columns in
+SCHEMA.md, isotope codes in isotopes.csv.
 """
     with open(path, "w") as f:
         f.write(text)
@@ -110,7 +116,18 @@ def main():
     emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
     write_readme(os.path.join(out, "README.md"), args.name, meta, emit)
 
-    n = len(DATA_FILES) + len(FIGURES) + 3
+    # Phantom medium for 511 keV gamma transport + reconstruction attenuation
+    # correction: composition + mu, derived from the run's phantom_material.
+    n_mat = 0
+    mat_name = str(meta["phantom_material"])
+    if mat_name in MATERIALS:
+        write_material_csv(MATERIALS[mat_name], ANNIHILATION_keV, out)
+        n_mat = 2
+    else:
+        print(f"WARNING: phantom_material '{mat_name}' not in the registry; "
+              f"no phantom_material_*.csv written (add it to common/phantom_material.py).")
+
+    n = len(DATA_FILES) + len(FIGURES) + 3 + n_mat
     print(f"snapshot '{args.name}': wrote {n} files -> {out}")
 
 
