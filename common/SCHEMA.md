@@ -6,7 +6,8 @@ C++, `common/isotopes.py` for Python). If code and this file disagree, the code 
 wrong. The detector stage (Stage B) is a separate downstream repo; each frozen run
 carries a short copy of these formats.
 
-Spec reference: `latex/01_user_guide.tex` (§2 Stage A, §3 handoff, §4 Stage B).
+Spec reference: the LaTeX docs in `latex/` — `01_user_guide` for the pipeline
+overview, `04_source_reference` for the annotated, canonical form of this file.
 
 **File format: CSV.** Files are flat, columnar **CSV** (one row per record, one
 scalar per column, header row, units as `_mm`/`_keV`/`_ns` column suffixes). Each
