@@ -37,15 +37,28 @@ FIGURES = ["sobp_g4.png", "transport_validation.png", "activity.png"]
 
 
 def write_isotopes_csv(path):
-    rows = ["isotope_id,name,half_life_s,endpoint_MeV"]
+    rows = ["isotope_id,name,half_life_s,endpoint_MeV,prompt_gamma"]
     for iid in sorted(ISOTOPES):
         iso = ISOTOPES[iid]
-        rows.append(f"{iid},{iso.name},{iso.half_life_s:g},{iso.endpoint_MeV:g}")
+        rows.append(f"{iid},{iso.name},{iso.half_life_s:g},{iso.endpoint_MeV:g},"
+                    f"{int(iso.prompt_gamma)}")
     with open(path, "w") as f:
         f.write("\n".join(rows) + "\n")
 
 
-def write_readme(path, name, meta, emit):
+def read_budget_legend(data_dir):
+    """(scenario, t_irr, t_del, t_meas) for each sampling_budget_*_meta.csv."""
+    legend = []
+    for fn in DATA_FILES:
+        if not fn.startswith("sampling_budget_") or not fn.endswith("_meta.csv"):
+            continue
+        bm = pd.read_csv(os.path.join(data_dir, fn)).iloc[0]
+        legend.append((str(bm["scenario"]), float(bm["t_irr_s"]),
+                       float(bm["t_del_s"]), float(bm["t_meas_s"])))
+    return legend
+
+
+def write_readme(path, name, meta, emit, legend):
     """Scenario README, numbers filled in from run_meta.csv and emitters.csv."""
     m = meta
     t_dose = float(m["target_dose_Gy"])
@@ -57,15 +70,22 @@ def write_readme(path, name, meta, emit):
 
     diam = float(m["phantom_diameter_mm"]) / 10.0
     length = float(m["phantom_length_mm"]) / 10.0
+    half_z = float(m["phantom_length_mm"]) / 2.0
     box_diam = 2 * float(m["target_radius_mm"]) / 10.0
     box_len = (float(m["target_dist_depth_mm"]) - float(m["target_prox_depth_mm"])) / 10.0
     box_lo = float(m["target_prox_depth_mm"]) / 10.0
     box_hi = float(m["target_dist_depth_mm"]) / 10.0
+    z_lo = float(m["target_prox_depth_mm"]) - half_z
+    z_hi = float(m["target_dist_depth_mm"]) - half_z
+
+    legrows = "\n".join(
+        f"- `{s}`: t_irr={ti:g}, t_del={td:g}, t_meas={tm:g} s" for s, ti, td, tm in legend)
 
     text = f"""# {name}
 
 Proton SOBP on {m['phantom_material']}, {int(m['n_protons']):g} protons, scaled to
-1 Gy in the target box.
+1 Gy in the target box. Detector-independent positron-annihilation source for a
+downstream PET simulation.
 
 ## Setup
 - Phantom: {m['phantom_material']} cylinder, {diam:g} cm diameter x {length:g} cm
@@ -74,6 +94,12 @@ Proton SOBP on {m['phantom_material']}, {int(m['n_protons']):g} protons, scaled 
 - Protons: {int(m['n_protons']):g}
 - Geant4 {m['geant4_version']}, {m['physics_list']}, seed {int(m['random_seed'])}
 
+## Coordinate frame
+Phantom centred at the origin, axis along +z (the beam direction). It spans
+z in [{-half_z:g}, {half_z:g}] mm and r <= {float(m['phantom_diameter_mm'])/2:g} mm; the beam enters at
+z = {-half_z:g} mm. Depth from the entrance maps as z = depth - {half_z:g} mm, so the
+target box sits at z in [{z_lo:g}, {z_hi:g}] mm. emitters.csv positions are in this frame.
+
 ## Normalization
 - Target dose: {t_dose:.2e} Gy for {int(m['n_protons']):g} protons
 - Np(1 Gy): {float(m['Np_per_Gy']):.3e} protons
@@ -81,6 +107,23 @@ Proton SOBP on {m['phantom_material']}, {int(m['n_protons']):g} protons, scaled 
 ## Yields per 1 Gy
 {ystr} (total {total:.2e})
 Parodi 2008 Table 2 comparison: about 2.2x overall.
+
+## Timing scenarios (budgets)
+The acquisition timing is the only difference between budgets; the spatial
+source (emitters.csv) is shared. N_expected is for 1 Gy.
+{legrows}
+
+## How to use this source
+1. Pick a timing budget; read N_expected per isotope from sampling_budget_<s>.csv.
+2. For each isotope j, draw M_j ~ Poisson(N_expected_j) annihilation points by
+   sampling (with replacement) the matching isotope_id rows of emitters.csv
+   (anh_x/y/z_mm). Seed reproducibly (e.g. master_seed + realization) so every
+   detector config sees the identical source.
+3. Emit a back-to-back 511 keV photon pair (isotropic, with the chosen
+   non-collinearity) from each sampled annihilation point.
+4. Transport the photons through the phantom defined by phantom_material_*.csv +
+   the geometry above; use the same medium for reconstruction attenuation
+   correction.
 
 ## Files
 emitters.csv, run_meta.csv, sampling_budget_{{inroom,fast,offline}}.csv (+ _meta),
@@ -115,7 +158,8 @@ def main():
 
     meta = pd.read_csv(os.path.join(args.data_dir, "run_meta.csv")).iloc[0]
     emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
-    write_readme(os.path.join(out, "README.md"), args.name, meta, emit)
+    legend = read_budget_legend(args.data_dir)
+    write_readme(os.path.join(out, "README.md"), args.name, meta, emit, legend)
 
     # Phantom medium for 511 keV gamma transport + reconstruction attenuation
     # correction: composition + mu, derived from the run's phantom_material.

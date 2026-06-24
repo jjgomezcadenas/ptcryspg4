@@ -73,19 +73,34 @@ that would escape the phantom into air are killed at the boundary, so their
 | column | type | meaning |
 |--------|------|---------|
 | `n_protons` | int | primaries run |
-| `beam_energy_MeV` | float | primary proton kinetic energy |
+| `beam_energy_MeV` | float | nominal proton energy; for a SOBP run this is the fallback single energy (real spectrum in `sobp_layers.csv`) |
 | `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
-| `phantom_material` | string | `"G4_PLEXIGLASS"` (PMMA) |
-| `phantom_diameter_mm`, `phantom_length_mm` | float | 200.0 baseline |
-| `phantom_mass_g` | float | scoring-volume mass (for dose) |
+| `phantom_material` | string | Geant4 NIST name, e.g. `"G4_BRAIN_ICRP"` |
+| `phantom_diameter_mm`, `phantom_length_mm` | float | phantom cylinder size (standard 160 × 160) |
+| `phantom_mass_g` | float | phantom mass (for dose) |
 | `edep_total_MeV` | float | total energy deposited in the phantom |
 | `dose_total_Gy` | float | whole-phantom dose for `n_protons` |
+| `target_dose_Gy` | float | dose in the target box for `n_protons` (normalization) |
+| `target_mass_g` | float | target-box mass |
+| `target_radius_mm` | float | target box (cylinder) radius |
+| `target_prox_depth_mm`, `target_dist_depth_mm` | float | target box faces, depth from the entrance |
+| `Np_per_Gy` | float | protons for 1 Gy (= `n_protons` / `target_dose_Gy`) |
 | `geant4_version` | string | e.g. `"11.4.1"` |
 | `physics_list` | string | e.g. `"QGSP_BIC_HP"` |
 | `random_seed` | int | master seed of the run |
 
-`Pj_per_proton` is derivable as per-isotope count / `n_protons`. Dose is
-whole-phantom; a Bragg-region "dose at target" definition is TBD (spec §2.5).
+`Pj_per_proton` is derivable as per-isotope count / `n_protons`. The absolute
+normalization scales production to a clinical dose via `target_dose_Gy`.
+
+### Coordinate frame
+
+All positions — `emitters.csv`, the phantom, the target box — share one frame:
+the phantom is a cylinder **centred at the origin** with its axis along **+z**,
+the beam direction. It spans `z ∈ [−L/2, +L/2]` and `r = √(x²+y²) ∈ [0, R]`
+(L = `phantom_length_mm`, R = `phantom_diameter_mm`/2). The beam enters at the
+`z = −L/2` face; depth from the entrance is `d = z + L/2` (so the target-box
+depths map to `z = depth − L/2`). A consumer that places the phantom with its
+centre at the origin is co-registered with the `emitters.csv` source.
 
 **Medium / attenuation map.** The source is detector-independent, but **not
 medium-independent**: the downstream sim must propagate the 511 keV annihilation
