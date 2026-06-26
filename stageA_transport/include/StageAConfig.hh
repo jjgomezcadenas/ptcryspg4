@@ -33,7 +33,8 @@ inline constexpr double kTargetDistDepthMM = 105.0;  // distal depth (5 cm thick
 // posterior, z = superior-inferior). Selected by /stageA/phantom/geometry
 // mird_head; the cylinder above remains the default.
 inline constexpr const char* kGeometryCylinder = "cylinder";
-inline constexpr const char* kGeometryMirdHead = "mird_head";
+inline constexpr const char* kGeometryUniformHead = "uniform_head";  // 1 region
+inline constexpr const char* kGeometryMirdHead = "mird_head";        // 3 regions
 inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
 
 // Head-local frame origin = skull/scalp centre; the brain sits +kBrainOffsetZMM

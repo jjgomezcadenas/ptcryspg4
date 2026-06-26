@@ -102,14 +102,14 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
            << G4endl;
     return;
   }
-  f << "n_protons,beam_energy_MeV,beam_sigma_mm,phantom_material,"
+  f << "n_protons,beam_energy_MeV,beam_sigma_mm,geometry,phantom_material,"
        "phantom_diameter_mm,phantom_length_mm,phantom_mass_g,edep_total_MeV,"
        "dose_total_Gy,target_dose_Gy,target_mass_g,target_radius_mm,"
        "target_prox_depth_mm,target_dist_depth_mm,Np_per_Gy,"
        "geant4_version,physics_list,random_seed\n";
   f << std::setprecision(7) << nProtons << ',' << stageA::kBeamEnergyMeV << ','
-    << stageA::kBeamSigmaMM << ',' << fDet->PhantomLabel() << ','
-    << bboxDiam << ',' << bboxLen << ','
+    << stageA::kBeamSigmaMM << ',' << fDet->Geometry() << ','
+    << fDet->PhantomLabel() << ',' << bboxDiam << ',' << bboxLen << ','
     << (mass / g) << ',' << edepMeV << ',' << doseGy << ',' << tDoseGy << ','
     << (tMass / g) << ',' << (fDet->TargetRadius() / mm) << ','
     << (tProxDepth / mm) << ',' << (tDistDepth / mm) << ',' << npPerGy << ','

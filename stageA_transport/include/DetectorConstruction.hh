@@ -78,7 +78,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   // Build the homogeneous cylinder (default) or the MIRD head into worldLV; each
   // sets fPhantomLV (the scoring volume) and fBeamHalfExtent.
   void BuildCylinder(G4LogicalVolume* worldLV);
-  void BuildMirdHead(G4LogicalVolume* worldLV);
+  void BuildUniformHead(G4LogicalVolume* worldLV);  // 1-region brain ellipsoid
+  void BuildMirdHead(G4LogicalVolume* worldLV);     // 3-region scalp/skull/brain
 
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)

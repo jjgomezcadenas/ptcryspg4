@@ -139,7 +139,8 @@ column & type & meaning \\
 \file{beam\_energy\_MeV} & float & nominal proton energy; for a SOBP run, the \\
  & & fallback single energy (real spectrum in \file{sobp\_layers.csv}) \\
 \file{beam\_sigma\_mm} & float & Gaussian beam $\sigma$ at entrance (pencil mode) \\
-\file{phantom\_material} & string & Geant4 NIST name, e.g.\ \file{G4\_BRAIN\_ICRP} \\
+\file{geometry} & string & phantom case: \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \\
+\file{phantom\_material} & string & single material, or \file{multi} (medium per-region in \file{phantom\_regions.csv}) \\
 \file{phantom\_diameter\_mm}, \file{phantom\_length\_mm} & float & phantom cylinder size \\
 \file{phantom\_mass\_g} & float & phantom mass \\
 \file{edep\_total\_MeV} & float & total energy deposited in the phantom \\

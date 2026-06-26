@@ -26,7 +26,8 @@ from matplotlib.patches import Ellipse  # noqa: E402
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 NAMES = {0: "O15", 1: "C11", 2: "N13", 3: "C10", 4: "O14"}
-REG_COLOURS = {"brain": "#9aa8e0", "skull": "#e8e8e0", "scalp": "#d9b38c"}
+REG_COLOURS = {"brain": "#9aa8e0", "skull": "#e8e8e0", "scalp": "#d9b38c",
+               "head": "#9aa8e0"}  # uniform-head single region
 
 
 def classify(X, Y, Z, regions):

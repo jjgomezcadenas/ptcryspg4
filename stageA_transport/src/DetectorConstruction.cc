@@ -21,6 +21,20 @@
 #include "G4PSEnergyDeposit.hh"
 #include "G4PhysicalConstants.hh"
 
+namespace {
+// Map a head-local ellipsoid (centre, semi-axes) to a world-frame PhantomRegion.
+// The lateral placement world = (z_loc - kBrainOffsetZ, y_loc, -x_loc) is a 90°
+// rotation, so axis-aligned stays axis-aligned: world centre = (cz - off, cy,
+// -cx), world semi-axes = (sz, sy, sx). Euler angles 0.
+PhantomRegion HeadRegion(const char* name, const char* mat, G4double cx,
+                         G4double cy, G4double cz, G4double sx, G4double sy,
+                         G4double sz) {
+  const G4double off = stageA::kBrainOffsetZMM;
+  return PhantomRegion{name, mat, "ellipsoid", sz, sy, sx,
+                       cz - off, cy, (cx == 0. ? 0. : -cx), 0., 0., 0.};
+}
+}  // namespace
+
 DetectorConstruction::DetectorConstruction()
     : fMaterialName(stageA::kPhantomMaterial),
       fGeometry(stageA::kDefaultGeometry),
@@ -36,7 +50,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   auto* nist = G4NistManager::Instance();
   G4Material* air = nist->FindOrBuildMaterial("G4_AIR");
 
-  const bool head = (fGeometry == stageA::kGeometryMirdHead);
+  const bool head = (fGeometry == stageA::kGeometryMirdHead ||
+                     fGeometry == stageA::kGeometryUniformHead);
 
   // --- world: an air box sized to contain whichever geometry, with a margin.
   // The world is the top volume; tracks die when they leave it.
@@ -57,8 +72,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   auto* worldPV = new G4PVPlacement(nullptr, {}, worldLV, "World",
                                     nullptr, false, 0, true);
 
-  if (head)
+  if (fGeometry == stageA::kGeometryMirdHead)
     BuildMirdHead(worldLV);
+  else if (fGeometry == stageA::kGeometryUniformHead)
+    BuildUniformHead(worldLV);
   else
     BuildCylinder(worldLV);
 
@@ -128,25 +145,39 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
   fPhantomLV = headLV;  // scoring volume = whole head (GetMass includes daughters)
   fBeamHalfExtent = kScalpAxMM * mm;  // L-R semi-axis, now along +z
 
-  // Medium regions in the WORLD frame (priority-ordered: brain carves the skull
-  // shell, skull carves the scalp). The lateral placement world =
-  // (z_loc - kBrainOffsetZ, y_loc, -x_loc) is a 90° rotation, so each local
-  // axis-aligned ellipsoid stays axis-aligned: world centre = (cz - off, cy,
-  // -cx), world semi-axes = (sz, sy, sx). Helper does that mapping.
-  auto toWorld = [](const char* name, const char* mat, double cx, double cy,
-                    double cz, double sx, double sy, double sz) {
-    const double off = kBrainOffsetZMM;
-    return PhantomRegion{name, mat, "ellipsoid", sz, sy, sx,
-                         cz - off, cy, (cx == 0. ? 0. : -cx), 0., 0., 0.};
-  };
+  // Medium regions (world frame), priority-ordered: brain carves the skull
+  // shell, skull carves the scalp.
   fRegions = {
-      toWorld("brain", kBrainMaterial, 0., 0., kBrainOffsetZMM, kBrainAxMM,
-              kBrainByMM, kBrainCzMM),
-      toWorld("skull", kSkullMaterial, 0., 0., 0., kSkullOutAxMM, kSkullOutByMM,
-              kSkullOutCzMM),
-      toWorld("scalp", kScalpMaterial, 0., 0., 0., kScalpAxMM, kScalpByMM,
-              kScalpCzMM),
+      HeadRegion("brain", kBrainMaterial, 0., 0., kBrainOffsetZMM, kBrainAxMM,
+                 kBrainByMM, kBrainCzMM),
+      HeadRegion("skull", kSkullMaterial, 0., 0., 0., kSkullOutAxMM,
+                 kSkullOutByMM, kSkullOutCzMM),
+      HeadRegion("scalp", kScalpMaterial, 0., 0., 0., kScalpAxMM, kScalpByMM,
+                 kScalpCzMM),
   };
+}
+
+// Uniform head (Phase 2): the SAME outer envelope as the MIRD head (the scalp
+// ellipsoid) but a single homogeneous material (brain). Same shape as the
+// 3-region head, so the two cases isolate the effect of the skull/scalp on the
+// proton range and the isotope mix. One medium region.
+void DetectorConstruction::BuildUniformHead(G4LogicalVolume* worldLV) {
+  using namespace stageA;
+  auto* nist = G4NistManager::Instance();
+  G4Material* brainMat = nist->FindOrBuildMaterial(kBrainMaterial);
+
+  auto* headSolid = new G4Ellipsoid("Head", kScalpAxMM * mm, kScalpByMM * mm,
+                                    kScalpCzMM * mm);
+  fPhantomLV = new G4LogicalVolume(headSolid, brainMat, "Head");
+  fPhantomLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.6, 0.6, 0.9, 0.3)));
+
+  const G4Transform3D tf =
+      G4Translate3D(-kBrainOffsetZMM * mm, 0., 0.) * G4RotateY3D(90. * deg);
+  new G4PVPlacement(tf, fPhantomLV, "Head", worldLV, false, 0, true);
+  fBeamHalfExtent = kScalpAxMM * mm;
+
+  fRegions = {HeadRegion("head", kBrainMaterial, 0., 0., 0., kScalpAxMM,
+                         kScalpByMM, kScalpCzMM)};
 }
 
 void DetectorConstruction::ConstructSDandField() {
@@ -160,10 +191,10 @@ void DetectorConstruction::ConstructSDandField() {
 }
 
 G4String DetectorConstruction::PhantomLabel() const {
-  // What run_meta.csv records as "phantom_material": the NIST name for the
-  // cylinder, or a label for the heterogeneous head (per-region medium is Phase 2).
-  return (fGeometry == stageA::kGeometryMirdHead) ? G4String("MIRD_head")
-                                                  : fMaterialName;
+  // run_meta.csv "phantom_material": the single material when the phantom is one
+  // region (cylinder, uniform head), else "multi" (the medium is per-region in
+  // phantom_regions.csv). The case itself is the separate "geometry" column.
+  return (fRegions.size() == 1) ? fRegions[0].material : G4String("multi");
 }
 
 G4double DetectorConstruction::PhantomMass() const {

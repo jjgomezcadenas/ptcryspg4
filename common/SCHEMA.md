@@ -76,8 +76,9 @@ that would escape the phantom into air are killed at the boundary, so their
 | `n_protons` | int | primaries run |
 | `beam_energy_MeV` | float | nominal proton energy; for a SOBP run this is the fallback single energy (real spectrum in `sobp_layers.csv`) |
 | `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
-| `phantom_material` | string | Geant4 NIST name, e.g. `"G4_BRAIN_ICRP"` |
-| `phantom_diameter_mm`, `phantom_length_mm` | float | phantom cylinder size (standard 160 × 160) |
+| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` |
+| `phantom_material` | string | single material (cylinder, uniform head) or `"multi"` (the medium is per-region in `phantom_regions.csv`) |
+| `phantom_diameter_mm`, `phantom_length_mm` | float | overall bounding box (transverse, beam); detail in `phantom_regions.csv` |
 | `phantom_mass_g` | float | phantom mass (for dose) |
 | `edep_total_MeV` | float | total energy deposited in the phantom |
 | `dose_total_Gy` | float | whole-phantom dose for `n_protons` |
