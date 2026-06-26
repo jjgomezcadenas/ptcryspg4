@@ -38,6 +38,7 @@ void RunAction::EndOfRunAction(const G4Run* run) {
 
   WriteEmittersCsv(stRun);
   WriteMetaCsv(stRun);
+  WriteRegionsCsv();
   WriteDepthDoseCsv(stRun);
   PrintSummary(stRun);
 }
@@ -79,6 +80,17 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   const G4double tProxDepth = fDet->TargetProxZ() + fDet->PhantomHalfLength();
   const G4double tDistDepth = fDet->TargetDistZ() + fDet->PhantomHalfLength();
 
+  // Overall bounding box from the medium regions (a summary; the detailed
+  // geometry is in phantom_regions.csv). Diameter = transverse, length = beam.
+  G4double hx = 0., hy = 0., hz = 0.;
+  for (const auto& r : fDet->Regions()) {
+    hx = std::max(hx, std::abs(r.cx) + r.a);
+    hy = std::max(hy, std::abs(r.cy) + r.b);
+    hz = std::max(hz, std::abs(r.cz) + r.c);
+  }
+  const G4double bboxDiam = 2. * std::max(hx, hy);
+  const G4double bboxLen = 2. * hz;
+
   const int major = G4VERSION_NUMBER / 100;
   const int minor = (G4VERSION_NUMBER / 10) % 10;
   const int patch = G4VERSION_NUMBER % 10;
@@ -97,13 +109,37 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
        "geant4_version,physics_list,random_seed\n";
   f << std::setprecision(7) << nProtons << ',' << stageA::kBeamEnergyMeV << ','
     << stageA::kBeamSigmaMM << ',' << fDet->PhantomLabel() << ','
-    << stageA::kPhantomDiameterMM << ',' << stageA::kPhantomLengthMM << ','
+    << bboxDiam << ',' << bboxLen << ','
     << (mass / g) << ',' << edepMeV << ',' << doseGy << ',' << tDoseGy << ','
     << (tMass / g) << ',' << (fDet->TargetRadius() / mm) << ','
     << (tProxDepth / mm) << ',' << (tDistDepth / mm) << ',' << npPerGy << ','
     << major << '.' << minor << '.' << patch << ',' << stageA::kPhysicsList
     << ',' << G4Random::getTheSeed() << '\n';
   G4cout << "[Stage A] wrote run metadata -> " << path << G4endl;
+}
+
+// The medium as a priority-ordered list of world-frame regions (Phase 2): one
+// row per region, the first containing a point owns it. Ellipsoids are
+// axis-aligned (Euler angles 0). Lets a downstream sim rebuild the phantom and
+// assign mu(511 keV) per region. Written for both geometries (cylinder = 1 row).
+void RunAction::WriteRegionsCsv() const {
+  const std::string path = fOutputDir + "/phantom_regions.csv";
+  std::ofstream f(path);
+  if (!f) {
+    G4cerr << "[Stage A] ERROR: cannot open " << path << " for writing." << G4endl;
+    return;
+  }
+  f << "region,priority,material,solid,a_mm,b_mm,c_mm,cx_mm,cy_mm,cz_mm,"
+       "euler_x_deg,euler_y_deg,euler_z_deg\n";
+  f << std::setprecision(7);
+  int priority = 0;
+  for (const auto& r : fDet->Regions()) {
+    f << r.name << ',' << priority++ << ',' << r.material << ',' << r.solid << ','
+      << r.a << ',' << r.b << ',' << r.c << ',' << r.cx << ',' << r.cy << ','
+      << r.cz << ',' << r.ex << ',' << r.ey << ',' << r.ez << '\n';
+  }
+  G4cout << "[Stage A] wrote " << fDet->Regions().size()
+         << " phantom region(s) -> " << path << G4endl;
 }
 
 // The Bragg profile: energy deposited per 1 mm z-bin, total and primary-only,

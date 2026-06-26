@@ -75,6 +75,10 @@ void DetectorConstruction::BuildCylinder(G4LogicalVolume* worldLV) {
   fPhantomLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.6, 0.6, 0.9, 0.3)));
   new G4PVPlacement(nullptr, {}, fPhantomLV, "Phantom", worldLV, false, 0, true);
   fBeamHalfExtent = fHalfZ;
+
+  // One homogeneous region (world frame): a cylinder centred at the origin.
+  fRegions = {{"phantom", fMaterialName, "cylinder", fRadius / mm, fRadius / mm,
+               fHalfZ / mm, 0., 0., 0., 0., 0., 0.}};
 }
 
 // Heterogeneous head (Phase 1): a soft-tissue scalp ellipsoid ⊃ bone skull shell
@@ -123,6 +127,26 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
 
   fPhantomLV = headLV;  // scoring volume = whole head (GetMass includes daughters)
   fBeamHalfExtent = kScalpAxMM * mm;  // L-R semi-axis, now along +z
+
+  // Medium regions in the WORLD frame (priority-ordered: brain carves the skull
+  // shell, skull carves the scalp). The lateral placement world =
+  // (z_loc - kBrainOffsetZ, y_loc, -x_loc) is a 90° rotation, so each local
+  // axis-aligned ellipsoid stays axis-aligned: world centre = (cz - off, cy,
+  // -cx), world semi-axes = (sz, sy, sx). Helper does that mapping.
+  auto toWorld = [](const char* name, const char* mat, double cx, double cy,
+                    double cz, double sx, double sy, double sz) {
+    const double off = kBrainOffsetZMM;
+    return PhantomRegion{name, mat, "ellipsoid", sz, sy, sx,
+                         cz - off, cy, (cx == 0. ? 0. : -cx), 0., 0., 0.};
+  };
+  fRegions = {
+      toWorld("brain", kBrainMaterial, 0., 0., kBrainOffsetZMM, kBrainAxMM,
+              kBrainByMM, kBrainCzMM),
+      toWorld("skull", kSkullMaterial, 0., 0., 0., kSkullOutAxMM, kSkullOutByMM,
+              kSkullOutCzMM),
+      toWorld("scalp", kScalpMaterial, 0., 0., 0., kScalpAxMM, kScalpByMM,
+              kScalpCzMM),
+  };
 }
 
 void DetectorConstruction::ConstructSDandField() {

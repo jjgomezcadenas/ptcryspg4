@@ -117,6 +117,22 @@ MATERIALS: dict[str, Material] = {
         },
         note="PMMA; carbon-rich (11C-dominated) cross-check material.",
     ),
+    # Cortical bone -- the MIRD-head skull (Phase 2). Dense, Ca/P-rich.
+    "G4_BONE_CORTICAL_ICRP": Material(
+        name="G4_BONE_CORTICAL_ICRP", density_g_cm3=1.920, mean_excitation_eV=110.0,
+        composition={
+            "H":  Element(1,  1.008,  0.034),
+            "C":  Element(6,  12.011, 0.155),
+            "N":  Element(7,  14.007, 0.042),
+            "O":  Element(8,  15.999, 0.435),
+            "Na": Element(11, 22.990, 0.001),
+            "Mg": Element(12, 24.305, 0.002),
+            "P":  Element(15, 30.974, 0.103),
+            "S":  Element(16, 32.066, 0.003),
+            "Ca": Element(20, 40.078, 0.225),
+        },
+        note="ICRP cortical bone; the MIRD-head skull.",
+    ),
 }
 
 DEFAULT_MATERIAL = "G4_BRAIN_ICRP"

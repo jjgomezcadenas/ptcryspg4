@@ -67,13 +67,31 @@ the spatial source (emitters.csv) is shared by all of them.
 The proton energy layers (energy and weight) that make up the spread-out Bragg
 peak. Input to the run; kept so the field is fully documented.
 
-## phantom_material_<name>.csv — the medium for gamma transport
+## phantom_regions.csv — the medium as priority-ordered regions
 The source is detector-independent but not medium-independent: a PET sim must
 propagate the 511 keV annihilation photons through the phantom and needs the
-attenuation coefficient for reconstruction. This file is the phantom's elemental
-composition (one row per element: element, Z, A_g_mol, mass_fraction).
-    phantom_material_<name>_meta.csv  density_g_cm3, mean_excitation_eV,
+material at each point (for attenuation + scatter, and for reconstruction
+attenuation correction). This file is the medium: one row per region, in the
+SAME world frame as emitters.csv.
+    region        name (e.g. brain, skull, scalp; or phantom for the cylinder)
+    priority      lower = checked first
+    material      NIST name -> see phantom_material_<material>.csv
+    solid         ellipsoid | cylinder
+    a_mm b_mm c_mm  ellipsoid: semi-axes along x,y,z; cylinder: radius,radius,half-length
+    cx_mm cy_mm cz_mm  region centre (world frame)
+    euler_x_deg euler_y_deg euler_z_deg  intrinsic X-Y-Z rotation; 0 = axis-aligned
+
+Regions are AXIS-ALIGNED in the world frame (Euler angles are 0 here). Material
+lookup: a point gets the material of the first (lowest-priority) region that
+contains it, else air. For an axis-aligned ellipsoid the containment test is
+    ((x-cx)/a)^2 + ((y-cy)/b)^2 + ((z-cz)/c)^2 <= 1.
+Brain-first ordering carves the skull shell, so no boolean solids are needed.
+
+## phantom_material_<material>.csv — composition + mu, one per region material
+The elemental composition of each material in phantom_regions.csv (one row per
+element: element, Z, A_g_mol, mass_fraction).
+    phantom_material_<material>_meta.csv  density_g_cm3, mean_excitation_eV,
         mu_rho_cm2_g and mu_cm_inv at energy_keV=511 (annihilation), mean_free_path_cm
-<name> is the run_meta.csv phantom_material, lower-cased (e.g. g4_brain_icrp).
-Valid only for this homogeneous phantom; a heterogeneous phantom would instead
-need a voxel attenuation map.
+<material> is the NIST name lower-cased (e.g. g4_brain_icrp, g4_bone_cortical_icrp).
+The phantom may be homogeneous (one region/material) or an analytic multi-region
+solid (e.g. the MIRD head); a voxelized phantom would instead need a voxel map.

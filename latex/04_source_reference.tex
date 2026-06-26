@@ -51,7 +51,7 @@ reference and provenance files:
   \item[\emph{how many}] the measured decays per isotope at a chosen acquisition
     timing (\file{sampling\_budget\_<scenario>.csv});
   \item[\emph{through what}] the phantom medium the \SI{511}{keV} photons
-    traverse (\file{phantom\_material\_<name>.csv}).
+    traverse (\file{phantom\_regions.csv} $+$ \file{phantom\_material\_*}).
 \end{description}
 The consumer combines these (Sec.~\ref{sec:use}). The split matters: the spatial
 source is expensive and computed once; the number depends on dose and timing and
@@ -190,22 +190,37 @@ $\tdel=\SI{120}{s}$), \file{fast} ($\tdel=\SI{60}{s}$), and \file{offline}
 ($\tdel=\SI{300}{s}$, $\tmeas=\SI{1800}{s}$). Shorter delay keeps more
 short-lived $^{15}$O.
 
-\subsection{\file{phantom\_material\_<name>.csv} --- the medium}
+\subsection{\file{phantom\_regions.csv} $+$ \file{phantom\_material\_*} --- the medium}
 
 The source is detector-independent but \textbf{not} medium-independent: a PET
 simulation must propagate the \SI{511}{keV} annihilation photons through the
-phantom and needs the attenuation coefficient $\mu$ for reconstruction
-attenuation correction. \file{<name>} is the \file{phantom\_material},
-lower-cased (e.g.\ \file{g4\_brain\_icrp}). The composition file has one row per
-element (\file{element}, \file{Z}, \file{A\_g\_mol}, \file{mass\_fraction}); the
-companion \file{*\_meta.csv} carries \file{density\_g\_cm3},
-\file{mean\_excitation\_eV}, $\mu/\rho$ (\file{mu\_rho\_cm2\_g}) and $\mu$
-(\file{mu\_cm\_inv}) at \file{energy\_keV}$=511$, and \file{mean\_free\_path\_cm}.
-Compositions are the authoritative Geant4 NIST definitions; $\mu$ is
-Compton/Klein--Nishina (coherent $+$ photoelectric, $\sim$1--\SI{2}{\percent} at
-\SI{511}{keV}, are not included). This is valid only for the \emph{homogeneous}
-phantom of the standard scenarios; a heterogeneous (voxelized) phantom would
-instead require a voxel attenuation map, which is deferred.
+phantom and needs the material at each point (for attenuation $+$ scatter, and
+$\mu$ for reconstruction attenuation correction). The medium is two files:
+
+\textbf{\file{phantom\_regions.csv}} --- \emph{where} each material is: one row
+per region, in the same world frame as \file{emitters.csv}, with
+\file{region}, \file{priority}, \file{material}, \file{solid}
+(\file{ellipsoid}/\file{cylinder}), semi-axes \file{a\_mm,b\_mm,c\_mm} (cylinder:
+$r,r,\text{half-length}$), centre \file{cx\_mm,cy\_mm,cz\_mm}, and Euler angles
+\file{euler\_\{x,y,z\}\_deg}. The regions are \textbf{axis-aligned} (Euler angles
+$0$); a point takes the material of the first (lowest-\file{priority}) region
+containing it, else air, with ellipsoid membership
+$((x-c_x)/a)^2+((y-c_y)/b)^2+((z-c_z)/c)^2\le 1$. Brain-first ordering carves the
+skull shell, so no boolean solids are needed. The cylinder writes one row; the
+MIRD head writes brain/skull/scalp.
+
+\textbf{\file{phantom\_material\_<material>.csv}} --- \emph{what} each material
+is: one per distinct material in \file{phantom\_regions.csv}. The composition
+file has one row per element (\file{element}, \file{Z}, \file{A\_g\_mol},
+\file{mass\_fraction}); the companion \file{*\_meta.csv} carries
+\file{density\_g\_cm3}, \file{mean\_excitation\_eV}, $\mu/\rho$
+(\file{mu\_rho\_cm2\_g}) and $\mu$ (\file{mu\_cm\_inv}) at \file{energy\_keV}$=511$,
+and \file{mean\_free\_path\_cm}. Compositions are the authoritative Geant4 NIST
+definitions; $\mu$ is Compton/Klein--Nishina (coherent $+$ photoelectric,
+$\sim$1--\SI{2}{\percent} at \SI{511}{keV}, are not included). This covers
+homogeneous (one region) and analytic multi-region (e.g.\ the MIRD head)
+phantoms; a fully \emph{voxelized} patient would instead need a voxel map and is
+deferred.
 
 \subsection{Reference and figures}
 
@@ -234,8 +249,9 @@ The scenario gives the source; the detector study realizes it. The recipe:
   \item From each sampled point, emit a back-to-back \SI{511}{keV} photon pair
     (isotropic direction, with the chosen non-collinearity blur).
   \item Transport the photons through the phantom defined by
-    \file{phantom\_material\_<name>.csv} and the geometry of Sec.~\ref{sec:frame};
-    use the same medium for reconstruction attenuation correction.
+    \file{phantom\_regions.csv} (region $\to$ material at each point) and
+    \file{phantom\_material\_*} (its $\mu$); use the same medium for
+    reconstruction attenuation correction.
 \end{enumerate}
 All randomness (the Poisson draw, the emission directions) lives in the consumer;
 the scenario itself is deterministic and seed-free, so the source is reproducible
