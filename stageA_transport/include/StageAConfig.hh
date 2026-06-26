@@ -26,6 +26,41 @@ inline constexpr double kTargetRadiusMM = 30.0;      // Ø6 cm
 inline constexpr double kTargetProxDepthMM = 55.0;   // proximal depth
 inline constexpr double kTargetDistDepthMM = 105.0;  // distal depth (5 cm thick)
 
+// --- MIRD-head variant (Phase 1) ------------------------------------------
+// A heterogeneous stylized head: brain inside a skull shell inside a soft-tissue
+// outer head, replicated from the Geant4 advanced/human_phantom MIRD model.
+// Semi-axes [mm], in the head-local frame (x = left-right, y = anterior-
+// posterior, z = superior-inferior). Selected by /stageA/phantom/geometry
+// mird_head; the cylinder above remains the default.
+inline constexpr const char* kGeometryCylinder = "cylinder";
+inline constexpr const char* kGeometryMirdHead = "mird_head";
+inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
+
+// Head-local frame origin = skull/scalp centre; the brain sits +kBrainOffsetZMM
+// toward the crown (the MIRD cranium cavity offset). The face/neck of the full
+// MIRD head is dropped: the lateral cranial field never traverses it, so the
+// outer head is a single soft-tissue scalp ellipsoid enclosing the skull.
+// Scalp = skull-outer semi-axes + ~4 mm.
+inline constexpr double kScalpAxMM = 72.0;
+inline constexpr double kScalpByMM = 102.0;
+inline constexpr double kScalpCzMM = 87.0;
+// Skull cranium shell = outer ellipsoid minus inner cavity (offset by the brain).
+inline constexpr double kSkullOutAxMM = 68.0;
+inline constexpr double kSkullOutByMM = 98.0;
+inline constexpr double kSkullOutCzMM = 83.0;
+inline constexpr double kSkullInAxMM = 60.0;
+inline constexpr double kSkullInByMM = 90.0;
+inline constexpr double kSkullInCzMM = 65.0;
+// Brain ellipsoid (fills the cranium cavity), offset from the skull centre.
+inline constexpr double kBrainAxMM = 60.0;
+inline constexpr double kBrainByMM = 90.0;
+inline constexpr double kBrainCzMM = 65.0;
+inline constexpr double kBrainOffsetZMM = 10.0;  // brain centre vs skull centre
+// Materials (NIST). Brain matches the cylinder reference.
+inline constexpr const char* kScalpMaterial = "G4_TISSUE_SOFT_ICRP";
+inline constexpr const char* kSkullMaterial = "G4_BONE_CORTICAL_ICRP";
+inline constexpr const char* kBrainMaterial = "G4_BRAIN_ICRP";
+
 // Physics
 inline constexpr const char* kPhysicsList = "QGSP_BIC_HP";
 

@@ -23,6 +23,13 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* det) : fDet(det) {
   // Geometry is constructed at /run/initialize, so only allow this beforehand.
   fMatCmd->AvailableForStates(G4State_PreInit);
 
+  fGeomCmd = new G4UIcmdWithAString("/stageA/phantom/geometry", this);
+  fGeomCmd->SetGuidance("Phantom geometry: 'cylinder' (default, homogeneous) or "
+                        "'mird_head' (heterogeneous scalp/skull/brain).");
+  fGeomCmd->SetParameterName("name", false);
+  fGeomCmd->SetCandidates("cylinder mird_head");
+  fGeomCmd->AvailableForStates(G4State_PreInit);
+
   // --- target box (dose-normalization scoring region) -----------------------
   fDirTarget = new G4UIdirectory("/stageA/target/");
   fDirTarget->SetGuidance("Target (tumour) box for dose normalization.");
@@ -51,6 +58,7 @@ DetectorMessenger::~DetectorMessenger() {
   delete fTProxCmd;
   delete fTRadiusCmd;
   delete fDirTarget;
+  delete fGeomCmd;
   delete fMatCmd;
   delete fDirPhantom;
   delete fDirStageA;
@@ -59,6 +67,8 @@ DetectorMessenger::~DetectorMessenger() {
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value) {
   if (command == fMatCmd) {
     fDet->SetMaterialName(value);
+  } else if (command == fGeomCmd) {
+    fDet->SetGeometry(value);
   } else if (command == fTRadiusCmd) {
     fDet->SetTargetRadius(fTRadiusCmd->GetNewDoubleValue(value));
   } else if (command == fTProxCmd) {

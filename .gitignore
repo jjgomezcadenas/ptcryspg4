@@ -34,3 +34,6 @@ venv/
 latex/*.pdf
 docs/*.pdf
 !docs/proton-therapy-ptet-doses-mc.pdf
+
+# clangd/editor caches
+.cache/

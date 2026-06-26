@@ -30,6 +30,7 @@ class DetectorMessenger : public G4UImessenger {
   G4UIdirectory* fDirPhantom = nullptr;   // "/stageA/phantom/"
   G4UIdirectory* fDirTarget = nullptr;    // "/stageA/target/"
   G4UIcmdWithAString* fMatCmd = nullptr;  // "/stageA/phantom/material"
+  G4UIcmdWithAString* fGeomCmd = nullptr;  // "/stageA/phantom/geometry"
   G4UIcmdWithADoubleAndUnit* fTRadiusCmd = nullptr;
   G4UIcmdWithADoubleAndUnit* fTProxCmd = nullptr;
   G4UIcmdWithADoubleAndUnit* fTDistCmd = nullptr;
