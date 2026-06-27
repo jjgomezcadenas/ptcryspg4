@@ -29,6 +29,9 @@ import sys
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
 
 FALLOFF_CM = 0.5  # excluded from the plateau: any SOBP must drop to zero here
 
@@ -68,7 +71,35 @@ def metrics(run_dir):
     r80_prox = crossing(depth, dose, 0.8 * plateau, 0.0, mid)
     return dict(geometry=str(m["geometry"]), plateau_Gy=plateau,
                 uniformity_pct=uniformity, prox=prox, dist=dist,
-                r80_distal=r80_distal, r80_prox=r80_prox)
+                r80_distal=r80_distal, r80_prox=r80_prox,
+                depth=depth, dose=dose)
+
+
+def plot(run_dir, r, out=None):
+    """Annotate the central-axis dose with the target band, plateau, R80, 80% level."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(r["depth"], r["dose"], color="C0", lw=1.5)
+    ax.axvspan(r["prox"], r["dist"], color="C2", alpha=0.15, label="target")
+    ax.axhline(r["plateau_Gy"], color="0.4", ls="--", lw=1,
+               label=f"plateau {r['plateau_Gy']:.2e} Gy ({r['uniformity_pct']:.1f}%)")
+    ax.axhline(0.8 * r["plateau_Gy"], color="C3", ls=":", lw=1, label="80% level")
+    if r["r80_distal"] is not None:
+        off = (r["r80_distal"] - r["dist"]) * 10.0
+        ax.axvline(r["r80_distal"], color="C3", lw=1.5)
+        ax.annotate(f"R80 = {r['r80_distal']:.2f} cm ({off:+.0f} mm)",
+                    xy=(r["r80_distal"], 0.8 * r["plateau_Gy"]),
+                    xytext=(6, 10), textcoords="offset points", color="C3")
+    ax.set(xlabel="depth from entrance [cm]", ylabel="dose_core [Gy]",
+           title=f"SOBP plateau — {r['geometry']}", xlim=(0, r['dist'] + 3),
+           ylim=(0, None))
+    ax.legend(loc="upper left", fontsize=9)
+    fig.tight_layout()
+    if out is None:
+        figdir = os.path.join(run_dir, "figures")
+        os.makedirs(figdir, exist_ok=True)
+        out = os.path.join(figdir, "sobp_plateau.png")
+    fig.savefig(out, dpi=130)
+    return out
 
 
 def main():
@@ -79,6 +110,8 @@ def main():
                     help="fail if plateau uniformity exceeds this %% (acceptance)")
     ap.add_argument("--r80-tol", type=float, default=None,
                     help="fail if |R80 - target distal edge| exceeds this mm")
+    ap.add_argument("--no-plot", action="store_true",
+                    help="skip the annotated figures/sobp_plateau.png")
     args = ap.parse_args()
 
     r = metrics(args.run_dir)
@@ -101,6 +134,9 @@ def main():
         print("  R80 (distal range)   : no distal 80% crossing found")
     if args.max_uniformity is not None and r["uniformity_pct"] > args.max_uniformity:
         fails.append(f"uniformity {r['uniformity_pct']:.1f}% (> {args.max_uniformity:g}%)")
+
+    if not args.no_plot:
+        print(f"  plot                 : {plot(args.run_dir, r)}")
 
     if fails:
         print("\nFAIL: " + "; ".join(fails))
