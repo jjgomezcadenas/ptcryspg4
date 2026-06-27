@@ -177,8 +177,8 @@ is the relative electron density (from the elemental mass fractions $w_k$ and
 their $Z_k/A_k$) and $I$ is the mean excitation energy. Both inputs ($\rho$,
 composition, $I$) are already in \texttt{common/phantom\_material.py}. RSP depends
 only weakly on energy, so we evaluate Eq.~\eqref{eq:rsp} at a representative
-\SI{150}{MeV}; this gives $\mathrm{RSP}\approx1.0$ (soft tissue), $1.03$ (brain),
-$1.6$ (cortical bone). Equation~\eqref{eq:rsp} is the principled form of the
+\SI{150}{MeV}; this gives $\mathrm{RSP}\approx1.03$ (soft tissue), $1.04$ (brain),
+$1.71$ (cortical bone). Equation~\eqref{eq:rsp} is the principled form of the
 $1/\rho_{\mathrm{rel}}$ scaling of Sec.~\ref{sec:pristine} -- the analytic analogue
 of a treatment-planning system's Hounsfield-unit$\to$RSP calibration.
 
@@ -196,10 +196,11 @@ the accumulated WEPL equals $R$, whatever it traversed. For the standard head ax
 to the proximal target ($d=\SI{55}{mm}$: ${\sim}\SI{4}{mm}$ scalp, \SI{8}{mm}
 bone, \SI{43}{mm} brain),
 \[
-\mathrm{WEPL}=4(1.0)+8(1.6)+43(1.03)\approx\SI{61}{mm},
+\mathrm{WEPL}=4(1.03)+8(1.71)+43(1.04)\approx\SI{62}{mm},
 \]
-i.e.\ the bone pushes the radiological depth ${\sim}\SI{6}{mm}$ beyond the
-geometric one; the distal target maps similarly to ${\sim}\SI{113}{mm}$.
+i.e.\ the bone pushes the radiological depth ${\sim}\SI{7}{mm}$ beyond the
+geometric one; the distal target maps similarly to ${\sim}\SI{114}{mm}$ (the
+\texttt{sobp.py} ray-trace gives \SI{61.8}{mm} and \SI{113.9}{mm}).
 
 \subsection{Designing through the head}
 The SOBP is then built exactly as before, but in WEPL:
@@ -216,10 +217,23 @@ $\mathrm{dose}/\mathrm d(\text{geom})=\big[\mathrm{dose}/\mathrm d(\mathrm{WEPL}
 \times\mathrm{RSP}$ with RSP nearly constant across the brain target, the geometric
 plateau is flat where it matters.
 \end{enumerate}
-This is an opt-in mode of \texttt{field\_design/sobp.py} (a \texttt{-{}-regions}
-flag pointing at a run's \texttt{phantom\_regions.csv}); without it, the
-homogeneous $\rho_{\mathrm{rel}}$ path of the standard cylinder scenario is
-untouched.
+This is the \texttt{-{}-from-run RUN\_DIR} mode of \texttt{field\_design/sobp.py}:
+it reads the run's deterministic geometry (\texttt{phantom\_regions.csv}) and its
+target window (\texttt{run\_meta.csv}); without it, the homogeneous
+$\rho_{\mathrm{rel}}$ path of the standard cylinder scenario is untouched.
+
+\paragraph{The field is phantom-specific.} Because the medium (via WEPL) and the
+target window both enter the design, the cylinder, \texttt{mird\_head} and
+\texttt{uniform\_head} fields are \emph{different} tables -- a field is not
+universal. Each design is therefore written per field,
+\texttt{data/field/<label>\_sobp\_layers.csv}, with a companion
+\texttt{\_meta.csv} stamping what it was designed for (\texttt{design\_geometry},
+materials, the geometric and WEPL windows, $\mu$, $N$). Each geometry's SOBP macro
+loads its own table; the run copies both the table and its meta into its directory;
+and \texttt{check\_run.py} asserts \texttt{design\_geometry} and the target window
+match the run -- so loading the wrong field for a phantom \emph{fails the gate}
+instead of producing a quietly-wrong plateau (the run-directory ``name cannot
+disagree with content'' principle, applied to the field).
 
 \paragraph{Limits.} The ray-trace is one-dimensional (central axis); off-axis rays
 of the lateral disk cross slightly different skull thickness, so plateau
@@ -245,7 +259,7 @@ $L_{\mathrm t}=d_{\mathrm{dist}}-d_{\mathrm{prox}}$ & target length (modulation 
 $D$ & prescribed dose to the target & \SI{1}{Gy} \\
 $N$ (\texttt{-{}-n-layers}) & number of energy layers & $20$ \\
 $\rho_{\mathrm{rel}}$ (\texttt{-{}-rho-rel}) & material density rel.\ to water & $1.04$ (brain) \\
-\texttt{-{}-regions} & \texttt{phantom\_regions.csv} for WEPL design (Sec.~\ref{sec:wepl}) & none (homogeneous) \\
+\texttt{-{}-from-run} & run dir for WEPL design through its phantom (Sec.~\ref{sec:wepl}) & none (homogeneous) \\
 $\mu$ (\texttt{-{}-mu}) & attenuation-correction coefficient & \SI{0.025}{cm^{-1}} \\
 material & phantom material & \texttt{G4\_BRAIN\_ICRP} \\
 \bottomrule

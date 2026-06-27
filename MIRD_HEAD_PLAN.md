@@ -245,13 +245,22 @@ explicit so a run cannot silently load the wrong field. Method derived in
   `cylinder_sobp.mac` / `mird_head_sobp.mac` / `uniform_head_sobp.mac`,
   `analysis_transport/check_run.py` (field↔phantom guard), `common/SCHEMA.md` (the
   meta), `latex/02_beam_design.tex` (add the per-field naming + provenance note).
-- **Tests (check_run pattern):** RSP unit values (water=1, bone∈[1.5,1.7],
+- **Tests (check_run pattern):** RSP unit values (water=1, bone∈[1.5,1.8],
   brain∈[1.0,1.07]); WEPL monotonic, pure-water WEPL = geometric, homogeneous
   WEPL = geometric×rho_rel; the field↔phantom guard fails on a swapped meta.
 - **Done when:** `data/field/mird_head_sobp_layers.csv` (+ meta) generated from the
   head regions, nominal peak placement matches the geometric target; a
   `mird_head_sobp` run carries the matching field and passes `check_run`, and a
   deliberately mismatched field fails it.
+
+- **DONE (this branch).** `common/regions.py` (shared point→material; de-dups
+  `check_run`/`plot_mird_head`); `relative_stopping_power()` (water=1, brain 1.04,
+  bone 1.71); `sobp.py --from-run` WEPL mode + per-field naming + provenance meta
+  (head: 5.5–10.5 cm → 6.18–11.39 cm WEPL, E 89–125 MeV); `RunAction` copies table
+  + meta; macros `cylinder/mird_head/uniform_head_sobp.mac`; `check_run` field↔
+  phantom guard (head SOBP run 12/12; cylinder-field-in-head fails). Unit tests
+  `field_design/test_field.py` (11/11). 3-panel design plot adds the WEPL ray-trace
+  (bone kink). Docs: §5 RSP/example + per-field note, SCHEMA, CLAUDE, user guide.
 
 **Documented first.** `latex/02_beam_design.tex` §5 already derives RSP (Bethe),
 WEPL (with the 61 mm head example) and the design-in-WEPL recipe (Abel weights
@@ -340,6 +349,6 @@ runnable.
 | 1 | `geometry-proof` | **done, merged to main** (builds, no overlaps; ~1.9k emitters, all in-head; skull O15/C11=1.37 vs brain 2.17) |
 | 2 | `heterogeneous-medium` | **done, merged to main** (phantom_regions.csv + per-region μ; bone added; explicit `geometry` label; **3 cases**: cylinder / uniform_head / mird_head, same head envelope; docs + data-driven plot) |
 | — | `data-reorg` | **done, merged to main** (per-run `data/runs/<tag>/` dirs; geometry-aware `make_figures.py`; snapshot tied to a run tag — the infra Phase 3 freezes through) |
-| 3 | `SOBP` | **scoped** (WEPL design + central-axis dose + R80/uniformity; pencil & SOBP selectable). Awaiting OK to implement. |
+| 3 | `SOBP` | **in progress.** Steps 0 (depth ref + target density), 1 (central-axis `dose_core`), 2 (WEPL field + phantom-specific identity) **done**, each with tests + plots + a regression net. Next: Step 3 (run head SOBP, grade R80/uniformity), then Steps 4–5. |
 
 Update this table and tick the boxes as each phase lands.

@@ -140,6 +140,16 @@ GDML) rather than analytic solids. Materialized by `common/phantom_material.py`
 - Encodes the production **shape** P_j(r) at high statistics; the absolute
   measured count is set downstream (File 2), never here.
 
+### `sobp_layers.csv` (+ `_meta`) — the SOBP field (only on SOBP runs)
+The proton energy layers (`energy_MeV`, `weight`) the gun sampled; `sobp.py`
+designs them and the run copies the table into its own dir. The field is
+**phantom-specific** (the medium enters via WEPL, the target window too), so the
+companion `sobp_layers_meta.csv` stamps what it was designed for —
+`design_geometry` (must equal `run_meta.geometry`), `mode` (`homogeneous`|`wepl`),
+`materials`, `d_prox_mm`/`d_dist_mm` (geometric target), `wepl_prox_mm`/
+`wepl_dist_mm`, `rho_rel`, `mu`, `n_layers`. `check_run.py` asserts the field's
+geometry + window match the run, so a phantom never runs with the wrong field.
+
 ---
 
 ## File 2: handoff output — the budget (deterministic) + realizations (stochastic)

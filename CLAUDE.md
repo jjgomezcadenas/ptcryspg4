@@ -226,10 +226,16 @@ The standard scenario uses a **Spread-Out Bragg Peak**, not a single pencil. The
 depth field is implemented and verified:
 - `field_design/sobp.py` computes the energy-layer weights (Bortfeld range-energy
   + Abel-inversion flattening weights + an `exp(µR)` attenuation correction,
-  `--mu` tuned) → `data/field/sobp_layers.csv` (the design staging dir).
+  `--mu` tuned) → `data/field/<label>_sobp_layers.csv` (+ a provenance `_meta.csv`).
+  **The field is phantom-specific**, not universal: homogeneous mode designs the
+  cylinder/brain field; `--from-run <run_dir>` designs in **WEPL** through a
+  heterogeneous phantom (RSP ray-trace, see `latex/02_beam_design.tex` §5), so the
+  head's bone offset is absorbed. Each geometry's SOBP macro loads its own table.
 - The gun (`BeamConfig` + `/stageA/beam/layers <file>`) samples a layer energy
-  per primary (stochastic; per-layer Poisson noise ≲0.2% at ≥10⁷ protons); the
-  run copies the layer table into its own dir (`data/runs/<tag>/sobp_layers.csv`).
+  per primary (stochastic; per-layer Poisson noise ≲0.2% at ≥10⁷ protons); the run
+  copies the layer table **and its meta** into its own dir, and `check_run.py`
+  asserts the field's `design_geometry`/window matches the run (no phantom↔field
+  mismatch).
 - `make_figures.py` (via `field_design/plot_sobp.py`) renders the realized G4
   depth-dose (`data/runs/<tag>/depth_dose.csv`) → the run's `figures/sobp_g4.png`.
   Verified flat plateau (~7%) over the target depth with a sharp distal edge.
@@ -256,7 +262,7 @@ Run:
 ```bash
 ./proton_transport            # interactive Qt viewer; runs vis.mac,
                               #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
-./proton_transport sobp.mac   # batch (18 threads)
+./proton_transport cylinder_sobp.mac   # batch (18 threads); also mird_head_sobp.mac, uniform_head_sobp.mac
 ```
 
 **Each run owns a directory.** Macros set the base `/stageA/output/dir
@@ -271,8 +277,11 @@ overwrites only its own directory.
 SOBP run (depth field): design the layers, then run the macro that loads them:
 
 ```bash
-python3 field_design/sobp.py --mu 0.025          # -> data/field/sobp_layers.csv
-./proton_transport sobp.mac                      # -> data/runs/cylinder_sobp_1e7/
+python3 field_design/sobp.py --mu 0.025          # -> data/field/cylinder_sobp_layers.csv (+meta)
+./proton_transport cylinder_sobp.mac             # -> data/runs/cylinder_sobp_1e7/
+# head SOBP: design in WEPL from a head run's geometry, then run the head macro
+python3 field_design/sobp.py --from-run data/runs/mird_head_pencil_1e5
+./proton_transport mird_head_sobp.mac            # -> data/runs/mird_head_sobp_1e7/
 ```
 
 `build/compile_commands.json` (the `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` flag)

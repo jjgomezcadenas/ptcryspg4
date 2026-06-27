@@ -185,7 +185,9 @@ def main():
     flatness = (plateau.max() - plateau.min()) / plateau.mean() * 100
     xlabel = "water-equivalent depth [cm]" if x_is_wepl else "depth [cm]"
 
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
+    n_panels = 3 if x_is_wepl else 2
+    fig, axes = plt.subplots(1, n_panels, figsize=(5.5 * n_panels, 4))
+    a1, a2 = axes[0], axes[1]
     a1.stem(E, w)
     a1.set(xlabel="layer energy [MeV]", ylabel="weight",
            title=f"{label} SOBP layer weights")
@@ -194,6 +196,15 @@ def main():
     a2.set(xlabel=xlabel, ylabel="relative dose",
            title=f"analytic SOBP (plateau flatness {flatness:.1f}%)")
     a2.legend()
+    if x_is_wepl:  # WEPL ray-trace: the bone kink that makes the field phantom-specific
+        a3 = axes[2]
+        dcm, wcm = depths / 10.0, wepl / 10.0
+        a3.plot(dcm, wcm, "C0", label="WEPL(depth)")
+        a3.plot([0, dcm.max()], [0, dcm.max()], "k--", lw=0.8, label="water (RSP=1)")
+        a3.axvspan(d_prox, d_dist, color="C2", alpha=0.15, label="target")
+        a3.set(xlabel="geometric depth [cm]", ylabel="WEPL [cm]",
+               title="WEPL ray-trace through the phantom")
+        a3.legend(fontsize=8)
     fig.tight_layout()
     out_png = os.path.join(args.field_dir, f"{label}_sobp_design.png")
     fig.savefig(out_png, dpi=120)

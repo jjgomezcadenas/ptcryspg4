@@ -319,10 +319,10 @@ recovered. The random draws live downstream, so the source side is reproducible.
 Design the beam, run the transport, compute the budget, and freeze the result as a
 scenario:
 \begin{verbatim}
-  python3 field_design/sobp.py --mu 0.025      # design the SOBP energy layers
-  ./proton_transport sobp.mac                  # Geant4 run -> emitters/run_meta/depth_dose
-  python3 decay_sampling/budget.py             # -> sampling_budget_inroom.csv
-  python3 tools/snapshot_scenario.py head_sobp_1e7   # freeze into the scenarios repo
+  python3 field_design/sobp.py --mu 0.025      # design the cylinder SOBP layers
+  ./proton_transport cylinder_sobp.mac         # Geant4 run -> data/runs/<tag>/
+  python3 decay_sampling/budget.py data/runs/<tag>   # -> sampling_budget_inroom.csv
+  python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze into the scenarios repo
 \end{verbatim}
 Full build and run instructions are in \texttt{CLAUDE.md}; the file columns are in
 \texttt{common/SCHEMA.md}. A frozen run is checked with

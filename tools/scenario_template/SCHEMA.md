@@ -64,9 +64,19 @@ the spatial source (emitters.csv) is shared by all of them.
     prompt_gamma   1 if the isotope emits a prompt de-excitation gamma in
                    coincidence with the decay (relevant to PET backgrounds)
 
-## sobp_layers.csv — the beam definition
-The proton energy layers (energy and weight) that make up the spread-out Bragg
-peak. Input to the run; kept so the field is fully documented.
+## sobp_layers.csv (+ _meta) — the beam definition
+The proton energy layers (energy_MeV, weight) that make up the spread-out Bragg
+peak. Input to the run; kept so the field is fully documented. The companion
+sobp_layers_meta.csv records what the field was *designed for* — the field is
+phantom-specific (the medium and target window enter the design), not universal:
+    design_geometry   geometry the field targets (must match run_meta.geometry)
+    mode              homogeneous | wepl
+    materials         media along the design ray (wepl mode)
+    d_prox_mm d_dist_mm   geometric target window the field was designed for
+    wepl_prox_mm wepl_dist_mm   that window in water-equivalent path length
+    rho_rel mu n_layers e_min_MeV e_max_MeV   design parameters
+A downstream check (and check_run.py) verifies design_geometry + the window match
+the run, so a phantom is never paired with the wrong field.
 
 ## phantom_regions.csv — the medium as priority-ordered regions
 The source is detector-independent but not medium-independent: a PET sim must
