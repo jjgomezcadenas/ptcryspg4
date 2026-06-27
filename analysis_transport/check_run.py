@@ -33,6 +33,8 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "..", "common"))
 from phantom_material import MATERIALS  # noqa: E402
 from regions import material_at  # noqa: E402  (shared point->material rule)
+sys.path.insert(0, _HERE)
+from sobp_metrics import metrics as plateau_metrics  # noqa: E402
 
 # These are exact recomputes (geometry + density, no MC noise), so the tolerance
 # is tight — loose enough only for float rounding, tight enough to catch a
@@ -41,6 +43,10 @@ RTOL = 0.005
 DOSE_RTOL = 0.01           # looser: absorbs G4-vs-registry density-table diffs
 R_CORE_MM = 5.0            # mirrors kCoreRadiusMM in StageAConfig.hh
 MEV_TO_J = 1.602176634e-13
+# SOBP plateau acceptance (generous hard gate: catches a non-flat plateau or an
+# off-range R80, e.g. from a phantom<->field mismatch; not a clinical spec).
+MAX_UNIFORMITY_PCT = 12.0
+R80_TOL_MM = 5.0
 
 
 def main():
@@ -169,6 +175,16 @@ def main():
         add("field target window matches run", win_ok,
             f"field [{float(fm['d_prox_mm']):g},{float(fm['d_dist_mm']):g}] vs "
             f"run [{prox:g},{dist:g}] mm")
+
+        # The realized plateau must be flat enough and land R80 on the target
+        # (sobp_metrics; see analysis_transport/sobp_metrics.py).
+        pm = plateau_metrics(args.run_dir)
+        add("plateau flat enough", pm["uniformity_pct"] <= MAX_UNIFORMITY_PCT,
+            f"uniformity {pm['uniformity_pct']:.1f}% (<= {MAX_UNIFORMITY_PCT:g}%)")
+        if pm["r80_distal"] is not None:
+            off = (pm["r80_distal"] - pm["dist"]) * 10.0
+            add("R80 on target distal edge", abs(off) <= R80_TOL_MM,
+                f"R80 {pm['r80_distal']:.2f} cm ({off:+.0f} mm, <= {R80_TOL_MM:g} mm)")
 
     # --- report --------------------------------------------------------------
     width = max(len(n) for n, _, _ in checks)
