@@ -180,40 +180,84 @@ for the bone heterogeneity, a **central-axis dose** profile for the shape, and
   `edep_core ≤ edep_total` (subset) + an independent `dose_core` recompute
   (`edep_core/(ρ·πr²Δz)`, matches C++ to ~5e-7; catches a 1.5× corruption).
 
-#### Step 2 — design the field in WEPL (the principled bone correction)
+#### Step 2 — design the field in WEPL, *per phantom* (the principled bone correction)
+
+The SOBP is **phantom-specific**: the medium (via WEPL) and the target window both
+enter the design, so the cylinder/brain field, the `mird_head` field, and the
+`uniform_head` field are three different tables. This step does two things —
+**(A)** implement the WEPL design, and **(B)** make each field's phantom identity
+explicit so a run cannot silently load the wrong field. Method derived in
+`latex/02_beam_design.tex` §5.
+
+##### A. WEPL design
 - **What's wrong.** `sobp.py` designs a flat SOBP in a *single water-equivalent*
-  medium. The head path is soft tissue → ~0.8 cm bone → brain → bone → soft
-  tissue; cortical bone's relative stopping power (RSP ≈ 1.6) makes 0.8 cm of
-  skull ≈ 1.3 cm water-equivalent, so a water design lands the whole stack
-  proximal.
-- **Why.** Real planning never designs in geometric depth through bone — it
-  converts to **water-equivalent path length** (`WEPL = ∫ RSP · dx`) and designs
-  there, where the Bragg curve is universal. This absorbs the bone offset *by
-  construction*; no `exp(µR)` fudge factor.
+  medium (`rho_rel`). The head path is soft tissue → ~0.8 cm bone → brain → bone →
+  soft tissue; cortical bone's RSP ≈ 1.6 makes 0.8 cm of skull ≈ 1.3 cm
+  water-equivalent, so a water/brain design lands the whole stack proximal.
+- **Why.** Real planning designs in **water-equivalent path length**
+  (`WEPL = ∫ RSP·dx`), where the Bragg curve is universal — absorbing the bone
+  offset by construction, no `exp(µR)` fudge.
 - **How.**
-  1. **RSP per material** — relative stopping power vs water from each material's
-     density + mean excitation energy (already in `phantom_material.py`) via the
-     Bethe stopping-power ratio at a representative energy (~150 MeV; RSP is only
-     weakly energy-dependent). Brain ≈ 1.03, cortical bone ≈ 1.6, soft tissue ≈ 1.0.
-  2. **Ray-trace the central axis** (+z) through the priority-ordered ellipsoids
-     in `phantom_regions.csv` to get each material's geometric thickness vs depth,
-     and integrate RSP → `WEPL(geometric depth)`.
-  3. **Map the geometric target window** (55–105 mm) to its WEPL window and hand
-     that *radiological* window to `sobp.py`'s existing Bortfeld/Abel design. The
-     layer energies then place Bragg peaks at the right WEPL — i.e. the right
-     geometric depth in the head.
-- **Files:** `field_design/sobp.py` (a heterogeneous/WEPL mode taking
-  `phantom_regions.csv` + RSP; the water/cylinder path stays the default),
-  `common/phantom_material.py` (expose RSP), `latex/02_beam_design.tex` (document
-  the WEPL design).
-- **Done when:** layers generated for the head's WEPL window; the design's nominal
-  peak placement matches the target geometrically.
-- **Documented first (this branch).** `latex/02_beam_design.tex` §5 now derives
-  RSP (Bethe, Eq. RSP), WEPL (Eq. WEPL, with the 61 mm head worked example), and
-  the design-in-WEPL recipe (ray-trace → map window → existing Abel weights with
-  `rho_rel=1`), plus the `--regions` parameter and the central-axis R80/uniformity
-  verification. (The Abel weights + Bortfeld were already documented.) Code to
-  follow.
+  1. **RSP per material** — `common/phantom_material.py :: relative_stopping_power(
+     mat, E=150)`: Bethe stopping-power ratio (relative electron density from the
+     composition × the `ln(…/I)` term). Brain ≈ 1.03, cortical bone ≈ 1.6, soft
+     tissue ≈ 1.0, water = 1.
+  2. **Ray-trace the central axis** (x=y=0, +z from the entrance), material lookup
+     by the priority-ordered region rule, integrate RSP·dz → `WEPL(d)`; map the
+     geometric target window `[d_prox,d_dist]` → `[WEPL_prox,WEPL_dist]`.
+  3. **Design** on the WEPL window with the existing Bortfeld/Abel `design()` at
+     `rho_rel=1`; the Abel weights are unchanged (flat in WEPL ⇒ flat across the
+     brain target, RSP≈const).
+- Factor the shared point→material logic (`contains`/`material_at`) into
+  `common/regions.py` — `check_run.py` and `plot_phantom.py` each already have a
+  copy; `sobp.py` would be the third. One source of truth.
+
+##### B. The field is phantom-specific — make it explicit (the fix)
+- **Geometry source (chicken-and-egg).** WEPL needs the geometry, but
+  `phantom_regions.csv` is a run *output*. It is **deterministic per geometry**, so
+  the design reads it from any existing run of that geometry (e.g. the Step-1
+  `mird_head_pencil` run); a fresh setup does one quick pencil run first. *(Optional
+  nicety, not required: a `/stageA/geometry/dump <path>` command to emit the
+  regions without transport.)*
+- **Per-field naming.** `sobp.py --regions <phantom_regions.csv> [--label NAME]`
+  writes `data/field/<label>_sobp_layers.csv`, `label` defaulting to the regions'
+  geometry (`cylinder` / `mird_head` / `uniform_head`). No generic `sobp_layers.csv`
+  to mismatch; each geometry's SOBP macro loads its own table.
+- **Provenance + guard.** Write `data/field/<label>_sobp_layers_meta.csv` recording
+  what the field was designed for: `design_geometry`, materials, `d_prox`/`d_dist`
+  (geometric), `wepl_prox`/`wepl_dist`, `mu`, `n_layers`, energy range. `RunAction`
+  copies **both** the table and its meta into the run dir (`sobp_layers.csv` +
+  `sobp_layers_meta.csv`). `check_run` then asserts `design_geometry ==
+  run_meta.geometry` **and** the design target window == the run's target depths —
+  so a phantom↔field mismatch *fails the gate* instead of producing a quietly-wrong
+  plateau (the run-dir "name can't disagree with content" principle, applied to the
+  field).
+- **Cylinder too.** Route the standard cylinder through the same regions-based path
+  (its single brain region → homogeneous WEPL ≈ geometric×1.04, reproducing today's
+  field) so every field is phantom-derived and stamped; the bare `--rho-rel` mode
+  stays for quick standalone use.
+
+##### Files / tests / done
+- **Files:** `common/phantom_material.py` (RSP), `common/regions.py` (shared
+  point→material; de-dups `check_run`/`plot_phantom`), `field_design/sobp.py` (WEPL
+  mode + per-field naming + provenance meta), `stageA_transport` (`RunAction` copies
+  the meta too; `BeamConfig` exposes its path), macros
+  `cylinder_sobp.mac` / `mird_head_sobp.mac` / `uniform_head_sobp.mac`,
+  `analysis_transport/check_run.py` (field↔phantom guard), `common/SCHEMA.md` (the
+  meta), `latex/02_beam_design.tex` (add the per-field naming + provenance note).
+- **Tests (check_run pattern):** RSP unit values (water=1, bone∈[1.5,1.7],
+  brain∈[1.0,1.07]); WEPL monotonic, pure-water WEPL = geometric, homogeneous
+  WEPL = geometric×rho_rel; the field↔phantom guard fails on a swapped meta.
+- **Done when:** `data/field/mird_head_sobp_layers.csv` (+ meta) generated from the
+  head regions, nominal peak placement matches the geometric target; a
+  `mird_head_sobp` run carries the matching field and passes `check_run`, and a
+  deliberately mismatched field fails it.
+
+**Documented first.** `latex/02_beam_design.tex` §5 already derives RSP (Bethe),
+WEPL (with the 61 mm head example) and the design-in-WEPL recipe (Abel weights
+unchanged, `rho_rel=1`), plus the `--regions` parameter and the central-axis
+R80/uniformity verification. The implementation adds the per-field naming +
+provenance guard (a short doc addition when coded).
 
 #### Step 3 — run + verify with R80 and plateau uniformity (the standard metrics)
 - **Why these.** Range is specified as **R80** — the distal depth at 80 % of the
