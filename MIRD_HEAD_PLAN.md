@@ -208,6 +208,12 @@ for the bone heterogeneity, a **central-axis dose** profile for the shape, and
   the WEPL design).
 - **Done when:** layers generated for the head's WEPL window; the design's nominal
   peak placement matches the target geometrically.
+- **Documented first (this branch).** `latex/02_beam_design.tex` §5 now derives
+  RSP (Bethe, Eq. RSP), WEPL (Eq. WEPL, with the 61 mm head worked example), and
+  the design-in-WEPL recipe (ray-trace → map window → existing Abel weights with
+  `rho_rel=1`), plus the `--regions` parameter and the central-axis R80/uniformity
+  verification. (The Abel weights + Bortfeld were already documented.) Code to
+  follow.
 
 #### Step 3 — run + verify with R80 and plateau uniformity (the standard metrics)
 - **Why these.** Range is specified as **R80** — the distal depth at 80 % of the

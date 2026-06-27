@@ -31,7 +31,11 @@ weights flatten the dose over the target's depth extent, with a small attenuatio
 correction for the proton loss on the way in. The energies and weights are
 computed in Python and written to a layer table that the Geant4 gun samples from;
 the resulting plateau is verified directly against the simulated depth--dose
-curve. Lateral spreading and dose normalisation are separate, implemented steps,
+curve. For a \emph{heterogeneous} phantom -- the MIRD head, whose lateral path
+crosses a bone skull -- the same construction is carried out in
+\textbf{water-equivalent path length}, so the bone's extra stopping power is
+absorbed by design rather than by a tuned fudge factor (Sec.~\ref{sec:wepl}).
+Lateral spreading and dose normalisation are separate, implemented steps,
 described at the end.
 \end{abstract}
 
@@ -146,6 +150,85 @@ fallback, if a flatter plateau were needed, is to replace the analytic $S(z;R_i)
 with Geant4-simulated pristine peaks and solve Eq.~\eqref{eq:super} for $w_i$ by
 non-negative least squares.
 
+\section{Heterogeneous media: water-equivalent path length}
+\label{sec:wepl}
+
+Section~\ref{sec:pristine} scaled the range by a single density ratio
+$\rho_{\mathrm{rel}}$ -- correct for a \emph{homogeneous} phantom (the brain
+cylinder), but not for the MIRD head, whose lateral path crosses soft tissue, a
+bone skull shell, brain, then bone again. Cortical bone stops protons far more
+strongly than its density alone suggests, so a water/brain-tuned layer set lands
+the whole stack proximal. The clinical remedy is to design in
+\textbf{water-equivalent path length} (WEPL).
+
+\subsection{Relative stopping power}
+The \textbf{relative stopping power} (RSP) of a material is its proton mass
+stopping power divided by water's at the same energy. From the Bethe formula,
+\begin{equation}
+\mathrm{RSP}(E)=\eta_{\mathrm{rel}}\,
+\frac{\ln\!\big(2 m_e c^2\beta^2\gamma^2/I_{\mathrm{mat}}\big)-\beta^2}
+{\ln\!\big(2 m_e c^2\beta^2\gamma^2/I_{\mathrm{water}}\big)-\beta^2},
+\label{eq:rsp}
+\end{equation}
+where
+$\eta_{\mathrm{rel}}=\dfrac{\rho_{\mathrm{mat}}}{\rho_{\mathrm{water}}}
+\dfrac{\sum_k w_k Z_k/A_k}{\left.\sum_k w_k Z_k/A_k\right|_{\mathrm{water}}}$
+is the relative electron density (from the elemental mass fractions $w_k$ and
+their $Z_k/A_k$) and $I$ is the mean excitation energy. Both inputs ($\rho$,
+composition, $I$) are already in \texttt{common/phantom\_material.py}. RSP depends
+only weakly on energy, so we evaluate Eq.~\eqref{eq:rsp} at a representative
+\SI{150}{MeV}; this gives $\mathrm{RSP}\approx1.0$ (soft tissue), $1.03$ (brain),
+$1.6$ (cortical bone). Equation~\eqref{eq:rsp} is the principled form of the
+$1/\rho_{\mathrm{rel}}$ scaling of Sec.~\ref{sec:pristine} -- the analytic analogue
+of a treatment-planning system's Hounsfield-unit$\to$RSP calibration.
+
+\subsection{Water-equivalent path length}
+The \textbf{WEPL} to a depth $d$ along the central axis is the thickness of water
+that would slow the proton equally: the geometric path reweighted by RSP,
+\begin{equation}
+\mathrm{WEPL}(d)=\int_0^{d}\mathrm{RSP}\big(\mathrm{material}(z)\big)\,\mathrm dz
+\;=\;\sum_k t_k\,\mathrm{RSP}_k ,
+\label{eq:wepl}
+\end{equation}
+the sum running over the materials the axis crosses ($t_k$ their thicknesses). In
+WEPL the Bragg curve is \emph{universal}: a proton of water range $R$ stops where
+the accumulated WEPL equals $R$, whatever it traversed. For the standard head axis
+to the proximal target ($d=\SI{55}{mm}$: ${\sim}\SI{4}{mm}$ scalp, \SI{8}{mm}
+bone, \SI{43}{mm} brain),
+\[
+\mathrm{WEPL}=4(1.0)+8(1.6)+43(1.03)\approx\SI{61}{mm},
+\]
+i.e.\ the bone pushes the radiological depth ${\sim}\SI{6}{mm}$ beyond the
+geometric one; the distal target maps similarly to ${\sim}\SI{113}{mm}$.
+
+\subsection{Designing through the head}
+The SOBP is then built exactly as before, but in WEPL:
+\begin{enumerate}[nosep]
+\item Ray-trace Eq.~\eqref{eq:wepl} along the axis (material lookup from the
+priority-ordered \texttt{phantom\_regions.csv}) to map the \emph{geometric} target
+window $[\Rp,\Rd]$ to its \emph{water-equivalent} window
+$[\mathrm{WEPL}(\Rp),\mathrm{WEPL}(\Rd)]$.
+\item Run the layer design of Secs.~\ref{sec:weights}--\ref{sec:atten} on that
+window with $\rho_{\mathrm{rel}}=1$ (the medium conversion now lives in the WEPL
+map, not in a scalar). The Abel weights, Eq.~\eqref{eq:wi}, are \textbf{unchanged}:
+in WEPL space the plateau is flat by the same construction, and since
+$\mathrm{dose}/\mathrm d(\text{geom})=\big[\mathrm{dose}/\mathrm d(\mathrm{WEPL})\big]
+\times\mathrm{RSP}$ with RSP nearly constant across the brain target, the geometric
+plateau is flat where it matters.
+\end{enumerate}
+This is an opt-in mode of \texttt{field\_design/sobp.py} (a \texttt{-{}-regions}
+flag pointing at a run's \texttt{phantom\_regions.csv}); without it, the
+homogeneous $\rho_{\mathrm{rel}}$ path of the standard cylinder scenario is
+untouched.
+
+\paragraph{Limits.} The ray-trace is one-dimensional (central axis); off-axis rays
+of the lateral disk cross slightly different skull thickness, so plateau
+uniformity over the target \emph{box} (not just the axis) is the real test
+(Sec.~\ref{sec:verify}). WEPL corrects the mean range shift but not the extra
+straggling and multiple-scattering broadening at the bone interface; if the
+verified plateau is not flat enough, the recourse is the non-negative
+least-squares weights of Sec.~\ref{sec:weights} fit to Geant4-simulated peaks.
+
 \section{Parameters}
 \label{sec:params}
 
@@ -162,6 +245,7 @@ $L_{\mathrm t}=d_{\mathrm{dist}}-d_{\mathrm{prox}}$ & target length (modulation 
 $D$ & prescribed dose to the target & \SI{1}{Gy} \\
 $N$ (\texttt{-{}-n-layers}) & number of energy layers & $20$ \\
 $\rho_{\mathrm{rel}}$ (\texttt{-{}-rho-rel}) & material density rel.\ to water & $1.04$ (brain) \\
+\texttt{-{}-regions} & \texttt{phantom\_regions.csv} for WEPL design (Sec.~\ref{sec:wepl}) & none (homogeneous) \\
 $\mu$ (\texttt{-{}-mu}) & attenuation-correction coefficient & \SI{0.025}{cm^{-1}} \\
 material & phantom material & \texttt{G4\_BRAIN\_ICRP} \\
 \bottomrule
@@ -196,6 +280,18 @@ $\Rd$. The standard field achieves a flat plateau ($\sim$\SI{7}{\percent} over
 the target) with a sharp distal edge. If it were not flat enough, the recourse is
 to retune $\mu$, increase $N$, or fall back to the least-squares weights of
 Sec.~\ref{sec:weights}.
+
+\paragraph{Heterogeneous head.} The full-plane depth--dose conflates the SOBP with
+the head ellipsoid's varying cross-section and the bone shells, so for the head
+the plateau is graded on the \textbf{central-axis} dose instead: a thin on-axis
+core (\texttt{dose\_core\_Gy} in \texttt{depth\_dose.csv}, radius
+\texttt{kCoreRadiusMM}$=\SI{5}{mm}$), whose fixed cross-section makes
+$\mathrm{edep}\propto\mathrm{dose}$ within constant-density material. Acceptance is
+by \textbf{R80} -- the distal \SI{80}{\percent}-dose depth, used because it is
+nearly independent of the energy spread -- landing within a few mm of $\Rd$, and
+by plateau \textbf{uniformity} ($\lesssim\pm\SI{5}{\percent}$) across the target.
+The no-bone control (\texttt{uniform\_head}, same envelope, brain throughout)
+isolates the skull's effect on both.
 
 \section{Lateral spreading, normalisation, and cross-check}
 \label{sec:rest}
