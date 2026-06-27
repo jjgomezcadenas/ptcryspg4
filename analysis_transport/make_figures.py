@@ -60,6 +60,9 @@ def main():
         run_plotter("field_design/plot_sobp.py", args.run_dir)
     else:  # uniform_head | mird_head
         run_plotter("analysis_transport/plot_mird_head.py", args.run_dir)
+    # SOBP runs (those carrying a field) also get the annotated plateau plot.
+    if os.path.exists(os.path.join(args.run_dir, "sobp_layers_meta.csv")):
+        run_plotter("analysis_transport/sobp_metrics.py", args.run_dir)
 
     print(f"figures -> {os.path.join(args.run_dir, 'figures')}")
 
