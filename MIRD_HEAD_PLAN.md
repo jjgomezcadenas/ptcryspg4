@@ -176,7 +176,9 @@ for the bone heterogeneity, a **central-axis dose** profile for the shape, and
   target test); `depth_dose.csv` gains `edep_core_MeV` + `dose_core_Gy`
   (dose-to-medium per bin via `MaterialAt`). Verified: head pencil gives a clean
   central-axis Bragg peak (z≈−3 mm, sharp falloff); cylinder `dose_core/edep_core`
-  constant to 1e-6 (single material). SCHEMA documented.
+  constant to 1e-6 (single material). SCHEMA documented. `check_run.py` extended:
+  `edep_core ≤ edep_total` (subset) + an independent `dose_core` recompute
+  (`edep_core/(ρ·πr²Δz)`, matches C++ to ~5e-7; catches a 1.5× corruption).
 
 #### Step 2 — design the field in WEPL (the principled bone correction)
 - **What's wrong.** `sobp.py` designs a flat SOBP in a *single water-equivalent*

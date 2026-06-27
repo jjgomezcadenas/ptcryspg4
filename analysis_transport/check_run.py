@@ -15,6 +15,8 @@ Each check is independent; several would have caught the head depth-reference bu
   - Np_per_Gy == n_protons / target_dose_Gy                 [internal consistency]
   - target depths within the phantom; box radius within the transverse extent
   - regions inside the phantom bounding box; head carve order brain<skull<scalp
+  - depth_dose: edep_core <= edep_total (subset); dose_core == the independent
+    edep_core / (rho * pi r_core^2 dz) recompute  [Step 1 central-axis profile]
 
 Usage:
     python analysis_transport/check_run.py <run_dir>
@@ -35,6 +37,9 @@ from phantom_material import MATERIALS  # noqa: E402
 # is tight — loose enough only for float rounding, tight enough to catch a
 # wrong-material density swap (e.g. brain 1.04 vs scalp 1.03, ~1% apart).
 RTOL = 0.005
+DOSE_RTOL = 0.01           # looser: absorbs G4-vs-registry density-table diffs
+R_CORE_MM = 5.0            # mirrors kCoreRadiusMM in StageAConfig.hh
+MEV_TO_J = 1.602176634e-13
 
 
 def contains(r, x, y, z):
@@ -129,6 +134,42 @@ def main():
         order = list(regions.sort_values("priority")["region"])
         add("head carve order brain<skull<scalp", order == ["brain", "skull", "scalp"],
             " -> ".join(order))
+
+    # 7. Central-axis depth dose (Step 1): the core is a subset of the full plane,
+    #    and dose_core is the independent edep_core / (rho * pi r_core^2 dz) recompute.
+    dd_path = os.path.join(args.run_dir, "depth_dose.csv")
+    if os.path.exists(dd_path):
+        dd = pd.read_csv(dd_path)
+        if "edep_core_MeV" in dd.columns and "dose_core_Gy" in dd.columns:
+            scale = dd["edep_total_MeV"].max() or 1.0
+            excess = (dd["edep_core_MeV"] - dd["edep_total_MeV"]).max()
+            add("edep_core <= edep_total (subset)", excess <= 1e-6 * scale,
+                f"max(core - total) = {excess:.3e} MeV")
+
+            binw = abs(float(dd["z_mm"].diff().median()))
+            vbin_cm3 = math.pi * (R_CORE_MM / 10.0) ** 2 * (binw / 10.0)  # mm->cm
+            worst, worst_z, skipped = 0.0, None, 0
+            for row in dd.itertuples():
+                mat = material_at(regions, 0.0, 0.0, row.z_mm)
+                if mat is None:                       # on-axis air -> dose must be 0
+                    exp = 0.0
+                elif mat in MATERIALS:
+                    mass_kg = vbin_cm3 * MATERIALS[mat].density_g_cm3 / 1000.0
+                    exp = (row.edep_core_MeV * MEV_TO_J) / mass_kg
+                else:
+                    skipped += 1
+                    continue
+                ref = max(abs(row.dose_core_Gy), abs(exp))
+                if ref > 0:
+                    worst = max(worst, abs(row.dose_core_Gy - exp) / ref)
+                    if worst == abs(row.dose_core_Gy - exp) / ref:
+                        worst_z = row.z_mm
+            note = f"worst rel. diff {worst:.2e}"
+            if worst_z is not None:
+                note += f" at z={worst_z:.1f} mm"
+            if skipped:
+                note += f" ({skipped} bins skipped: material not in registry)"
+            add("dose_core matches edep_core recompute", worst <= DOSE_RTOL, note)
 
     # --- report --------------------------------------------------------------
     width = max(len(n) for n, _, _ in checks)
