@@ -8,22 +8,29 @@
 
 class G4Run;
 class DetectorConstruction;
+class BeamConfig;
 class OutputMessenger;
 class StageARun;
 
 // Creates the custom StageARun on every thread. On the master at end of run it
-// writes data/emitters.csv + data/run_meta.csv and prints a short summary.
+// derives a per-run tag (<geometry>_<beam>_<N>) from what actually ran, makes a
+// self-contained run directory <base>/<tag>/, and writes the CSV outputs there.
 class RunAction : public G4UserRunAction {
  public:
-  RunAction(G4bool onMaster, const DetectorConstruction* det);
+  RunAction(G4bool onMaster, const DetectorConstruction* det,
+            const BeamConfig* beam);
   ~RunAction() override;
 
   G4Run* GenerateRun() override;
   void EndOfRunAction(const G4Run* run) override;
 
-  void SetOutputDir(const G4String& dir) { fOutputDir = dir; }
+  // The base directory under which a per-run subdir is created (set by macro).
+  void SetOutputDir(const G4String& dir) { fBaseDir = dir; }
 
  private:
+  // <geometry>_<beam>_<N>, auto-derived from the run (cannot disagree with it).
+  std::string RunTag(const StageARun* run) const;
+
   void WriteEmittersCsv(const StageARun* run) const;
   void WriteMetaCsv(const StageARun* run) const;
   void WriteRegionsCsv() const;
@@ -31,8 +38,10 @@ class RunAction : public G4UserRunAction {
   void PrintSummary(const StageARun* run) const;
 
   const DetectorConstruction* fDet = nullptr;
+  const BeamConfig* fBeam = nullptr;
   OutputMessenger* fMessenger = nullptr;  // master only
-  std::string fOutputDir = ".";
+  std::string fBaseDir = ".";             // base; run subdir appended at write
+  std::string fOutputDir = ".";           // resolved <base>/<tag> for this run
 };
 
 #endif  // STAGEA_RUNACTION_HH

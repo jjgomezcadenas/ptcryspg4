@@ -189,7 +189,9 @@ def main(data_dir):
     panel_multiplicity(fig.add_subplot(gs[2, 0]), emit, meta)
     panel_table(fig.add_subplot(gs[2, 1:3]), meta, emit)
 
-    out = os.path.join(data_dir, "transport_validation.png")
+    figdir = os.path.join(data_dir, "figures")
+    os.makedirs(figdir, exist_ok=True)
+    out = os.path.join(figdir, "transport_validation.png")
     fig.savefig(out, dpi=110)
     plt.close(fig)
     print(f"\nsaved dashboard -> {out}")

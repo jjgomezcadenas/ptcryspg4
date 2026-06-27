@@ -12,7 +12,8 @@ OutputMessenger::OutputMessenger(RunAction* runAction) : fRunAction(runAction) {
   fDirOutput->SetGuidance("Output file controls.");
 
   fDirCmd = new G4UIcmdWithAString("/stageA/output/dir", this);
-  fDirCmd->SetGuidance("Directory for emitters.csv, run_meta.csv, depth_dose.csv.");
+  fDirCmd->SetGuidance("Base output dir; Stage A appends a per-run subdir "
+                       "<geometry>_<beam>_<N> and writes the CSVs there.");
   fDirCmd->SetParameterName("path", false);
   fDirCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }

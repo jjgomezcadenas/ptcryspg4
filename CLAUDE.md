@@ -209,12 +209,12 @@ normalization `P_j(D)=count_j·D/target_dose`; the budget N_j is computed by
 stageA_transport/    # Geant4 C++: protons → emitters.csv + run_meta.csv
 field_design/        # Python: SOBP beam design (sobp.py) + depth-dose plots
 decay_sampling/      # Python: time-decay budget (budget.py) + realizations (budget_gen.py)
-analysis_transport/  # Python: validate Stage A output (dashboard, diagnostics)
+analysis_transport/  # Python: validate Stage A (validate_transport.py) + make_figures.py
 tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
 common/              # shared schema, units, isotope table
 latex/               # our LaTeX docs (01_user_guide … 04_source_reference) + figures + biblio
 docs/                # reference papers only (.pdf, .txt)
-data/                # generated CSV (gitignored)
+data/runs/<run_tag>/ # generated CSV, one self-contained dir per run (gitignored)
 ```
 
 Frozen Stage-A runs live in the `ptcrysp-scenarios` data repo, one named directory
@@ -255,15 +255,23 @@ Run:
 ```bash
 ./proton_transport            # interactive Qt viewer; runs vis.mac,
                               #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
-./proton_transport sobp.mac   # batch (18 threads); writes emitters/run_meta/depth_dose.csv to data/
+./proton_transport sobp.mac   # batch (18 threads)
 ```
+
+**Each run owns a directory.** Macros set the base `/stageA/output/dir
+../../data/runs`; Stage A appends an auto-derived tag `<geometry>_<beam>_<N>`
+(e.g. `cylinder_sobp_1e7`, `mird_head_pencil_1e5`) and writes
+emitters/run_meta/phantom_regions/depth_dose there. The tag is built from the run
+itself (geometry from the detector, beam = sobp if a layer table is loaded else
+pencil, N the proton count), so it cannot disagree with what ran, and distinct
+cases coexist under `data/runs/` without clobbering. A re-run of the same config
+overwrites only its own directory.
 
 SOBP run (depth field): design the layers, then run the macro that loads them:
 
 ```bash
 python3 field_design/sobp.py --mu 0.025          # -> data/sobp_layers.csv
-./proton_transport sobp.mac                      # macro loads the layer table
-python3 field_design/plot_sobp.py                # -> data/sobp_g4.png
+./proton_transport sobp.mac                      # -> data/runs/cylinder_sobp_1e7/
 ```
 
 `build/compile_commands.json` (the `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` flag)
@@ -272,28 +280,31 @@ it via CMake Tools.
 
 ### Analysis + handoff (Python)
 
-System `python3` (already has numpy/scipy/pandas/matplotlib — no venv). Validate
-a Stage-A run:
+System `python3` (already has numpy/scipy/pandas/matplotlib — no venv). The
+analysis/handoff scripts all take a run directory as their first argument
+(default `data/`); pass `data/runs/<run_tag>` to operate on one run.
+
+### Handoff + figures + snapshot
 
 ```bash
-python3 analysis_transport/validate_transport.py   # -> data/transport_validation.png
-```
-
-Deps listed in `analysis_transport/requirements.txt` and
-`decay_sampling/requirements.txt` (numpy, scipy, pandas).
-
-### Handoff + snapshot
-
-```bash
-python3 decay_sampling/budget.py                 # -> data/sampling_budget_inroom.csv (measured N_j)
-python3 decay_sampling/budget_gen.py             # -> data/sampling_realizations_inroom.csv (Poisson draws)
-python3 tools/snapshot_scenario.py head_sobp_1e7 # freeze data/ into ../ptcrysp-scenarios
+RUN=data/runs/cylinder_sobp_1e7
+python3 decay_sampling/budget.py     $RUN              # -> $RUN/sampling_budget_inroom.csv (measured N_j)
+python3 decay_sampling/budget.py     $RUN --scenario fast --t-del 60
+python3 decay_sampling/budget_gen.py $RUN              # -> $RUN/sampling_realizations_inroom.csv (Poisson draws)
+python3 analysis_transport/make_figures.py $RUN        # -> $RUN/figures/ (geometry-aware control plots)
+python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze that run into ../ptcrysp-scenarios
 ```
 
 `budget.py` writes the per-isotope measured count N_j (no random numbers).
 `budget_gen.py` draws the Poisson realizations of N_j — this step will move to the
-downstream study. `snapshot_scenario.py` copies a finished run into the
-`ptcrysp-scenarios` repo as a named scenario.
+downstream study. `make_figures.py` reads `run_meta.geometry` and writes the
+figures that fit the case (cylinder → dashboard + Bragg/SOBP plateau; head →
+dashboard + phantom/beam/emitter plot), all into `<run_dir>/figures/`.
+`snapshot_scenario.py <run_tag>` freezes *that specific run* (identity, the files
+it actually has, and its figures) into the `ptcrysp-scenarios` repo as a named
+scenario (`--name` to override; defaults to the run tag). Python deps are listed
+in `analysis_transport/requirements.txt` and `decay_sampling/requirements.txt`
+(numpy, scipy, pandas).
 
 ## First-session checklist
 

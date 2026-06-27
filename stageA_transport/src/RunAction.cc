@@ -4,6 +4,7 @@
 #include "StageAConfig.hh"
 #include "OutputMessenger.hh"
 #include "DetectorConstruction.hh"
+#include "BeamConfig.hh"
 #include "Isotopes.hh"
 
 #include "G4Run.hh"
@@ -13,15 +14,35 @@
 #include "globals.hh"
 
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <string>
 
-RunAction::RunAction(G4bool onMaster, const DetectorConstruction* det)
-    : fDet(det) {
+RunAction::RunAction(G4bool onMaster, const DetectorConstruction* det,
+                     const BeamConfig* beam)
+    : fDet(det), fBeam(beam) {
   // Only the master owns the messenger, to avoid duplicate UI-command
   // registration from the worker threads.
   if (onMaster) fMessenger = new OutputMessenger(this);
 }
+
+namespace {
+// Compact, exact rendering of a proton count for the run tag: powers of ten
+// become 1eK (10000000 -> "1e7"), small mantissas m·10^k become "me K"
+// (5000000 -> "5e6"), anything else falls back to the plain integer.
+std::string FormatProtonCount(long n) {
+  if (n <= 0) return std::to_string(n);
+  long m = n;
+  int k = 0;
+  while (m % 10 == 0) {
+    m /= 10;
+    ++k;
+  }
+  if (m < 10 && k > 0) return std::to_string(m) + "e" + std::to_string(k);
+  return std::to_string(n);
+}
+}  // namespace
 
 RunAction::~RunAction() { delete fMessenger; }
 
@@ -36,11 +57,36 @@ void RunAction::EndOfRunAction(const G4Run* run) {
   if (!IsMaster()) return;  // only the merged master run has all the data
   const auto* stRun = static_cast<const StageARun*>(run);
 
+  // Resolve the self-contained run directory <base>/<tag> now that the run is
+  // over (the proton count is known). Each run gets its own dir, so distinct
+  // cases coexist under data/runs/ and a re-run overwrites only itself.
+  fOutputDir = fBaseDir + "/" + RunTag(stRun);
+  std::error_code ec;
+  std::filesystem::create_directories(fOutputDir, ec);
+  if (ec) {
+    G4cerr << "[Stage A] ERROR: cannot create run dir " << fOutputDir << ": "
+           << ec.message() << G4endl;
+    return;
+  }
+  G4cout << "[Stage A] run directory -> " << fOutputDir << G4endl;
+
   WriteEmittersCsv(stRun);
   WriteMetaCsv(stRun);
   WriteRegionsCsv();
   WriteDepthDoseCsv(stRun);
   PrintSummary(stRun);
+}
+
+// <geometry>_<beam>_<N>: geometry from the detector, beam from the gun config
+// (sobp if a layer table is loaded, else pencil), N the protons simulated. The
+// tag is built from the run itself, so it cannot disagree with what ran.
+std::string RunAction::RunTag(const StageARun* run) const {
+  const std::string geom = fDet->Geometry().empty()
+                               ? std::string(stageA::kGeometryCylinder)
+                               : std::string(fDet->Geometry());
+  const std::string beam =
+      (fBeam && fBeam->SobpEnabled()) ? "sobp" : "pencil";
+  return geom + "_" + beam + "_" + FormatProtonCount(run->GetNumberOfEvent());
 }
 
 // One row per captured β⁺ emitter: event_id, isotope, prod point, anh point.

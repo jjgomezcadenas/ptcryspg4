@@ -74,7 +74,9 @@ def main():
         ax.set_ylim(bottom=0)
     ax.legend()
     fig.tight_layout()
-    out = os.path.join(args.data_dir, "activity.png")
+    figdir = os.path.join(args.data_dir, "figures")
+    os.makedirs(figdir, exist_ok=True)
+    out = os.path.join(figdir, "activity.png")
     fig.savefig(out, dpi=120)
 
     # Quick numeric readout at a few times (cf. the paper's table).

@@ -8,7 +8,7 @@
 /stageA/phantom/geometry uniform_head
 /run/initialize
 
-/stageA/output/dir ../../data
+/stageA/output/dir ../../data/runs
 /random/setSeeds 12345 67890
 
 /run/printProgress 20000
