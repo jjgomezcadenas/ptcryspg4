@@ -144,6 +144,10 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
 
   fPhantomLV = headLV;  // scoring volume = whole head (GetMass includes daughters)
   fBeamHalfExtent = kScalpAxMM * mm;  // L-R semi-axis, now along +z
+  // Depth reference = the entrance face. The beam enters the scalp at -fHalfZ, so
+  // fHalfZ must be the beam-axis half-extent (not the cylinder length), else the
+  // target box and the reported depths are mis-registered against the head.
+  fHalfZ = fBeamHalfExtent;
 
   // Medium regions (world frame), priority-ordered: brain carves the skull
   // shell, skull carves the scalp.
@@ -175,6 +179,7 @@ void DetectorConstruction::BuildUniformHead(G4LogicalVolume* worldLV) {
       G4Translate3D(-kBrainOffsetZMM * mm, 0., 0.) * G4RotateY3D(90. * deg);
   new G4PVPlacement(tf, fPhantomLV, "Head", worldLV, false, 0, true);
   fBeamHalfExtent = kScalpAxMM * mm;
+  fHalfZ = fBeamHalfExtent;  // depth reference = entrance face (see BuildMirdHead)
 
   fRegions = {HeadRegion("head", kBrainMaterial, 0., 0., 0., kScalpAxMM,
                          kScalpByMM, kScalpCzMM)};
@@ -202,11 +207,38 @@ G4double DetectorConstruction::PhantomMass() const {
   return fPhantomLV ? fPhantomLV->GetMass() : 0.;
 }
 
+// Material of the first priority-ordered region containing p, else nullptr (air).
+// Mirrors the phantom_regions.csv point→material rule (ellipsoid / cylinder,
+// axis-aligned). Lengths in PhantomRegion are mm.
+const G4Material* DetectorConstruction::MaterialAt(const G4ThreeVector& p) const {
+  auto* nist = G4NistManager::Instance();
+  for (const auto& r : fRegions) {
+    const G4double dx = p.x() - r.cx * mm;
+    const G4double dy = p.y() - r.cy * mm;
+    const G4double dz = p.z() - r.cz * mm;
+    bool inside = false;
+    if (r.solid == "cylinder") {  // (a,b,c) = (radius, radius, half-length)
+      inside = (dx * dx + dy * dy) <= (r.a * mm) * (r.a * mm) &&
+               std::abs(dz) <= r.c * mm;
+    } else {  // ellipsoid: (a,b,c) = semi-axes
+      const G4double fx = dx / (r.a * mm), fy = dy / (r.b * mm),
+                     fz = dz / (r.c * mm);
+      inside = (fx * fx + fy * fy + fz * fz) <= 1.0;
+    }
+    if (inside) return nist->FindOrBuildMaterial(r.material);
+  }
+  return nullptr;
+}
+
 G4double DetectorConstruction::TargetMass() const {
   // The target box is conceptual (not a volume), so compute its mass directly
-  // from its dimensions and the phantom material density.
+  // from its dimensions and the density of the medium at the box centre (e.g.
+  // brain for the head — not the scalp mother LV the box is nested in).
   if (!fPhantomLV) return 0.;
+  const G4double zc = 0.5 * (TargetProxZ() + TargetDistZ());
+  const G4Material* mat = MaterialAt(G4ThreeVector(0., 0., zc));
+  if (!mat) mat = fPhantomLV->GetMaterial();  // fallback (box centre in air)
   const G4double length = fTargetDistDepth - fTargetProxDepth;
   const G4double volume = pi * fTargetRadius * fTargetRadius * length;
-  return volume * fPhantomLV->GetMaterial()->GetDensity();
+  return volume * mat->GetDensity();
 }

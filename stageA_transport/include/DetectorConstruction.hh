@@ -2,11 +2,13 @@
 #define STAGEA_DETECTORCONSTRUCTION_HH
 
 #include "G4VUserDetectorConstruction.hh"
+#include "G4ThreeVector.hh"
 #include "globals.hh"
 
 #include <vector>
 
 class G4LogicalVolume;
+class G4Material;
 class DetectorMessenger;
 
 // One medium region for phantom_regions.csv (Phase 2): a world-frame solid with
@@ -72,9 +74,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double TargetRadius() const { return fTargetRadius; }
   G4double TargetProxZ() const { return -fHalfZ + fTargetProxDepth; }  // beam at -fHalfZ
   G4double TargetDistZ() const { return -fHalfZ + fTargetDistDepth; }
-  G4double TargetMass() const;  // π·r²·L·ρ (ρ from the phantom material)
+  G4double TargetMass() const;  // π·r²·L·ρ (ρ from the medium at the box centre)
 
  private:
+  // Material of the first (priority-ordered) region containing a world point,
+  // else nullptr (air). Same rule as phantom_regions.csv; used so the target box
+  // takes the density of the medium it actually sits in (e.g. brain, not scalp).
+  const G4Material* MaterialAt(const G4ThreeVector& p) const;
+
   // Build the homogeneous cylinder (default) or the MIRD head into worldLV; each
   // sets fPhantomLV (the scoring volume) and fBeamHalfExtent.
   void BuildCylinder(G4LogicalVolume* worldLV);
