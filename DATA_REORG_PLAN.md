@@ -81,4 +81,11 @@ gun and copied into the run dir if used.
 
 ## Status
 
-Not started — scope written, awaiting the OK to implement (after compaction).
+Implemented. `RunAction` auto-derives `<geometry>_<beam>_<N>` and writes each run
+to its own `data/runs/<tag>/`; `make_figures.py` dispatches geometry-aware figures
+into `<run_dir>/figures/`; the four plotters write into that subdir;
+`snapshot_scenario.py <run_tag>` globs the files a run actually has and copies its
+figures. Verified: two cases coexist (`mird_head_pencil_1e5`,
+`uniform_head_pencil_1e5`), re-run is idempotent, and the snapshot freezes the
+exact run with only its files + head figures + adapted README. `data/*` already
+gitignores `data/runs/`.

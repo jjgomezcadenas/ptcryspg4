@@ -69,7 +69,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("data_dir", nargs="?", default=os.path.join(_HERE, "..", "data"))
-    ap.add_argument("--out", default=None, help="output PNG (default data/mird_head.png)")
+    ap.add_argument("--out", default=None,
+                    help="output PNG (default <data_dir>/figures/mird_head.png)")
     args = ap.parse_args()
 
     e = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
@@ -133,7 +134,12 @@ def main():
     summ = ", ".join(f"{rn} {int((reg==rn).sum())}" for rn in reg_names)
     fig.suptitle(f"MIRD head — {len(e)} emitters ({summ})", fontsize=12)
     fig.tight_layout()
-    out = args.out or os.path.join(args.data_dir, "mird_head.png")
+    if args.out:
+        out = args.out
+    else:
+        figdir = os.path.join(args.data_dir, "figures")
+        os.makedirs(figdir, exist_ok=True)
+        out = os.path.join(figdir, "mird_head.png")
     fig.savefig(out, dpi=130)
     print(f"saved {out}")
     for rn in reg_names:

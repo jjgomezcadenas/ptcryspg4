@@ -8,8 +8,9 @@
 
 void ActionInitialization::BuildForMaster() const {
   // The master receives the merged run and writes the CSVs; it owns the
-  // output messenger and never generates primaries.
-  SetUserAction(new RunAction(/*onMaster=*/true, fDet));
+  // output messenger and never generates primaries. It needs the beam config
+  // to tag the run dir (pencil vs sobp).
+  SetUserAction(new RunAction(/*onMaster=*/true, fDet, fBeam));
 }
 
 void ActionInitialization::Build() const {
@@ -19,5 +20,5 @@ void ActionInitialization::Build() const {
   SetUserAction(eventAction);
   SetUserAction(new TrackingAction(eventAction));
   SetUserAction(new SteppingAction(fDet));
-  SetUserAction(new RunAction(/*onMaster=*/false, fDet));
+  SetUserAction(new RunAction(/*onMaster=*/false, fDet, fBeam));
 }

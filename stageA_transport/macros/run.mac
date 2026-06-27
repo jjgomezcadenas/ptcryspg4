@@ -9,8 +9,9 @@
 /stageA/phantom/material G4_TISSUE_SOFT_ICRP
 /run/initialize
 
-# Send the CSVs to the repo data/ dir (relative to the build/ working dir).
-/stageA/output/dir ../../data
+# Base output dir (relative to build/). Stage A appends <geometry>_<beam>_<N>,
+# so this run lands in data/runs/cylinder_pencil_1e5/.
+/stageA/output/dir ../../data/runs
 
 # Reproducibility: master seed (workers get deterministic per-event seeds).
 /random/setSeeds 12345 67890

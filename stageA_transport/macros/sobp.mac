@@ -16,7 +16,7 @@
 /stageA/target/distal 105 mm
 /run/initialize
 
-/stageA/output/dir ../../data
+/stageA/output/dir ../../data/runs
 /random/setSeeds 12345 67890
 
 /run/printProgress 1000000

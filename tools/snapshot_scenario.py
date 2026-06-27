@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
-"""Freeze a finished Stage-A run in data/ into a scenario snapshot.
+"""Freeze a finished Stage-A run directory into a scenario snapshot.
 
-Copies the run's source files and figures into <dest>/scenarios/<name>/, writes
-isotopes.csv (from common/isotopes.py), the file-format note (SCHEMA.md), the
-documentation PDFs (from latex/, into docs/), and a scenario README with the
-run's numbers filled in. Each snapshot is standalone: it carries everything
-needed to read it without the rest of this repo.
+A snapshot is tied to a *specific run*: you name a run tag (the directory under
+data/runs/, e.g. cylinder_sobp_1e7) and the run's identity, file set, and
+figures all come from that directory — nothing is hand-typed or pulled from a
+shared scratch dir. Copies the run's source files (whichever exist) and its
+figures/ into <dest>/scenarios/<name>/, writes isotopes.csv (from
+common/isotopes.py), the file-format note (SCHEMA.md), the documentation PDFs
+(from latex/, into docs/), and a scenario README with the run's numbers filled
+in. Each snapshot is standalone: it carries everything needed to read it without
+the rest of this repo.
 
 The doc PDFs are copied, not built: run `python latex/build_latex.py` first so
-they exist in latex/. A missing PDF is warned about, not fatal.
+they exist in latex/. A missing PDF is warned about, not fatal. Figures are made
+by `python analysis_transport/make_figures.py <run_dir>` — run that first.
 
 Usage:
-    python tools/snapshot_scenario.py <name> [--data-dir DIR] [--dest DIR]
+    python tools/snapshot_scenario.py <run_tag> [--name NAME] [--runs-dir DIR]
+                                      [--dest DIR]
 """
 
 import argparse
+import glob
 import os
 import shutil
 import sys
@@ -29,15 +36,14 @@ from phantom_material import MATERIALS, write_material_csv  # noqa: E402
 # Annihilation energy [keV] -- the energy the downstream mu/attenuation is for.
 ANNIHILATION_keV = 511.0
 
-# Files copied verbatim from data/ into the snapshot.
-DATA_FILES = [
-    "emitters.csv", "run_meta.csv",
-    "sampling_budget_inroom.csv", "sampling_budget_inroom_meta.csv",
-    "sampling_budget_fast.csv", "sampling_budget_fast_meta.csv",
-    "sampling_budget_offline.csv", "sampling_budget_offline_meta.csv",
-    "sobp_layers.csv", "phantom_regions.csv",
+# Source files copied from the run dir if present. The exact set varies by run
+# (a head pencil run has no sobp_layers; budgets exist only once budget.py ran),
+# so each is optional -- we copy what is there, not a hardcoded must-have list.
+CORE_FILES = [
+    "emitters.csv", "run_meta.csv", "depth_dose.csv",
+    "phantom_regions.csv", "sobp_layers.csv",
 ]
-FIGURES = ["sobp_g4.png", "transport_validation.png", "activity.png"]
+# Plus every sampling_budget_*.csv (+ _meta) found in the run dir (glob).
 
 # Documentation PDFs copied from latex/ into the snapshot's docs/ (build first
 # with latex/build_latex.py). The full doc set travels with the frozen scenario.
@@ -46,6 +52,14 @@ DOC_PDFS = [
     "01_user_guide.pdf", "02_beam_design.pdf",
     "03_decay_kinetics.pdf", "04_source_reference.pdf",
 ]
+
+
+def collect_data_files(run_dir):
+    """Names of the source CSVs that actually exist in the run dir."""
+    files = [fn for fn in CORE_FILES if os.path.exists(os.path.join(run_dir, fn))]
+    for path in sorted(glob.glob(os.path.join(run_dir, "sampling_budget_*.csv"))):
+        files.append(os.path.basename(path))
+    return files
 
 
 def write_isotopes_csv(path):
@@ -58,21 +72,21 @@ def write_isotopes_csv(path):
         f.write("\n".join(rows) + "\n")
 
 
-def read_budget_legend(data_dir):
+def read_budget_legend(run_dir):
     """(scenario, t_irr, t_del, t_meas) for each sampling_budget_*_meta.csv."""
     legend = []
-    for fn in DATA_FILES:
-        if not fn.startswith("sampling_budget_") or not fn.endswith("_meta.csv"):
-            continue
-        bm = pd.read_csv(os.path.join(data_dir, fn)).iloc[0]
+    for path in sorted(glob.glob(os.path.join(run_dir, "sampling_budget_*_meta.csv"))):
+        bm = pd.read_csv(path).iloc[0]
         legend.append((str(bm["scenario"]), float(bm["t_irr_s"]),
                        float(bm["t_del_s"]), float(bm["t_meas_s"])))
     return legend
 
 
-def write_readme(path, name, meta, emit, legend):
+def write_readme(path, name, meta, emit, legend, data_files):
     """Scenario README, numbers filled in from run_meta.csv and emitters.csv."""
     m = meta
+    geometry = str(m["geometry"])
+    has_sobp = "sobp_layers.csv" in data_files
     t_dose = float(m["target_dose_Gy"])
     counts = emit["isotope_id"].value_counts()
     # Production yield per Gy = count_j / target_dose (the absolute normalization).
@@ -90,18 +104,46 @@ def write_readme(path, name, meta, emit, legend):
     z_lo = float(m["target_prox_depth_mm"]) - half_z
     z_hi = float(m["target_dist_depth_mm"]) - half_z
 
+    # Phantom + beam descriptions adapt to the run (cylinder vs head; SOBP vs pencil).
+    if geometry == "cylinder":
+        phantom_desc = (f"{m['phantom_material']} cylinder, {diam:g} cm diameter "
+                        f"x {length:g} cm")
+    else:
+        phantom_desc = (f"{geometry} ({m['phantom_material']}; regions in "
+                        f"phantom_regions.csv), bounding box {diam:g} x {length:g} cm")
+    # "multi" (a heterogeneous head) reads awkwardly in prose; name the geometry.
+    medium = m['phantom_material'] if str(m['phantom_material']) != "multi" \
+        else f"the {geometry} phantom"
+    if has_sobp:
+        beam_desc = ("proton SOBP (energy layers in sobp_layers.csv), uniform disk "
+                     "over the target")
+        beam_title = f"Proton SOBP on {medium}"
+    else:
+        beam_desc = (f"single proton pencil, {float(m['beam_energy_MeV']):g} MeV, "
+                     f"sigma {float(m['beam_sigma_mm']):g} mm")
+        beam_title = f"Proton pencil on {medium}"
+
     legrows = "\n".join(
         f"- `{s}`: t_irr={ti:g}, t_del={td:g}, t_meas={tm:g} s" for s, ti, td, tm in legend)
+    if not legrows:
+        legrows = "- (no timing budget frozen yet; run decay_sampling/budget.py)"
+
+    files_line = ", ".join(data_files)
+    # The Parodi Table 2 yield check is for the SOBP target-volume delivery; a
+    # single pencil paints a thin track, so its integral yield is not comparable.
+    parodi_note = ("Parodi 2008 Table 2 comparison: about 2.2x overall." if has_sobp
+                   else "(Single-pencil run: thin-track yields, not comparable to "
+                        "the Parodi Table 2 SOBP integrals.)")
 
     text = f"""# {name}
 
-Proton SOBP on {m['phantom_material']}, {int(m['n_protons']):g} protons, scaled to
-1 Gy in the target box. Detector-independent positron-annihilation source for a
-downstream PET simulation.
+{beam_title}, {int(m['n_protons']):g} protons, scaled to 1 Gy in the target box.
+Detector-independent positron-annihilation source for a downstream PET simulation.
 
 ## Setup
-- Phantom: {m['phantom_material']} cylinder, {diam:g} cm diameter x {length:g} cm
-- Beam: proton SOBP (energy layers in sobp_layers.csv), uniform disk over the target
+- Geometry: {geometry}
+- Phantom: {phantom_desc}
+- Beam: {beam_desc}
 - Target box: {box_diam:g} cm diameter x {box_len:g} cm, at {box_lo:g}-{box_hi:g} cm depth
 - Protons: {int(m['n_protons']):g}
 - Geant4 {m['geant4_version']}, {m['physics_list']}, seed {int(m['random_seed'])}
@@ -118,7 +160,7 @@ target box sits at z in [{z_lo:g}, {z_hi:g}] mm. emitters.csv positions are in t
 
 ## Yields per 1 Gy
 {ystr} (total {total:.2e})
-Parodi 2008 Table 2 comparison: about 2.2x overall.
+{parodi_note}
 
 ## Timing scenarios (budgets)
 The acquisition timing is the only difference between budgets; the spatial
@@ -138,8 +180,7 @@ source (emitters.csv) is shared. N_expected is for 1 Gy.
    correction.
 
 ## Files
-emitters.csv, run_meta.csv, sampling_budget_{{inroom,fast,offline}}.csv (+ _meta),
-sobp_layers.csv, phantom_regions.csv (the medium as priority-ordered regions),
+{files_line},
 phantom_material_*.csv (+ _meta: composition, density, mu at 511 keV per region,
 for gamma transport + attenuation correction), figures/. Columns in SCHEMA.md,
 isotope codes in isotopes.csv. The full documentation (user guide, beam design,
@@ -152,34 +193,54 @@ decay kinetics, source reference) is in docs/ as PDFs.
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("name", help="scenario name, e.g. head_sobp_1e7")
-    ap.add_argument("--data-dir", default=os.path.join(_HERE, "..", "data"))
+    ap.add_argument("run_tag", help="run directory under --runs-dir, e.g. cylinder_sobp_1e7")
+    ap.add_argument("--name", default=None,
+                    help="scenario name (default: the run tag)")
+    ap.add_argument("--runs-dir", default=os.path.join(_HERE, "..", "data", "runs"))
     ap.add_argument("--dest", default=os.path.expanduser("~/Projects/ptcrysp-scenarios"))
     args = ap.parse_args()
 
-    out = os.path.join(args.dest, "scenarios", args.name)
+    run_dir = os.path.join(args.runs_dir, args.run_tag)
+    if not os.path.isdir(run_dir):
+        sys.exit(f"run directory not found: {run_dir}")
+    name = args.name or args.run_tag
+
+    out = os.path.join(args.dest, "scenarios", name)
     figdir = os.path.join(out, "figures")
     os.makedirs(figdir, exist_ok=True)
 
-    for fn in DATA_FILES:
-        shutil.copy2(os.path.join(args.data_dir, fn), os.path.join(out, fn))
-    for fn in FIGURES:
-        shutil.copy2(os.path.join(args.data_dir, fn), os.path.join(figdir, fn))
+    # Source CSVs: copy whatever this run actually produced.
+    data_files = collect_data_files(run_dir)
+    for fn in data_files:
+        shutil.copy2(os.path.join(run_dir, fn), os.path.join(out, fn))
+
+    # Figures: copy the run's figures/ verbatim (made by make_figures.py).
+    src_figdir = os.path.join(run_dir, "figures")
+    fig_names = []
+    if os.path.isdir(src_figdir):
+        for fn in sorted(os.listdir(src_figdir)):
+            src = os.path.join(src_figdir, fn)
+            if os.path.isfile(src):
+                shutil.copy2(src, os.path.join(figdir, fn))
+                fig_names.append(fn)
+    if not fig_names:
+        print("WARNING: no figures in the run dir; run "
+              "`python analysis_transport/make_figures.py <run_dir>` first.")
 
     write_isotopes_csv(os.path.join(out, "isotopes.csv"))
     shutil.copy2(os.path.join(_HERE, "scenario_template", "SCHEMA.md"),
                  os.path.join(out, "SCHEMA.md"))
 
-    meta = pd.read_csv(os.path.join(args.data_dir, "run_meta.csv")).iloc[0]
-    emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
-    legend = read_budget_legend(args.data_dir)
-    write_readme(os.path.join(out, "README.md"), args.name, meta, emit, legend)
+    meta = pd.read_csv(os.path.join(run_dir, "run_meta.csv")).iloc[0]
+    emit = pd.read_csv(os.path.join(run_dir, "emitters.csv"))
+    legend = read_budget_legend(run_dir)
+    write_readme(os.path.join(out, "README.md"), name, meta, emit, legend, data_files)
 
     # Phantom medium for 511 keV gamma transport + reconstruction attenuation
     # correction: composition + mu for each distinct material in
     # phantom_regions.csv (one homogeneous material for the cylinder; brain/bone/
     # soft tissue for the head).
-    regions = pd.read_csv(os.path.join(args.data_dir, "phantom_regions.csv"))
+    regions = pd.read_csv(os.path.join(run_dir, "phantom_regions.csv"))
     n_mat = 0
     for mat_name in dict.fromkeys(regions["material"].astype(str)):  # distinct, ordered
         if mat_name in MATERIALS:
@@ -202,8 +263,8 @@ def main():
             print(f"WARNING: {fn} not found in latex/; run "
                   f"`python latex/build_latex.py` first to include it.")
 
-    n = len(DATA_FILES) + len(FIGURES) + n_pdf + 3 + n_mat
-    print(f"snapshot '{args.name}': wrote {n} files -> {out}")
+    n = len(data_files) + len(fig_names) + n_pdf + 3 + n_mat
+    print(f"snapshot '{name}' from {run_dir}: wrote {n} files -> {out}")
 
 
 if __name__ == "__main__":
