@@ -49,8 +49,10 @@ def main():
     geometry = str(pd.read_csv(meta_path).iloc[0]["geometry"])
 
     print(f"figures for {args.run_dir}  (geometry: {geometry})")
-    # Geometry-independent: phantom+target drawing, dashboard, activity curves.
+    # Geometry-independent: phantom+target drawing, central-axis depth dose,
+    # dashboard, activity curves.
     run_plotter("analysis_transport/plot_phantom.py", args.run_dir)
+    run_plotter("analysis_transport/plot_depth_dose.py", args.run_dir)
     run_plotter("analysis_transport/validate_transport.py", args.run_dir)
     run_plotter("decay_sampling/activity_plot.py", args.run_dir)
     # Geometry-specific control plot.
