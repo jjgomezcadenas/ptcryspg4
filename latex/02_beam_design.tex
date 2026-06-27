@@ -4,6 +4,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{siunitx}
+\usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
 
@@ -235,6 +236,21 @@ match the run -- so loading the wrong field for a phantom \emph{fails the gate}
 instead of producing a quietly-wrong plateau (the run-directory ``name cannot
 disagree with content'' principle, applied to the field).
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{wepl_design.png}
+\caption{WEPL field design for the MIRD head (\texttt{sobp.py -{}-from-run}).
+\textbf{Left:} the Abel flattening weights (Eq.~\eqref{eq:wi}), heaviest on the
+distal layer. \textbf{Centre:} the resulting analytic SOBP, flat across the target
+in water-equivalent depth. \textbf{Right:} the WEPL ray-trace along the central
+axis (Eq.~\eqref{eq:wepl}) -- the curve rises above the water diagonal, with the
+kink in the first ${\sim}\SI{1.2}{cm}$ where the beam crosses scalp then skull
+bone, so the geometric target window $[\SI{5.5}{},\SI{10.5}{}]\,\si{cm}$ maps to
+$[\SI{6.2}{},\SI{11.4}{}]\,\si{cm}$ WEPL. This shift is the bone offset the design
+absorbs.}
+\label{fig:wepl}
+\end{figure}
+
 \paragraph{Limits.} The ray-trace is one-dimensional (central axis); off-axis rays
 of the lateral disk cross slightly different skull thickness, so plateau
 uniformity over the target \emph{box} (not just the axis) is the real test
@@ -307,8 +323,44 @@ $\mathrm{edep}\propto\mathrm{dose}$ within constant-density material. Acceptance
 by \textbf{R80} -- the distal \SI{80}{\percent}-dose depth, used because it is
 nearly independent of the energy spread -- landing within a few mm of $\Rd$, and
 by plateau \textbf{uniformity} ($\lesssim\pm\SI{5}{\percent}$) across the target.
-The no-bone control (\texttt{uniform\_head}, same envelope, brain throughout)
-isolates the skull's effect on both.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{beam_compare.png}
+\caption{Why a spread-out field, and what the skull does. Central-axis depth dose
+(each normalised to its own peak) for a single \SI{100}{MeV} \textbf{pencil}
+(dashed) and the \textbf{SOBP} (solid), in the brain-only \texttt{uniform\_head}
+(left) and the heterogeneous \texttt{mird\_head} (right). The pencil deposits a
+sharp peak at a single depth; the SOBP fills the whole target box (shaded). Across
+the two panels, the skull's fingerprints are the small dose bumps where the beam
+crosses bone (right only), and the same pencil stopping ${\sim}\SI{0.5}{cm}$
+\emph{shallower} in the head with bone -- the extra stopping power the WEPL design
+compensates for.}
+\label{fig:compare}
+\end{figure}
+
+\paragraph{Uniform head: the no-bone control.} Running the same machinery on
+\texttt{uniform\_head} (the same envelope, brain throughout) isolates the skull's
+effect. The bone demands a higher-energy field -- WEPL window
+$[\SI{6.18}{},\SI{11.39}{}]\,\si{cm}$ and layers \SIrange{88.8}{125.4}{MeV} for
+\texttt{mird\_head}, versus $[\SI{5.69}{},\SI{10.90}{}]\,\si{cm}$ and
+\SIrange{84.7}{122.3}{MeV} with no bone -- yet both land R80 \emph{on the target
+distal edge} (\SI{10.49} vs \SI{10.52}{cm}, target \SI{10.5}{cm}) at comparable
+uniformity (\SI{6.2} vs \SI{8.3}{\percent}). The skull changes the beam energy the
+field must deliver, not where the dose ends up: that is exactly what designing in
+WEPL buys.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\linewidth]{sobp_plateau_head.png}
+\caption{Realized \texttt{mird\_head} SOBP plateau (\texttt{sobp\_metrics.py}):
+on-axis \texttt{dose\_core} with the target band, the plateau mean
+($\SI{6.2}{\percent}$ uniformity), the \SI{80}{\percent} level, and the R80 marker
+at \SI{10.49}{cm} -- on the target distal edge ($-0\,\si{mm}$). A water-tuned field
+would land R80 ${\sim}\SI{1}{cm}$ short. \texttt{check\_run.py} gates head SOBP
+runs on these two numbers.}
+\label{fig:plateau}
+\end{figure}
 
 \section{Lateral spreading, normalisation, and cross-check}
 \label{sec:rest}
