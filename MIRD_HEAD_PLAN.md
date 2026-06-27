@@ -145,6 +145,13 @@ for the bone heterogeneity, a **central-axis dose** profile for the shape, and
 - **Files:** `DetectorConstruction.{cc,hh}`.
 - **Done when:** a head run reports target depths that match the physical box, and
   target mass uses brain density.
+- **Done (this branch).** Plus a regression net so this class of bug can't recur
+  silently: `analysis_transport/check_run.py` (independent Python invariant
+  checker — box-in-medium, target-mass density, dose ≥ whole-phantom, Np
+  consistency, depths/regions in bounds; would have failed on both halves of the
+  bug), `analysis_transport/plot_phantom.py` (regions + target box + beam in two
+  cross-sections, wired into `make_figures`), and a C++ run-time guard warning
+  when the box centre is in air.
 
 #### Step 1 — central-axis dose profile (the curve we actually grade)
 - **What's wrong.** `depth_dose.csv` tallies edep per z-bin integrated over the

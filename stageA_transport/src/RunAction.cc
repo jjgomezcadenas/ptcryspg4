@@ -126,6 +126,15 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   const G4double tProxDepth = fDet->TargetProxZ() + fDet->PhantomHalfLength();
   const G4double tDistDepth = fDet->TargetDistZ() + fDet->PhantomHalfLength();
 
+  // Guard: a target box whose centre is in air (depths beyond the phantom) makes
+  // the dose normalization meaningless. Warn loudly rather than write a bogus N_p.
+  if (!fDet->TargetMaterial()) {
+    const G4double zc = 0.5 * (fDet->TargetProxZ() + fDet->TargetDistZ());
+    G4cerr << "[Stage A] WARNING: target-box centre (z=" << zc / mm
+           << " mm) is in air — dose normalization is invalid. Check the target "
+              "depths against the phantom extent." << G4endl;
+  }
+
   // Overall bounding box from the medium regions (a summary; the detailed
   // geometry is in phantom_regions.csv). Diameter = transverse, length = beam.
   G4double hx = 0., hy = 0., hz = 0.;

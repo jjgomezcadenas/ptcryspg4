@@ -284,6 +284,15 @@ System `python3` (already has numpy/scipy/pandas/matplotlib — no venv). The
 analysis/handoff scripts all take a run directory as their first argument
 (default `data/`); pass `data/runs/<run_tag>` to operate on one run.
 
+**Validate a run before trusting it.** `analysis_transport/check_run.py <run_dir>`
+recomputes the geometry/normalization invariants in plain Python from
+`run_meta.csv` + `phantom_regions.csv` and exits non-zero on any violation (target
+box in air, wrong target-mass density, target dose < whole-phantom dose, …) — the
+gate that catches geometry bugs the units don't. `make_figures.py` also draws
+`phantom.png` (`plot_phantom.py`): the medium regions + target box + beam in two
+cross-sections, so a mis-placed box is obvious by eye. A C++ guard in `RunAction`
+warns at run time if the target-box centre is in air.
+
 ### Handoff + figures + snapshot
 
 ```bash

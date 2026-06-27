@@ -75,6 +75,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double TargetProxZ() const { return -fHalfZ + fTargetProxDepth; }  // beam at -fHalfZ
   G4double TargetDistZ() const { return -fHalfZ + fTargetDistDepth; }
   G4double TargetMass() const;  // π·r²·L·ρ (ρ from the medium at the box centre)
+  // Medium at the target-box centre, or nullptr if it is in air — a mis-placed
+  // box (depths beyond the phantom) makes the dose normalization meaningless.
+  const G4Material* TargetMaterial() const {
+    return MaterialAt(G4ThreeVector(0., 0., 0.5 * (TargetProxZ() + TargetDistZ())));
+  }
 
  private:
   // Material of the first (priority-ordered) region containing a world point,
