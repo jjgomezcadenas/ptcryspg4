@@ -73,6 +73,20 @@ void RunAction::EndOfRunAction(const G4Run* run) {
   }
   G4cout << "[Stage A] run directory -> " << fOutputDir << G4endl;
 
+  // Copy the beam's layer table (an SOBP run's input) into the run dir, so the
+  // run is self-contained and the snapshot picks it up with everything else.
+  if (fBeam && fBeam->SobpEnabled() && !fBeam->LayerPath().empty()) {
+    std::error_code cec;
+    std::filesystem::copy_file(
+        std::filesystem::path(fBeam->LayerPath().c_str()),
+        std::filesystem::path(fOutputDir + "/sobp_layers.csv"),
+        std::filesystem::copy_options::overwrite_existing, cec);
+    if (cec) {
+      G4cerr << "[Stage A] WARNING: could not copy layer table "
+             << fBeam->LayerPath() << ": " << cec.message() << G4endl;
+    }
+  }
+
   WriteEmittersCsv(stRun);
   WriteMetaCsv(stRun);
   WriteRegionsCsv();

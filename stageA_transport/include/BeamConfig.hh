@@ -21,6 +21,10 @@ class BeamConfig {
 
   bool SobpEnabled() const { return !fEnergyMeV.empty(); }
 
+  // Path of the loaded layer table (empty if none), so the run can copy this
+  // beam *input* into its own directory and stay self-contained.
+  const G4String& LayerPath() const { return fLayerPath; }
+
   // Sample one layer's energy [MeV] in proportion to its weight, using the
   // calling worker thread's RNG (stochastic delivery, see latex/02_beam_design.tex).
   G4double SampleEnergyMeV() const;
@@ -35,6 +39,7 @@ class BeamConfig {
  private:
   std::vector<G4double> fEnergyMeV;
   std::vector<G4double> fCumWeight;  // cumulative weights, normalized to 1
+  G4String fLayerPath;               // path of the loaded layer table (if any)
   G4double fDiskRadius = 0.;         // 0 -> pencil
   BeamMessenger* fMessenger = nullptr;
 };

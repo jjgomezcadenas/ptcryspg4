@@ -19,6 +19,7 @@ void BeamConfig::LoadLayers(const G4String& path) {
     G4cerr << "[Beam] ERROR: cannot open SOBP layer file " << path << G4endl;
     return;
   }
+  fLayerPath = path;  // remembered so the run can copy it into its own dir
   fEnergyMeV.clear();
   fCumWeight.clear();
 
