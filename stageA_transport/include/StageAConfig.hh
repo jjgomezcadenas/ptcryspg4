@@ -26,6 +26,13 @@ inline constexpr double kTargetRadiusMM = 30.0;      // Ø6 cm
 inline constexpr double kTargetProxDepthMM = 55.0;   // proximal depth
 inline constexpr double kTargetDistDepthMM = 105.0;  // distal depth (5 cm thick)
 
+// Central-axis depth-dose core (Phase 3 Step 1): a thin on-axis cylinder whose
+// fixed cross-section makes edep(z) ∝ dose within constant-density material —
+// the clean profile graded for SOBP plateau flatness / R80 through the head
+// (the full-plane edep tally conflates the SOBP shape with the ellipsoid's
+// varying cross-section and the bone shells).
+inline constexpr double kCoreRadiusMM = 5.0;
+
 // --- MIRD-head variant (Phase 1) ------------------------------------------
 // A heterogeneous stylized head: brain inside a skull shell inside a soft-tissue
 // outer head, replicated from the Geant4 advanced/human_phantom MIRD model.

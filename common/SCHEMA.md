@@ -117,13 +117,23 @@ cavities) is still **deferred** — it would need a voxel material/density map (
 GDML) rather than analytic solids. Materialized by `common/phantom_material.py`
 + Stage A, frozen into every scenario snapshot.
 
-### `depth_dose.csv` — Bragg profile (1 mm z-bins)
+### `depth_dose.csv` — Bragg / depth-dose profile (z-bins along the beam)
 
 | column | type | meaning |
 |--------|------|---------|
 | `z_mm` | float | bin centre along the beam axis |
-| `edep_total_MeV` | float | energy deposit in the bin (all particles) |
-| `edep_primary_MeV` | float | energy deposit by the primary proton only |
+| `edep_total_MeV` | float | energy deposit in the bin, **whole transverse plane** (all particles) |
+| `edep_primary_MeV` | float | energy deposit by the primary proton only (whole plane) |
+| `edep_core_MeV` | float | energy deposit in the **thin on-axis core** (r ≤ 5 mm), all particles |
+| `dose_core_Gy` | float | `edep_core` as dose to the medium on the axis in that bin (`edep/(ρ·πr²Δz)`) |
+
+> The `*_total`/`*_primary` columns are the full-plane slab tally — the honest
+> total-energy Bragg curve. The `*_core` columns are the **central-axis depth
+> dose**: a fixed-area on-axis cylinder, so within constant-density material
+> `edep_core ∝ dose` (no contamination from a varying cross-section). For the
+> head this is the profile graded for SOBP plateau flatness / R80; `dose_core`
+> converts it to dose-to-medium per bin (using the on-axis material density there,
+> e.g. brain vs bone). The core radius is `kCoreRadiusMM` in `StageAConfig.hh`.
 
 ### Invariants
 - Generated **once**; never modified by downstream stages.

@@ -1,6 +1,7 @@
 #include "SteppingAction.hh"
 
 #include "StageARun.hh"
+#include "StageAConfig.hh"
 #include "DetectorConstruction.hh"
 
 #include "G4Step.hh"
@@ -24,14 +25,18 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
     auto* run = static_cast<StageARun*>(
         G4RunManager::GetRunManager()->GetNonConstCurrentRun());
 
-    // Depth-dose: distribute edep across the z-bins the step spans.
-    run->AddEdepAlongStep(pre.z() / mm, post.z() / mm, edep / MeV, primary);
+    // Transverse radius sqrt(x^2+y^2), shared by the on-axis core and the target.
+    const G4double rmid = 0.5 * (pre.perp() + post.perp());
+
+    // Depth-dose: distribute edep across the z-bins the step spans; steps within
+    // the thin on-axis core also feed the central-axis profile.
+    const bool inCore = rmid <= stageA::kCoreRadiusMM * mm;
+    run->AddEdepAlongStep(pre.z() / mm, post.z() / mm, edep / MeV, primary,
+                          inCore);
 
     // Target-box dose: add edep if the step midpoint is inside the target
     // (cylinder: target z-range and radius from DetectorConstruction).
     const G4double zmid = 0.5 * (pre.z() + post.z());
-    const G4double rmid =
-        0.5 * (pre.perp() + post.perp());  // transverse radius sqrt(x^2+y^2)
     if (zmid >= fDet->TargetProxZ() && zmid <= fDet->TargetDistZ() &&
         rmid <= fDet->TargetRadius()) {
       run->AddTargetEdep(edep);

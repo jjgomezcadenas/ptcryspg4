@@ -171,6 +171,12 @@ for the bone heterogeneity, a **central-axis dose** profile for the shape, and
   `common/SCHEMA.md`.
 - **Done when:** the core profile over the brain is a clean plateau/peak without
   the ellipsoid taper.
+- **Done (this branch).** `kCoreRadiusMM = 5`; `StageARun` fills a parallel
+  `fEdepZCore` (reusing the step's transverse radius already computed for the
+  target test); `depth_dose.csv` gains `edep_core_MeV` + `dose_core_Gy`
+  (dose-to-medium per bin via `MaterialAt`). Verified: head pencil gives a clean
+  central-axis Bragg peak (z≈−3 mm, sharp falloff); cylinder `dose_core/edep_core`
+  constant to 1e-6 (single material). SCHEMA documented.
 
 #### Step 2 — design the field in WEPL (the principled bone correction)
 - **What's wrong.** `sobp.py` designs a flat SOBP in a *single water-equivalent*

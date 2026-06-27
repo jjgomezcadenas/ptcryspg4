@@ -44,7 +44,7 @@ void StageARun::RecordEvent(const G4Event* event) {
 }
 
 void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
-                                 bool primary) {
+                                 bool primary, bool inCore) {
   const G4double zlo = std::min(z1, z2);
   const G4double zhi = std::max(z1, z2);
   const G4double len = zhi - zlo;
@@ -55,6 +55,7 @@ void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
     if (bin >= 0 && bin < kNZBins) {
       fEdepZTotal[bin] += edep;
       if (primary) fEdepZPrimary[bin] += edep;
+      if (inCore) fEdepZCore[bin] += edep;
     }
     return;
   }
@@ -71,6 +72,7 @@ void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
     const G4double e = edep * (overlap / len);
     fEdepZTotal[b] += e;
     if (primary) fEdepZPrimary[b] += e;
+    if (inCore) fEdepZCore[b] += e;
   }
 }
 
@@ -85,6 +87,7 @@ void StageARun::Merge(const G4Run* aRun) {
   for (int i = 0; i < kNZBins; ++i) {
     fEdepZTotal[i] += local->fEdepZTotal[i];
     fEdepZPrimary[i] += local->fEdepZPrimary[i];
+    fEdepZCore[i] += local->fEdepZCore[i];
   }
   G4Run::Merge(aRun);
 }

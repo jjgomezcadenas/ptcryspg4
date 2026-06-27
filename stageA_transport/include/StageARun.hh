@@ -14,7 +14,7 @@
 // locking. The master's merged instance is what RunAction writes to CSV.
 class StageARun : public G4Run {
  public:
-  static constexpr int kNZBins = 200;  // 1 mm bins over the 200 mm phantom
+  static constexpr int kNZBins = 200;  // z-bins over kPhantomLengthMM (0.8 mm)
 
   StageARun();
   ~StageARun() override = default;
@@ -27,9 +27,11 @@ class StageARun : public G4Run {
 
   // Bin a step's energy deposit by depth, distributing it across the z-bins the
   // step spans (weighted by path-length overlap) so long plateau steps give a
-  // smooth profile rather than midpoint spikes. z in mm, edep in MeV.
+  // smooth profile rather than midpoint spikes. z in mm, edep in MeV. inCore
+  // (step within kCoreRadiusMM of the beam axis) also bins it into the thin
+  // central-axis core profile.
   void AddEdepAlongStep(G4double z1_mm, G4double z2_mm, G4double edep_MeV,
-                        bool primary);
+                        bool primary, bool inCore);
 
   // Accumulate a step's energy deposit that falls inside the target box
   // (SteppingAction decides; G4 internal energy units) -> the dose normalization.
@@ -40,6 +42,7 @@ class StageARun : public G4Run {
   G4double TargetEdep() const { return fTargetEdep; }
   const std::vector<G4double>& EdepZTotal() const { return fEdepZTotal; }
   const std::vector<G4double>& EdepZPrimary() const { return fEdepZPrimary; }
+  const std::vector<G4double>& EdepZCore() const { return fEdepZCore; }
 
  private:
   ptcrysp::EmitterData fEmitters;
@@ -48,6 +51,8 @@ class StageARun : public G4Run {
   G4int fCollID = -1;  // cached scorer collection ID
   std::vector<G4double> fEdepZTotal{std::vector<G4double>(kNZBins, 0.)};
   std::vector<G4double> fEdepZPrimary{std::vector<G4double>(kNZBins, 0.)};
+  // Thin on-axis core (r <= kCoreRadiusMM): the clean central-axis depth dose.
+  std::vector<G4double> fEdepZCore{std::vector<G4double>(kNZBins, 0.)};
 };
 
 #endif  // STAGEA_STAGEARUN_HH

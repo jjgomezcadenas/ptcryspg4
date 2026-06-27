@@ -8,7 +8,10 @@
 #include "Isotopes.hh"
 
 #include "G4Run.hh"
+#include "G4Material.hh"
+#include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4ThreeVector.hh"
 #include "G4Version.hh"
 #include "Randomize.hh"
 #include "globals.hh"
@@ -197,13 +200,21 @@ void RunAction::WriteRegionsCsv() const {
          << " phantom region(s) -> " << path << G4endl;
 }
 
-// The Bragg profile: energy deposited per 1 mm z-bin, total and primary-only,
-// with the z column as bin centres.
+// The Bragg profile: energy deposited per z-bin, with the z column as bin
+// centres. edep_total/primary are the full transverse-plane slab tallies (the
+// honest total-energy Bragg curve). edep_core is the thin on-axis core
+// (r <= kCoreRadiusMM); dose_core converts it to dose-to-medium per bin using
+// the density of the medium on the axis there — the clean central-axis depth
+// dose graded for SOBP plateau flatness / R80 (see latex/02_beam_design.tex).
 void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
   const auto& tot = run->EdepZTotal();
   const auto& prim = run->EdepZPrimary();
+  const auto& core = run->EdepZCore();
   const double zmin = -0.5 * stageA::kPhantomLengthMM;
   const double binw = stageA::kPhantomLengthMM / StageARun::kNZBins;
+  // Core-bin volume = π r² Δz (in G4 units), for dose = edep / (ρ·V).
+  const double rcore = stageA::kCoreRadiusMM * mm;
+  const double vbin = pi * rcore * rcore * (binw * mm);
 
   const std::string path = fOutputDir + "/depth_dose.csv";
   std::ofstream f(path);
@@ -212,11 +223,15 @@ void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
            << G4endl;
     return;
   }
-  f << "z_mm,edep_total_MeV,edep_primary_MeV\n";
+  f << "z_mm,edep_total_MeV,edep_primary_MeV,edep_core_MeV,dose_core_Gy\n";
   f << std::setprecision(7);
   for (int i = 0; i < StageARun::kNZBins; ++i) {
     const double zc = zmin + (i + 0.5) * binw;  // bin centre
-    f << zc << ',' << tot[i] << ',' << prim[i] << '\n';
+    const G4Material* mat = fDet->MaterialAt(G4ThreeVector(0., 0., zc * mm));
+    double doseGy = 0.;
+    if (mat) doseGy = ((core[i] * MeV) / (mat->GetDensity() * vbin)) / gray;
+    f << zc << ',' << tot[i] << ',' << prim[i] << ',' << core[i] << ','
+      << doseGy << '\n';
   }
   G4cout << "[Stage A] wrote depth-dose profile -> " << path << G4endl;
 }

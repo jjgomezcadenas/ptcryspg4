@@ -81,12 +81,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     return MaterialAt(G4ThreeVector(0., 0., 0.5 * (TargetProxZ() + TargetDistZ())));
   }
 
- private:
   // Material of the first (priority-ordered) region containing a world point,
-  // else nullptr (air). Same rule as phantom_regions.csv; used so the target box
-  // takes the density of the medium it actually sits in (e.g. brain, not scalp).
+  // else nullptr (air). Same rule as phantom_regions.csv; used for the target-box
+  // density and the per-bin density of the central-axis dose profile.
   const G4Material* MaterialAt(const G4ThreeVector& p) const;
 
+ private:
   // Build the homogeneous cylinder (default) or the MIRD head into worldLV; each
   // sets fPhantomLV (the scoring volume) and fBeamHalfExtent.
   void BuildCylinder(G4LogicalVolume* worldLV);
