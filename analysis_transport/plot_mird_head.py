@@ -24,24 +24,13 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import Ellipse  # noqa: E402
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+import sys
+sys.path.insert(0, os.path.join(_HERE, "..", "common"))
+from regions import classify  # noqa: E402  (shared point->material rule)
 
 NAMES = {0: "O15", 1: "C11", 2: "N13", 3: "C10", 4: "O14"}
 REG_COLOURS = {"brain": "#9aa8e0", "skull": "#e8e8e0", "scalp": "#d9b38c",
                "head": "#9aa8e0"}  # uniform-head single region
-
-
-def classify(X, Y, Z, regions):
-    """Region of each world point: the first (lowest-priority) ellipsoid that
-    contains it, else 'air'. Ellipsoids are axis-aligned (Euler angles 0)."""
-    reg = np.full(len(X), "air", dtype=object)
-    assigned = np.zeros(len(X), dtype=bool)
-    for _, r in regions.sort_values("priority").iterrows():
-        inside = (((X - r.cx_mm) / r.a_mm) ** 2 + ((Y - r.cy_mm) / r.b_mm) ** 2
-                  + ((Z - r.cz_mm) / r.c_mm) ** 2) <= 1.0
-        take = inside & ~assigned
-        reg[take] = r.region
-        assigned |= take
-    return reg
 
 
 def _draw_regions(ax, regions, fill):
@@ -75,8 +64,8 @@ def main():
 
     e = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
     regions = pd.read_csv(os.path.join(args.data_dir, "phantom_regions.csv"))
-    reg = classify(e["anh_x_mm"].to_numpy(), e["anh_y_mm"].to_numpy(),
-                   e["anh_z_mm"].to_numpy(), regions)
+    reg = classify(regions, e["anh_x_mm"].to_numpy(), e["anh_y_mm"].to_numpy(),
+                   e["anh_z_mm"].to_numpy())
     reg_names = list(regions.sort_values("priority")["region"])
     isos = [0, 1, 2, 3, 4]
 

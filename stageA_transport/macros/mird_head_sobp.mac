@@ -1,0 +1,25 @@
+# Stage A — MIRD-head SOBP run: a WEPL-designed field through the heterogeneous
+# head (scalp/skull/brain). The bone offset is absorbed in the field design.
+# Generate the field first (needs a head run for the geometry):
+#   python3 field_design/sobp.py --from-run data/runs/mird_head_pencil_1e5
+
+/run/numberOfThreads 18
+
+# Heterogeneous head geometry (must precede /run/initialize); it builds its own
+# scalp/skull/brain materials, so no /stageA/phantom/material here.
+/stageA/phantom/geometry mird_head
+# SOBP energy layers for THIS phantom (WEPL-designed for the head path).
+/stageA/beam/layers ../../data/field/mird_head_sobp_layers.csv
+# Lateral fluence: uniform disk over the target cross-section (Ø6 cm).
+/stageA/beam/disk 30 mm
+# Target box for dose normalization (Ø6 cm × 5 cm at 5.5-10.5 cm depth).
+/stageA/target/radius 30 mm
+/stageA/target/proximal 55 mm
+/stageA/target/distal 105 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+/run/printProgress 1000000
+/run/beamOn 10000000

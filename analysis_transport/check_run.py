@@ -32,6 +32,7 @@ import pandas as pd
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "..", "common"))
 from phantom_material import MATERIALS  # noqa: E402
+from regions import material_at  # noqa: E402  (shared point->material rule)
 
 # These are exact recomputes (geometry + density, no MC noise), so the tolerance
 # is tight — loose enough only for float rounding, tight enough to catch a
@@ -40,22 +41,6 @@ RTOL = 0.005
 DOSE_RTOL = 0.01           # looser: absorbs G4-vs-registry density-table diffs
 R_CORE_MM = 5.0            # mirrors kCoreRadiusMM in StageAConfig.hh
 MEV_TO_J = 1.602176634e-13
-
-
-def contains(r, x, y, z):
-    """True if world point (x,y,z) is inside region row r (mm)."""
-    dx, dy, dz = x - r.cx_mm, y - r.cy_mm, z - r.cz_mm
-    if r.solid == "cylinder":  # (a,b,c) = (radius, radius, half-length)
-        return dx * dx + dy * dy <= r.a_mm ** 2 and abs(dz) <= r.c_mm
-    return (dx / r.a_mm) ** 2 + (dy / r.b_mm) ** 2 + (dz / r.c_mm) ** 2 <= 1.0
-
-
-def material_at(regions, x, y, z):
-    """NIST material of the first priority-ordered region containing the point."""
-    for r in regions.sort_values("priority").itertuples():
-        if contains(r, x, y, z):
-            return r.material
-    return None
 
 
 def main():
@@ -170,6 +155,20 @@ def main():
             if skipped:
                 note += f" ({skipped} bins skipped: material not in registry)"
             add("dose_core matches edep_core recompute", worst <= DOSE_RTOL, note)
+
+    # 8. Field provenance (Step 2): if an SOBP field was used, it must have been
+    #    designed for THIS phantom (geometry + target window) — else the plateau
+    #    is silently wrong. The field is phantom-specific, not universal.
+    fmeta_path = os.path.join(args.run_dir, "sobp_layers_meta.csv")
+    if os.path.exists(fmeta_path):
+        fm = pd.read_csv(fmeta_path).iloc[0]
+        add("field designed for this geometry", str(fm["design_geometry"]) == geom,
+            f"field '{fm['design_geometry']}' vs run '{geom}'")
+        win_ok = (abs(float(fm["d_prox_mm"]) - prox) <= 1e-6 and
+                  abs(float(fm["d_dist_mm"]) - dist) <= 1e-6)
+        add("field target window matches run", win_ok,
+            f"field [{float(fm['d_prox_mm']):g},{float(fm['d_dist_mm']):g}] vs "
+            f"run [{prox:g},{dist:g}] mm")
 
     # --- report --------------------------------------------------------------
     width = max(len(n) for n, _, _ in checks)

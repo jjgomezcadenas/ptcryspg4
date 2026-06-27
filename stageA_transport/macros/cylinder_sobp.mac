@@ -1,13 +1,13 @@
-# Stage A — SOBP run: load the energy-layer table and transport.
-# Generate the layers first:  python3 field_design/sobp.py [--mu 0.025]
+# Stage A — cylinder SOBP run: load the energy-layer table and transport.
+# Generate the field first:  python3 field_design/sobp.py   (homogeneous brain)
 
 /run/numberOfThreads 18
 
 # Phantom material (must precede /run/initialize). Brain = Parodi standard.
 /stageA/phantom/material G4_BRAIN_ICRP
-# SOBP energy layers (from field_design/sobp.py). Without this the gun is a
+# SOBP energy layers for THIS phantom (cylinder/brain). Without this the gun is a
 # single-energy pencil.
-/stageA/beam/layers ../../data/field/sobp_layers.csv
+/stageA/beam/layers ../../data/field/cylinder_sobp_layers.csv
 # Lateral fluence: uniform disk over the target cross-section (Ø6 cm).
 /stageA/beam/disk 30 mm
 # Target box for dose normalization (Ø6 cm × 5 cm at 5.5-10.5 cm depth).

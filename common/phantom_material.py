@@ -138,6 +138,33 @@ MATERIALS: dict[str, Material] = {
 DEFAULT_MATERIAL = "G4_BRAIN_ICRP"
 
 
+_M_PROTON_MeV = 938.27208816
+_MEC2_eV = _MEC2_keV * 1.0e3
+
+
+def _electron_density_factor(material: Material) -> float:
+    """Sum_k w_k Z_k/A_k -- proportional to electrons per gram (Z/A weighted)."""
+    return sum(e.mass_fraction * e.Z / e.A for e in material.composition.values())
+
+
+def relative_stopping_power(material: Material, energy_MeV: float = 150.0) -> float:
+    """Proton stopping power relative to water (RSP), from the Bethe ratio at
+    energy_MeV. Water = 1 by construction; brain ~1.03, cortical bone ~1.6.
+    The medium enters the SOBP design only through this (WEPL); see
+    latex/02_beam_design.tex Sec. 5. Weakly energy-dependent over the therapeutic
+    band, so the default 150 MeV is representative."""
+    water = MATERIALS["G4_WATER"]
+    gamma = 1.0 + energy_MeV / _M_PROTON_MeV
+    beta2 = 1.0 - 1.0 / gamma**2
+    arg = 2.0 * _MEC2_eV * beta2 * gamma**2  # 2 m_e c^2 beta^2 gamma^2 [eV]
+    log_mat = math.log(arg / material.mean_excitation_eV) - beta2
+    log_water = math.log(arg / water.mean_excitation_eV) - beta2
+    eta_rel = ((material.density_g_cm3 / water.density_g_cm3)
+               * _electron_density_factor(material)
+               / _electron_density_factor(water))
+    return eta_rel * log_mat / log_water
+
+
 def klein_nishina_cm2(energy_keV: float) -> float:
     """Klein-Nishina total cross section per electron [cm^2] at photon energy E."""
     a = energy_keV / _MEC2_keV

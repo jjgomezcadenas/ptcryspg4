@@ -73,17 +73,30 @@ void RunAction::EndOfRunAction(const G4Run* run) {
   }
   G4cout << "[Stage A] run directory -> " << fOutputDir << G4endl;
 
-  // Copy the beam's layer table (an SOBP run's input) into the run dir, so the
-  // run is self-contained and the snapshot picks it up with everything else.
+  // Copy the beam's layer table + its provenance meta (an SOBP run's input) into
+  // the run dir, so the run is self-contained, the snapshot picks them up, and
+  // check_run can verify the field was designed for this phantom.
   if (fBeam && fBeam->SobpEnabled() && !fBeam->LayerPath().empty()) {
+    const std::string layer = fBeam->LayerPath();
     std::error_code cec;
     std::filesystem::copy_file(
-        std::filesystem::path(fBeam->LayerPath().c_str()),
+        std::filesystem::path(layer.c_str()),
         std::filesystem::path(fOutputDir + "/sobp_layers.csv"),
         std::filesystem::copy_options::overwrite_existing, cec);
     if (cec) {
-      G4cerr << "[Stage A] WARNING: could not copy layer table "
-             << fBeam->LayerPath() << ": " << cec.message() << G4endl;
+      G4cerr << "[Stage A] WARNING: could not copy layer table " << layer << ": "
+             << cec.message() << G4endl;
+    }
+    // <label>_sobp_layers.csv -> <label>_sobp_layers_meta.csv (provenance).
+    if (layer.size() > 4 && layer.substr(layer.size() - 4) == ".csv") {
+      const std::string meta = layer.substr(0, layer.size() - 4) + "_meta.csv";
+      std::error_code mec;
+      if (std::filesystem::exists(meta, mec)) {
+        std::filesystem::copy_file(
+            std::filesystem::path(meta.c_str()),
+            std::filesystem::path(fOutputDir + "/sobp_layers_meta.csv"),
+            std::filesystem::copy_options::overwrite_existing, mec);
+      }
     }
   }
 

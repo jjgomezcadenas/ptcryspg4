@@ -1,0 +1,21 @@
+# Stage A — uniform-head SOBP run: the SAME head envelope, brain throughout (no
+# bone). The no-bone control for the mird_head SOBP: same field design machinery,
+# isolates the skull's effect on the plateau and R80.
+# Generate the field first:
+#   python3 field_design/sobp.py --from-run data/runs/uniform_head_pencil_1e5
+
+/run/numberOfThreads 18
+
+/stageA/phantom/geometry uniform_head
+/stageA/beam/layers ../../data/field/uniform_head_sobp_layers.csv
+/stageA/beam/disk 30 mm
+/stageA/target/radius 30 mm
+/stageA/target/proximal 55 mm
+/stageA/target/distal 105 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+/run/printProgress 1000000
+/run/beamOn 10000000
