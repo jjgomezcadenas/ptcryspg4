@@ -260,8 +260,8 @@ The depths map to ranges $\Rp,\Rd$ in the chosen material via Sec.~\ref{sec:pris
 $\Rp,\Rd$ and the layer ranges $R_i$.
 \item Energies $E_i=E(R_i)$ from Eq.~\eqref{eq:range}; weights from
 Eqs.~\eqref{eq:wi},\eqref{eq:atten}; normalise $\sum_i w_i=1$.
-\item Write \texttt{data/sobp\_layers.csv} (the design staging input) with columns
-\texttt{energy\_MeV,\,weight}, and \texttt{data/sobp\_design.png}, a sanity plot
+\item Write \texttt{data/field/sobp\_layers.csv} (the design staging dir) with
+columns \texttt{energy\_MeV,\,weight}, and \texttt{data/field/sobp\_design.png}, a sanity plot
 of the weights and the analytic SOBP (idealised peaks $+$ attenuation $+$ range
 straggling).
 \item The Geant4 gun loads the table (\texttt{/stageA/beam/layers}) and samples

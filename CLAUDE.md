@@ -226,7 +226,7 @@ The standard scenario uses a **Spread-Out Bragg Peak**, not a single pencil. The
 depth field is implemented and verified:
 - `field_design/sobp.py` computes the energy-layer weights (Bortfeld range-energy
   + Abel-inversion flattening weights + an `exp(µR)` attenuation correction,
-  `--mu` tuned) → `data/sobp_layers.csv` (the design staging input).
+  `--mu` tuned) → `data/field/sobp_layers.csv` (the design staging dir).
 - The gun (`BeamConfig` + `/stageA/beam/layers <file>`) samples a layer energy
   per primary (stochastic; per-layer Poisson noise ≲0.2% at ≥10⁷ protons); the
   run copies the layer table into its own dir (`data/runs/<tag>/sobp_layers.csv`).
@@ -271,7 +271,7 @@ overwrites only its own directory.
 SOBP run (depth field): design the layers, then run the macro that loads them:
 
 ```bash
-python3 field_design/sobp.py --mu 0.025          # -> data/sobp_layers.csv
+python3 field_design/sobp.py --mu 0.025          # -> data/field/sobp_layers.csv
 ./proton_transport sobp.mac                      # -> data/runs/cylinder_sobp_1e7/
 ```
 

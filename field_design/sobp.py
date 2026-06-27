@@ -83,7 +83,10 @@ def main():
                     help="material density relative to water (brain=1.04)")
     ap.add_argument("--mu", type=float, default=0.025,
                     help="attenuation-correction coefficient [1/cm], tuned to flatten")
-    ap.add_argument("--out", default=os.path.join(_HERE, "..", "data", "sobp_layers.csv"))
+    # Design staging dir (data/field/); the gun reads the table from here and the
+    # run copies it into its own dir. Keeps data/ top-level to {runs/, field/}.
+    ap.add_argument("--out", default=os.path.join(_HERE, "..", "data", "field",
+                                                  "sobp_layers.csv"))
     args = ap.parse_args()
 
     R, E, w = design(args.d_prox, args.d_dist, args.n_layers, args.rho_rel, args.mu)
