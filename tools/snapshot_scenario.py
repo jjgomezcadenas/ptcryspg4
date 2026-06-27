@@ -35,7 +35,7 @@ DATA_FILES = [
     "sampling_budget_inroom.csv", "sampling_budget_inroom_meta.csv",
     "sampling_budget_fast.csv", "sampling_budget_fast_meta.csv",
     "sampling_budget_offline.csv", "sampling_budget_offline_meta.csv",
-    "sobp_layers.csv",
+    "sobp_layers.csv", "phantom_regions.csv",
 ]
 FIGURES = ["sobp_g4.png", "transport_validation.png", "activity.png"]
 
@@ -139,10 +139,11 @@ source (emitters.csv) is shared. N_expected is for 1 Gy.
 
 ## Files
 emitters.csv, run_meta.csv, sampling_budget_{{inroom,fast,offline}}.csv (+ _meta),
-sobp_layers.csv, phantom_material_*.csv (+ _meta: composition, density, mu at
-511 keV for gamma transport + attenuation correction), figures/. Columns in
-SCHEMA.md, isotope codes in isotopes.csv. The full documentation (user guide,
-beam design, decay kinetics, source reference) is in docs/ as PDFs.
+sobp_layers.csv, phantom_regions.csv (the medium as priority-ordered regions),
+phantom_material_*.csv (+ _meta: composition, density, mu at 511 keV per region,
+for gamma transport + attenuation correction), figures/. Columns in SCHEMA.md,
+isotope codes in isotopes.csv. The full documentation (user guide, beam design,
+decay kinetics, source reference) is in docs/ as PDFs.
 """
     with open(path, "w") as f:
         f.write(text)
@@ -175,15 +176,18 @@ def main():
     write_readme(os.path.join(out, "README.md"), args.name, meta, emit, legend)
 
     # Phantom medium for 511 keV gamma transport + reconstruction attenuation
-    # correction: composition + mu, derived from the run's phantom_material.
+    # correction: composition + mu for each distinct material in
+    # phantom_regions.csv (one homogeneous material for the cylinder; brain/bone/
+    # soft tissue for the head).
+    regions = pd.read_csv(os.path.join(args.data_dir, "phantom_regions.csv"))
     n_mat = 0
-    mat_name = str(meta["phantom_material"])
-    if mat_name in MATERIALS:
-        write_material_csv(MATERIALS[mat_name], ANNIHILATION_keV, out)
-        n_mat = 2
-    else:
-        print(f"WARNING: phantom_material '{mat_name}' not in the registry; "
-              f"no phantom_material_*.csv written (add it to common/phantom_material.py).")
+    for mat_name in dict.fromkeys(regions["material"].astype(str)):  # distinct, ordered
+        if mat_name in MATERIALS:
+            write_material_csv(MATERIALS[mat_name], ANNIHILATION_keV, out)
+            n_mat += 2
+        else:
+            print(f"WARNING: material '{mat_name}' not in the registry; no "
+                  f"phantom_material file (add it to common/phantom_material.py).")
 
     # Documentation PDFs (built separately by latex/build_latex.py) -> docs/.
     docdir = os.path.join(out, "docs")

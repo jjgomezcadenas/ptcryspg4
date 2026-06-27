@@ -76,8 +76,9 @@ that would escape the phantom into air are killed at the boundary, so their
 | `n_protons` | int | primaries run |
 | `beam_energy_MeV` | float | nominal proton energy; for a SOBP run this is the fallback single energy (real spectrum in `sobp_layers.csv`) |
 | `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
-| `phantom_material` | string | Geant4 NIST name, e.g. `"G4_BRAIN_ICRP"` |
-| `phantom_diameter_mm`, `phantom_length_mm` | float | phantom cylinder size (standard 160 × 160) |
+| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` |
+| `phantom_material` | string | single material (cylinder, uniform head) or `"multi"` (the medium is per-region in `phantom_regions.csv`) |
+| `phantom_diameter_mm`, `phantom_length_mm` | float | overall bounding box (transverse, beam); detail in `phantom_regions.csv` |
 | `phantom_mass_g` | float | phantom mass (for dose) |
 | `edep_total_MeV` | float | total energy deposited in the phantom |
 | `dose_total_Gy` | float | whole-phantom dose for `n_protons` |
@@ -106,18 +107,15 @@ centre at the origin is co-registered with the `emitters.csv` source.
 **Medium / attenuation map.** The source is detector-independent, but **not
 medium-independent**: the downstream sim must propagate the 511 keV annihilation
 photons through the phantom (attenuation + scatter) and again needs μ(511 keV)
-for reconstruction attenuation correction. For the standard scenario this is
-fully specified by the three `run_meta.csv` scalars — `phantom_material` (a NIST
-name that resolves to exact composition + density) and `phantom_diameter_mm` /
-`phantom_length_mm` (a homogeneous cylinder on the +z axis, centred at origin,
-sharing the `emitters.csv` frame). No voxel map is needed while the phantom is
-homogeneous. **Heterogeneous phantoms are deferred** — a voxelized patient
-(lung, bone, cavities) cannot be described by those scalars; supporting it means
-freezing a companion voxel material/density map (the attenuation map, or the
-GDML geometry) into the scenario snapshot and adding a pointer column to
-`run_meta.csv`. Until then this schema is homogeneous-phantom-only by
-construction. The composition + μ are materialized into File 3 (below) by
-`common/phantom_material.py` and frozen into every scenario snapshot.
+for reconstruction attenuation correction. The medium is described by
+`phantom_regions.csv` (File 3) — a priority-ordered list of world-frame solids,
+each with a NIST material whose composition + μ are in
+`phantom_material_<material>.csv`. This covers **homogeneous** phantoms (the
+cylinder: one region) and **analytic multi-region** phantoms (the MIRD head:
+brain/skull/scalp ellipsoids). A fully **voxelized** patient (lung, bone,
+cavities) is still **deferred** — it would need a voxel material/density map (or
+GDML) rather than analytic solids. Materialized by `common/phantom_material.py`
++ Stage A, frozen into every scenario snapshot.
 
 ### `depth_dose.csv` — Bragg profile (1 mm z-bins)
 
@@ -183,18 +181,37 @@ Companion `sampling_realizations_<scenario>_meta.csv` (one wide row): `scenario`
 
 ---
 
-## File 3: phantom medium — `phantom_material_<name>.csv` (+ `_meta.csv`)
+## File 3: phantom medium — `phantom_regions.csv` + `phantom_material_<material>.csv`
 
-Written by `common/phantom_material.py` (and emitted into every snapshot by
-`tools/snapshot_scenario.py`). The 511 keV photon-transport / attenuation-
-correction data for the homogeneous phantom — the medium the source implies but
-`emitters.csv` does not carry (see the "Medium / attenuation map" note above).
-`<name>` is the `run_meta.csv` `phantom_material`, lower-cased and sanitized
-(e.g. `g4_brain_icrp`). Compositions are the authoritative Geant4 NIST
-definitions; `μ` is Compton/Klein-Nishina (coherent + photoelectric ~1–2 %, not
-included).
+The medium the source implies but `emitters.csv` does not carry (see the
+"Medium / attenuation map" note above): **where** each material is
+(`phantom_regions.csv`) and **what** each material is
+(`phantom_material_<material>.csv`). Written by Stage A + `phantom_material.py`,
+emitted into every snapshot by `tools/snapshot_scenario.py`.
 
-### `phantom_material_<name>.csv` — one row per element
+### `phantom_regions.csv` — one row per medium region (world frame)
+
+Priority-ordered solids in the `emitters.csv` world frame. A point gets the
+material of the first (lowest-`priority`) region that contains it, else air —
+brain-first ordering carves the skull shell, so no boolean solids are needed.
+
+| column | type | meaning |
+|--------|------|---------|
+| `region` | string | name (`brain`/`skull`/`scalp`; `phantom` for the cylinder) |
+| `priority` | int | lower = checked first |
+| `material` | string | NIST name → `phantom_material_<material>.csv` |
+| `solid` | string | `ellipsoid` \| `cylinder` |
+| `a_mm`, `b_mm`, `c_mm` | float | ellipsoid: semi-axes along x,y,z; cylinder: r, r, half-length |
+| `cx_mm`, `cy_mm`, `cz_mm` | float | region centre (world frame) |
+| `euler_x_deg`, `euler_y_deg`, `euler_z_deg` | float | intrinsic X-Y-Z rotation; **0 = axis-aligned** |
+
+Regions are axis-aligned here (Euler angles 0); ellipsoid membership is
+`((x−cx)/a)² + ((y−cy)/b)² + ((z−cz)/c)² ≤ 1`. The cylinder writes one row; the
+MIRD head writes brain/skull/scalp. Compositions are the authoritative Geant4
+NIST definitions; `μ` is Compton/Klein-Nishina (coherent + photoelectric ~1–2 %,
+not included).
+
+### `phantom_material_<material>.csv` — one row per element
 
 | column | type | meaning |
 |--------|------|---------|

@@ -26,6 +26,7 @@ class RunAction : public G4UserRunAction {
  private:
   void WriteEmittersCsv(const StageARun* run) const;
   void WriteMetaCsv(const StageARun* run) const;
+  void WriteRegionsCsv() const;
   void WriteDepthDoseCsv(const StageARun* run) const;
   void PrintSummary(const StageARun* run) const;
 

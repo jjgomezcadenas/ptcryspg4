@@ -1,0 +1,15 @@
+# Stage A — uniform-head geometry (Phase 2).
+# The SAME head envelope as mird_head (the scalp ellipsoid), but a single
+# homogeneous material (brain). Same shape as the 3-region head, so the pair
+# isolates the effect of the skull/scalp. Single lateral proton pencil.
+
+/run/numberOfThreads 18
+
+/stageA/phantom/geometry uniform_head
+/run/initialize
+
+/stageA/output/dir ../../data
+/random/setSeeds 12345 67890
+
+/run/printProgress 20000
+/run/beamOn 100000

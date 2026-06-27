@@ -137,7 +137,7 @@ Realistic field through the heterogeneous head, then freeze the scenario.
 | phase | branch | status |
 |---|---|---|
 | 1 | `geometry-proof` | **done, merged to main** (builds, no overlaps; ~1.9k emitters, all in-head; skull O15/C11=1.37 vs brain 2.17) |
-| 2 | `heterogeneous-medium` | next — scope first |
+| 2 | `heterogeneous-medium` | done — pending review (phantom_regions.csv + per-region μ; bone added; explicit `geometry` label; **3 cases**: cylinder / uniform_head / mird_head, same head envelope; docs + data-driven plot) |
 | 3 | `SOBP` | not started |
 
 Update this table and tick the boxes as each phase lands.

@@ -4,8 +4,21 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
+#include <vector>
+
 class G4LogicalVolume;
 class DetectorMessenger;
+
+// One medium region for phantom_regions.csv (Phase 2): a world-frame solid with
+// its NIST material. Ellipsoid uses (a,b,c) = semi-axes; cylinder uses
+// (a,b,c) = (radius, radius, half-length). Euler angles are intrinsic X-Y-Z in
+// degrees and are 0 here (the regions are axis-aligned in the world frame).
+struct PhantomRegion {
+  G4String name, material, solid;
+  G4double a, b, c;        // mm
+  G4double cx, cy, cz;     // mm, world centre
+  G4double ex, ey, ez;     // deg, intrinsic XYZ Euler (0 = axis-aligned)
+};
 
 // Stage A geometry (spec sec 2.2): a homogeneous right-circular cylinder, axis
 // along +z, that serves both as the β⁺ production target and as the passive
@@ -36,6 +49,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   const G4String& Geometry() const { return fGeometry; }
   G4String PhantomLabel() const;
 
+  // The medium regions (world frame), for phantom_regions.csv. Priority-ordered:
+  // the first region containing a point owns it. Valid after Construct().
+  const std::vector<PhantomRegion>& Regions() const { return fRegions; }
+
   // Beam placement helpers, read by the primary generator.
   G4double PhantomHalfLength() const { return fHalfZ; }
   G4double PhantomRadius() const { return fRadius; }
@@ -61,7 +78,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   // Build the homogeneous cylinder (default) or the MIRD head into worldLV; each
   // sets fPhantomLV (the scoring volume) and fBeamHalfExtent.
   void BuildCylinder(G4LogicalVolume* worldLV);
-  void BuildMirdHead(G4LogicalVolume* worldLV);
+  void BuildUniformHead(G4LogicalVolume* worldLV);  // 1-region brain ellipsoid
+  void BuildMirdHead(G4LogicalVolume* worldLV);     // 3-region scalp/skull/brain
 
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)
@@ -72,6 +90,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double fTargetRadius = 0.;            // target box, defaults set in the ctor
   G4double fTargetProxDepth = 0.;
   G4double fTargetDistDepth = 0.;
+  std::vector<PhantomRegion> fRegions;   // medium regions, filled in the builders
   DetectorMessenger* fMessenger = nullptr;
 };
 
