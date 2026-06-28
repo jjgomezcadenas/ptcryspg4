@@ -14,47 +14,38 @@
 \newcommand{\Ox}[1]{{}^{#1}\mathrm{O}}
 \newcommand{\Nt}[1]{{}^{#1}\mathrm{N}}
 
-\title{Generating the positron-emitter source for proton-therapy PET\\
-\large A user guide to the \texttt{ptcryspg4} pipeline}
-\author{}
-\date{\today}
+\title{Generating the positron-emitter source for proton-therapy PET using \texttt{ptcryspg4}}
+\author{J.J. G\'omez-Cadenas\\\texttt{jjgomezcadenas@gmail.com}}
+\date{Documentation last rebuild: \today}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This guide explains what the \texttt{ptcryspg4} pipeline does, the physics behind
-it, and how to use it. The pipeline simulates a proton beam stopping in a phantom,
+The package \texttt{ptcryspg4} simulates a proton beam stopping in a phantom,
 records where positron emitters are created and where their positrons annihilate,
-and works out how many of those decays a PET scanner would actually measure. The
-result is a small set of CSV files that describe the annihilation source. They say
-nothing about any detector, so any PET detector simulation can read them. This tool
-produces the source; it does not model a detector.
+producing gamma pairs that can be detected by a PET scanner. The software defines a set of phantoms (currently a simple cylinder, an uniform ``head'' phantom and an MIRD ``head'' phantom are implemented), runs a Geant4 simulation of the proton beam traversing the phantom and outputs a set of CSV files that describe the resulting annihilation source (e.g., the trail of 2-$\gamma$ emissions that follows the proton beam) and the normalisation to a given (specified dose).  The result product is a ``scenario'' (phantom, beam, dose and the resulting output) that can be read out by a downstream PET simulation. 
 \end{abstract}
 
 \section{Tracking proton dose with \texorpdfstring{$\bplus$}{beta+}}
 \label{sec:physics-intro}
 
-A proton beam deposits most of its dose in a sharp peak at the end of its range
-(the Bragg peak), which is what makes proton therapy attractive: the dose can be
-concentrated on a tumour and spared beyond it. But that same sharpness makes the
-treatment sensitive to where exactly the beam stops, and that stopping point is
-hard to measure directly. Positron emission tomography offers an indirect handle.
+Conventional, photon-based radiation therapy deposits a high dose where the beam enters the patient, weakening gradually as it traverses tissue. A proton beam instead releases most of its energy near the end of its track, at the so-called Bragg peak; combining protons of several energies produces a spread-out Bragg peak (SOBP). The proton entrance dose is therefore much lower and no dose is deposited beyond the target volume. This lets proton therapy shape the high-dose region to the three-dimensional outline of the target while sparing the surrounding tissue, making it preferable for tumours with irregular shapes or close to critical structures. Its integral dose is also much smaller, about 60\% below that of photon therapy, which favours its use in paediatric patients, where the risk of a secondary tumour induced by dose to normal tissue is a concern \cite{parodi2023, 
+parodi2024}.
 
-When a proton beam stops in tissue, a few protons knock nucleons out of carbon and
-oxygen nuclei and leave short-lived nuclei behind. Some of those nuclei decay by
-positron emission ($\bplus$): the positron travels a fraction of a millimetre, meets
-an electron, and the pair annihilates into two \SI{511}{keV} photons emitted
-back-to-back. Those photon pairs are what a PET scanner records. Their spatial
-pattern follows the proton range, so measuring where the annihilations happen tells
-you where the beam stopped --- this is proton-range verification.
+The steep dose fall-off at the Bragg peak makes planning uncertainties more consequential than in photon therapy. A range error can leave part of a tumour with no dose at all (under-shooting), or deliver a full dose to the normal tissue lying distal to the beam (over-shooting). Verification is therefore of utmost importance, both to exploit the technique and to assess treatment-planning safety margins. Since proton beams stop completely in the body, direct in vivo monitoring is difficult, and at present the only practical approach is PET imaging of the proton-induced positron emitters.
+
+During irradiation, positron emitters are produced along the beam path through nuclear fragmentation, leaving a radiotracer footprint that a PET scanner can image. In soft tissue the main species are $^{11}$C, $^{13}$N and $^{15}$O. The last dominates right after irradiation, owing to the high oxygen density of tissue, but its short half-life (about 2 minutes) means $^{11}$C takes over after a few minutes\cite{zhu2013proton}.
+
+Dose deposition and positron-emitter production are distinct processes: dose is deposited electromagnetically, by ionising and exciting atomic electrons, whereas emitter production proceeds through nuclear reactions whose yield depends on proton fluence, energy-dependent reaction cross sections and target-nuclei density. The PET activity distribution is thus quite different from the dose distribution, with almost no activity in the $\sim$1~cm before the Bragg peak, owing to nuclear reaction thresholds; the measured activity must therefore be compared with a predicted distribution.
 
 \subsection{Induced activity and its time evolution}
 \label{sec:activity}
 
-For protons, only the target nuclei fragment (the proton itself cannot), so the
-relevant emitters in soft tissue are $\Ox{15}$ ($T_{1/2}\approx\SI{2}{min}$),
-$\Cl{11}$ ($T_{1/2}\approx\SI{20}{min}$), $\Nt{13}$ ($T_{1/2}\approx\SI{10}{min}$),
+Protons traversing biological tissue undergo nuclear reactions, such as for example,
+$p + \Ox{16} \rightarrow \Ox{15} + n + p$, followed by 
+$\Ox{15} \rightarrow \Nt{15} + \beta^+ + \nu_e$ ($T_{1/2} = 122 s \approx\SI{2}{min}$). 
+Other relevant $\beta^+$ emitters are $\Cl{11}$ ($T_{1/2}\approx\SI{20}{min}$), $\Nt{13}$ ($T_{1/2}\approx\SI{10}{min}$),
 and the shorter-lived $\Ox{14}$ ($T_{1/2}=\SI{70.6}{s}$) and $\Cl{10}$
 ($T_{1/2}=\SI{19.3}{s}$)~\cite{zhu2013proton,parodi2008comparison}. Because the
 signal is a mixture of species with very different half-lives, the measurement
@@ -64,14 +55,15 @@ depends strongly on when the scanner acquires.
 \centering
 \includegraphics[width=0.8\linewidth]{activity.png}
 \caption{Activity of the main positron-emitting species as a function of time after
-irradiation, from our own Geant4 simulation of a \SI{1}{Gy} proton field in an ICRP
+irradiation, from a Geant4 simulation of a \SI{1}{Gy} proton field in an ICRP
 brain-tissue phantom. The shaded band marks a representative in-room acquisition
 window. The shortest-lived emitter, $\Cl{10}$ ($T_{1/2}=\SI{19.3}{s}$), has
 effectively vanished before the window opens and is not drawn.}
 \label{fig:activity}
 \end{figure}
 
-Figure~\ref{fig:activity} shows the activity by species after a \SI{1}{Gy} field.
+Figure~\ref{fig:activity} shows the activity by species after a \SI{1}{Gy} field from a Geant4 simulation of a \SI{1}{Gy} proton field in an ICRP
+brain-tissue phantom. 
 The total peaks at $\sim$\SI{1.34}{MBq} at the end of the beam, dominated by
 $\Ox{15}$ at $\sim$\SI{1.2}{MBq}. But $\Ox{15}$ decays with a \SI{2}{min} half-life:
 by \SI{10}{min} it has fallen to the level of $\Cl{11}$, and by $\sim$\SI{15}{min}
@@ -80,12 +72,14 @@ $\Cl{10}$ within about a minute, $\Ox{14}$ within a few. The $\Cl{11}$ component
 nearly flat ($T_{1/2}\approx\SI{20}{min}$) at $\sim$\SI{0.06}{MBq} and comes to
 dominate after $\sim$\SIrange{10}{13}{min}.
 
-This is why the acquisition instant matters. An in-room scan at
-$\sim$\SI{2}{min} still sees $\sim$\SI{0.7}{MBq}, with $\Ox{15}$ dominant; an
-offline scan at $\geq$\SI{15}{min} sees only $\sim$\SI{0.04}{MBq},
-essentially $\Cl{11}$ alone --- more than an order of magnitude less signal. Since
-$\Ox{15}$ also has the longest positron range, the in-room case is both the
-brightest and the one where the positron-range blur matters most.
+Several consequences follow from this decay pattern. The first, and more obvious, is that the scan must start as soon as possible after the beam stops (in-beam scan may not be practical, due to backgrounds); the second is that every pair of photons is precious. These are, on itself, already somewhat contradictory requirements. To start the scan {\em immediately after} the beam stops, one needs an in-line PET. But such object needs to let the beam through, and thus it calls for an open geometry, which has poor geometrical acceptance. The opposite approach (take the patient to an off-room PET), is not practical either. After some five minutes, the activity has decreased enormously (not only due to the decay of the isotopes but also due to biological washout). An intermediate solution (in-room PET), may be an affordable compromise. For example,   
+An in-room scan at
+$\sim$\SI{2}{min} still sees $\sim$\SI{0.7}{MBq}, with $\Ox{15}$ sill dominant; 
+an offline scan at $\geq$\SI{15}{min} sees only $\sim$\SI{0.04}{MBq},
+essentially $\Cl{11}$ alone --- more than an order of magnitude less signal. 
+%Since
+%$\Ox{15}$ also has the longest positron range, the in-room case is both the
+%brightest and the one where the positron-range blur matters most.
 
 \subsection{Decay kinetics and the measured counts}
 \label{sec:kinetics}
@@ -120,34 +114,51 @@ the beam and the start of acquisition.
 decay while the scanner is acquiring.
 \end{itemize}
 The full derivation, including pulsed (synchrotron) deliveries, is in
-\texttt{03\_decay\_kinetics.tex}. Equation~\eqref{eq:nmeas} is exactly what turns the
-\emph{produced} emitters of the proton run into the \emph{measured} counts; it is
-applied in Sec.~\ref{sec:handoff}.
+\texttt{03\_decay\_kinetics.tex}. 
+%Equation~\eqref{eq:nmeas} is exactly what turns the
+%\emph{produced} emitters of the proton run into the \emph{measured} counts; it is
+%applied in Sec.~\ref{sec:handoff}.
 
-\subsection{The source we generate}
+\subsection{$\beta^+$ Activity vs proton dose}
 \label{sec:source-picture}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{transport_validation.png}
-\caption{The generated source, from a \SI{1}{Gy} SOBP field in the brain phantom
-(\texttt{analysis\_transport/validate\_transport.py}). The panels show, among other
-diagnostics, the production map along the beam (where the activity is created,
-peaking just before the Bragg peak), the per-species spatial distributions, the
-positron-range distributions per isotope (the physical resolution floor, largest for
-$\Ox{15}$), and the depth--dose Bragg curve. This is the detector-independent source
-the pipeline hands downstream.}
+\includegraphics[width=\linewidth]{dose_activity.png}
+\caption{Dose (red) and total $\bplus$ activity (blue) for a \SI{100}{MeV} proton
+pencil beam propagating in biological tissue, both in arbitrary units (each curve
+normalised to its own peak). The dose rises slowly and then peaks sharply at the
+Bragg peak, whereas the $\bplus$ activity is roughly flat along the track and falls
+away just before it.}
 \label{fig:source}
 \end{figure}
 
-Figure~\ref{fig:source} shows what the pipeline actually produces for the standard
-field. Two features set the limits of any range measurement built on this source.
-First, the activity is created a few millimetres before the Bragg peak,
-because making an emitter needs a proton above the reaction threshold --- so the
-activity distal edge tracks the range but sits slightly proximal to it. Second, the
-positron travels a short distance before annihilating, which blurs the source; that
-blur is largest for $\Ox{15}$, the dominant in-room species. Both are built into the
-files (Sec.~\ref{sec:production}), so a detector study inherits them automatically.
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=\linewidth]{transport_validation.png}
+%\caption{The generated source, from a \SI{1}{Gy} SOBP field in the brain phantom
+%(\texttt{analysis\_transport/validate\_transport.py}). The panels show, among other
+%diagnostics, the production map along the beam (where the activity is created,
+%peaking just before the Bragg peak), the per-species spatial distributions, the
+%positron-range distributions per isotope (the physical resolution floor, largest for
+%$\Ox{15}$), and the depth--dose Bragg curve. This is the detector-independent source
+%the pipeline hands downstream.}
+%\label{fig:source}
+%\end{figure}
+
+Consider, for illustration purposes, a pencil beam depositing a dose $D$ in biological tissue (Figure~\ref{fig:source}). Notice the sharp Bragg peak that defines the maximum of dose deposition. The figure also shows the total $\beta^+$ activity (this would correspond to the measurement of an ideal PET starting the acquisition right after the beam stops).
+
+Notice that the activity curve and the dose behave in different ways. While the proton beam propagates through the tissue, before the target region (and the Bragg peak), the dose is low and slowly rising, and the $\beta^+$ activity is relatively flat. As the proton beam goes through the Bragg peak, it quickly loses energy, quenching the nuclear reactions. Therefore the $\beta^+$ activity drops just where the Bragg ionisation rises.
+
+%Figure~\ref{fig:source} shows what the pipeline actually produces for the standard
+%field. Two features set the limits of any range measurement built on this source.
+%First, the activity is created a few millimetres before the Bragg peak,
+%because making an emitter needs a proton above the reaction threshold --- so the
+%activity distal edge tracks the range but sits slightly proximal to it. Second, the
+%positron travels a short distance before annihilating, which blurs the source; that
+%blur is largest for $\Ox{15}$, the dominant in-room species. Both are built into the
+%files (Sec.~\ref{sec:production}), so a detector study inherits them automatically.
 
 \section{Simulating the \texorpdfstring{$\bplus$}{beta+} trail}
 \label{sec:pipeline}

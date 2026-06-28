@@ -8,6 +8,7 @@ frozen scenario always ships the figures appropriate to what it actually is.
 
 Dispatch:
   any geometry          transport_validation.png  (Stage-A dashboard)
+                        dose_activity.png         (dose vs beta+ activity overlay)
                         activity.png              (decay/activity curves)
   cylinder              + sobp_g4.png             (realized depth-dose plateau)
   uniform_head/mird_head + mird_head.png          (phantom + beam + emitter trail)
@@ -53,6 +54,7 @@ def main():
     # dashboard, activity curves.
     run_plotter("analysis_transport/plot_phantom.py", args.run_dir)
     run_plotter("analysis_transport/plot_depth_dose.py", args.run_dir)
+    run_plotter("analysis_transport/plot_dose_activity.py", args.run_dir)
     run_plotter("analysis_transport/validate_transport.py", args.run_dir)
     run_plotter("decay_sampling/activity_plot.py", args.run_dir)
     # Geometry-specific control plot.
