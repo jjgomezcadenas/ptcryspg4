@@ -130,11 +130,6 @@ def write_readme(path, name, meta, emit, legend, data_files):
         legrows = "- (no timing budget frozen yet; run decay_sampling/budget.py)"
 
     files_line = ", ".join(data_files)
-    # The Parodi Table 2 yield check is for the SOBP target-volume delivery; a
-    # single pencil paints a thin track, so its integral yield is not comparable.
-    parodi_note = ("Parodi 2008 Table 2 comparison: about 2.2x overall." if has_sobp
-                   else "(Single-pencil run: thin-track yields, not comparable to "
-                        "the Parodi Table 2 SOBP integrals.)")
 
     text = f"""# {name}
 
@@ -156,12 +151,9 @@ z = {-half_z:g} mm. Depth from the entrance maps as z = depth - {half_z:g} mm, s
 target box sits at z in [{z_lo:g}, {z_hi:g}] mm. emitters.csv positions are in this frame.
 
 ## Normalization — where the dose comes from
-The clinical dose is set at the handoff. Three quantities, three roles:
+The clinical dose is set at the handoff.
 
-- **Protons simulated ({int(m['n_protons']):g})** — the Monte-Carlo statistics
-  knob: more protons means less noise. The dose and the per-Gy yields are ratios
-  in which the proton count cancels, so they hold at any statistics and Stage A
-  runs once, reused for every detector.
+- **Protons simulated ({int(m['n_protons']):g})** — statistics precision in G4.
 - **Target dose ({t_dose:.2e} Gy)** — a measured output of the run: the dose these
   protons deposited in the target box.
 - **Clinical dose D (1 Gy by default)** — the prescription, applied at the handoff
@@ -171,7 +163,6 @@ The clinical dose is set at the handoff. Three quantities, three roles:
 
 ## Yields per 1 Gy
 {ystr} (total {total:.2e})
-{parodi_note}
 
 ## Timing scenarios (budgets)
 The acquisition timing is the only difference between budgets; the spatial
