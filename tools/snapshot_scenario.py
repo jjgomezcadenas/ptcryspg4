@@ -156,20 +156,18 @@ z = {-half_z:g} mm. Depth from the entrance maps as z = depth - {half_z:g} mm, s
 target box sits at z in [{z_lo:g}, {z_hi:g}] mm. emitters.csv positions are in this frame.
 
 ## Normalization — where the dose comes from
-The clinical dose is **not** an input to the Geant4 run; it is applied at the
-handoff. Three quantities, three roles:
+The clinical dose is set at the handoff. Three quantities, three roles:
 
-- **Protons simulated ({int(m['n_protons']):g})** — a Monte-Carlo statistics knob
-  only. More protons means less noise; the dose and the per-Gy yields are
-  unchanged (they are ratios in which the proton count cancels). This is why
-  Stage A runs once and is reused for every detector.
-- **Target dose ({t_dose:.2e} Gy)** — a *measured output* of the run, the dose
-  these protons happened to deposit in the target box (far below 1 Gy). Not a
-  prescription.
+- **Protons simulated ({int(m['n_protons']):g})** — the Monte-Carlo statistics
+  knob: more protons means less noise. The dose and the per-Gy yields are ratios
+  in which the proton count cancels, so they hold at any statistics and Stage A
+  runs once, reused for every detector.
+- **Target dose ({t_dose:.2e} Gy)** — a measured output of the run: the dose these
+  protons deposited in the target box.
 - **Clinical dose D (1 Gy by default)** — the prescription, applied at the handoff
   by `budget.py --dose`. Yields are linear in dose, so each produced count is
-  rescaled `P_j(D) = count_j · D / target_dose`. Equivalently, delivering 1 Gy
-  to the box takes Np(1 Gy) = {float(m['Np_per_Gy']):.3e} protons.
+  rescaled `P_j(D) = count_j · D / target_dose`. Delivering 1 Gy to the box takes
+  Np(1 Gy) = {float(m['Np_per_Gy']):.3e} protons.
 
 ## Yields per 1 Gy
 {ystr} (total {total:.2e})
@@ -181,10 +179,9 @@ source (emitters.csv) is shared. N_expected is for 1 Gy.
 {legrows}
 
 ## How to use this source
-> Two counts, do not confuse them. The {n_emit:g} rows in emitters.csv are the
-> produced source's *spatial shape*, tied to this run's tiny target dose — they
-> are NOT "the decays a 1-Gy scan sees." The measured number for the clinical
-> dose is N_expected (the budget below), realized by the Poisson draw in step 2.
+emitters.csv holds {n_emit:g} annihilation points: the produced source's spatial
+shape at this run's target dose. The measured count for the clinical dose is
+N_expected (the budget below), realized by the Poisson draw in step 2.
 
 1. Pick a timing budget; read N_expected per isotope from sampling_budget_<s>.csv.
 2. For each isotope j, draw M_j ~ Poisson(N_expected_j) annihilation points by
