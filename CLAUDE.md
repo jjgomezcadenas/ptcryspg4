@@ -11,6 +11,14 @@ talk it through in prose: lay out the options and trade-offs conversationally,
 give a recommendation, and ask one question at a time. Options are welcome;
 canned option menus are not.
 
+**No defensive writing** — in prose, docs, comments, and especially LaTeX. State
+what something *is*, not what it is *not*. Drop reassurance and contrast-with-the-
+wrong-thing: "the ratio is computed from the simulation" (not "…, never assumed");
+"a uniform medium gives a clean ground truth" (not "…, free of heterogeneity").
+The reader does not need to be told the cheat we avoided or the doubt we
+anticipated — just say the positive fact. This applies to anything written for a
+person to read.
+
 ## Purpose
 
 Produce the **positron-emitter source** that a PET detector simulation needs for

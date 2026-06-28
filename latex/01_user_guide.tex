@@ -62,8 +62,8 @@ effectively vanished before the window opens and is not drawn.}
 \label{fig:activity}
 \end{figure}
 
-Figure~\ref{fig:activity} shows the activity by species after a \SI{1}{Gy} field from a Geant4 simulation of a \SI{1}{Gy} proton field in an ICRP
-brain-tissue phantom. 
+Figure~\ref{fig:activity} shows the activity by species from a Geant4 simulation of
+a \SI{1}{Gy} proton field in an ICRP brain-tissue phantom.
 The total peaks at $\sim$\SI{1.34}{MBq} at the end of the beam, dominated by
 $\Ox{15}$ at $\sim$\SI{1.2}{MBq}. But $\Ox{15}$ decays with a \SI{2}{min} half-life:
 by \SI{10}{min} it has fallen to the level of $\Cl{11}$, and by $\sim$\SI{15}{min}
@@ -72,11 +72,7 @@ $\Cl{10}$ within about a minute, $\Ox{14}$ within a few. The $\Cl{11}$ component
 nearly flat ($T_{1/2}\approx\SI{20}{min}$) at $\sim$\SI{0.06}{MBq} and comes to
 dominate after $\sim$\SIrange{10}{13}{min}.
 
-Several consequences follow from this decay pattern. The first, and more obvious, is that the scan must start as soon as possible after the beam stops (in-beam scan may not be practical, due to backgrounds); the second is that every pair of photons is precious. These are, on itself, already somewhat contradictory requirements. To start the scan {\em immediately after} the beam stops, one needs an in-line PET. But such object needs to let the beam through, and thus it calls for an open geometry, which has poor geometrical acceptance. The opposite approach (take the patient to an off-room PET), is not practical either. After some five minutes, the activity has decreased enormously (not only due to the decay of the isotopes but also due to biological washout). An intermediate solution (in-room PET), may be an affordable compromise. For example,   
-An in-room scan at
-$\sim$\SI{2}{min} still sees $\sim$\SI{0.7}{MBq}, with $\Ox{15}$ sill dominant; 
-an offline scan at $\geq$\SI{15}{min} sees only $\sim$\SI{0.04}{MBq},
-essentially $\Cl{11}$ alone --- more than an order of magnitude less signal. 
+Two consequences follow from this decay pattern. First, the scan must start as soon as possible after the beam stops, since an in-beam scan can be impractical because of backgrounds. Second, every photon pair is precious. These two requirements are somewhat contradictory. An immediate scan requires an in-line PET, which must let the beam through; the resulting open geometry has poor geometrical acceptance. The opposite approach, moving the patient to an off-room PET, is also impractical: after about five minutes the activity has fallen sharply, through both isotope decay and biological washout. An in-room PET --- a full-ring scanner in the treatment room --- is an affordable compromise. An in-room scan at $\sim$\SI{2}{min} still sees $\sim$\SI{0.7}{MBq}, with $\Ox{15}$ still dominant; an offline scan at $\geq$\SI{15}{min} sees only $\sim$\SI{0.04}{MBq}, essentially $\Cl{11}$ alone --- more than an order of magnitude less signal.
 %Since
 %$\Ox{15}$ also has the longest positron range, the in-room case is both the
 %brightest and the one where the positron-range blur matters most.
@@ -149,15 +145,15 @@ distal dose edge; that fall-off, $A(x)\to 0$, marks the beam's distal reach.}
 %\label{fig:source}
 %\end{figure}
 
-Consider, for illustration purposes, a pencil beam depositing a dose $D$ in biological tissue (left panel of Figure~\ref{fig:source}). Notice the sharp Bragg peak that defines the maximum of dose deposition. The figure also shows the total $\beta^+$ activity (this would correspond to the measurement of an ideal PET starting the acquisition right after the beam stops).
+The left panel of Figure~\ref{fig:source} shows a pencil beam depositing a dose $D$ in biological tissue. The sharp Bragg peak defines the maximum of dose deposition. The figure also shows the total $\beta^+$ activity, which would correspond to an ideal PET measurement starting acquisition immediately after the beam stops.
 
-Notice that the activity curve and the dose behave in different ways. While the proton beam propagates through the tissue, before the target region (and the Bragg peak), the dose is low and slowly rising, and the $\beta^+$ activity is relatively flat. As the proton beam goes through the Bragg peak, it quickly loses energy, quenching the nuclear reactions. Therefore the $\beta^+$ activity drops just where the Bragg ionisation rises, and reaches zero in the trailing edge of the peak. Thus, nominally, if $A(x)$ is the activity along the beam line, the estimator of the distal reach of the beam is $x' \rightarrow A(x') =0$.
+The activity curve and the dose behave differently. As the proton beam propagates through the tissue, before the target region (and the Bragg peak), the dose is low and slowly rising, and the $\beta^+$ activity is relatively flat. At the Bragg peak the beam quickly loses energy, quenching the nuclear reactions, so the $\beta^+$ activity drops just where the Bragg ionisation rises and reaches zero in the trailing edge of the peak. Formally, if $A(x)$ is the activity along the beam line, the distal reach of the beam is estimated by the point $x'$ at which $A(x')=0$.
 
-The right panel of Figure~\ref{fig:source} repeats the exercise for a spread-out Bragg peak --- the field actually used in treatment, where several proton energies combine to deliver a flat dose plateau across the target volume. The same logic applies: the $\beta^+$ activity is roughly flat across the plateau and falls to zero just past its distal edge, so $A(x) \rightarrow 0$ now estimates the distal edge of the target rather than a single range.
+The right panel of Figure~\ref{fig:source} shows the same comparison for a spread-out Bragg peak --- the field used in treatment, where several proton energies combine to deliver a flat dose plateau across the target volume. The same reasoning holds: the $\beta^+$ activity is roughly flat across the plateau and falls to zero just past its distal edge, so $A(x) \rightarrow 0$ marks the distal edge of the target volume.
 
-Several real-life complications must be added to this simple picture.  The first is that a PET scanner does not measure directly activity, just pairs of gammas. Activity must be reconstructed from the data, a non-trivial task. Furthermore, a PET does not measure all produce gamma pairs, but only a fraction, once we fold it geometrical and detector efficiency. Finally, $\beta^+$ reach (the distance the positrons travel before annihilation) introduce a genuine physical uncertainty in the determination of the distal  edge of the beam. 
+Several real-life complications must be added to this simple picture. First, a PET scanner does not directly measure activity, only pairs of gammas; the activity must be reconstructed from the data, a non-trivial task. Second, a scanner records only a fraction of the produced gamma pairs, once geometrical and detector efficiency are folded in. Finally, the $\beta^+$ reach --- the distance a positron travels before annihilation --- introduces a genuine physical uncertainty in the determination of the distal edge of the beam.
 
-The examples we have just described is also idealised (a cylinder filled with biological tissue). In real life, the proton beam propagates through an heterogenous medium, complicating further the picture.  
+The example just described is also idealised: a cylinder filled with biological tissue. In practice the proton beam propagates through a heterogeneous medium, which complicates the picture further.
 
 
 \section{Simulating the \texorpdfstring{$\bplus$}{beta+} trail in \texttt{ptcryspg4}}
@@ -167,19 +163,18 @@ The approach is to run a Geant4 simulation of a proton beam stopping in a phanto
 the run:
 
 \begin{itemize}[nosep]
-\item \textbf{A beam} --- protons; either a simple pencil beam of the more realistic SOBP (Spread Out Breagg Peak) case.  
+\item \textbf{A beam} --- protons; either a simple pencil beam or the more realistic SOBP (Spread-Out Bragg Peak) case.
 \item \textbf{A phantom} --- a body of material that stands in for the region being
-treated, chosen to represent the clinical problem. Currently, \texttt{ptcryspg4} implements  a homogeneous brain-tissue cylinder (used for the examples above), an homogenous head, filled with brain tissue, and a MIRD-head, using three different materials (scalp, bone and brain tissus). 
+treated, chosen to represent the clinical problem. Currently, \texttt{ptcryspg4} implements a homogeneous brain-tissue cylinder (used for the examples above), a homogeneous head filled with brain tissue, and a MIRD head built from three different materials (scalp, bone and brain tissue).
 \end{itemize}
 
-The code, then, performs the following actions:  
+The code performs two steps:
 \begin{enumerate}[nosep]
 \item \textbf{Propagation and production --- in space.} Geant4 transports the protons
 and records where each positron emitter is produced and where its positron
-annihilates. 
+annihilates.
 \item \textbf{Lifetime.} An analytic step folds in the radioactive
-half-lives and the scanner's acquisition timing (Sec.~\ref{sec:kinetics}), computing for each one of the emission points the number of decays corresponding to a given dose. 
-We call this second step the handoff.
+half-lives and the scanner's acquisition timing (Sec.~\ref{sec:kinetics}), computing for each emission point the number of decays that corresponds to a given dose. This second step is the handoff.
 \end{enumerate}
 
 The handoff takes the (scanner-independent) source produced by
@@ -206,29 +201,44 @@ Geant4 and applies ion decay and timing, preparing the count budget for a subseq
 \subsection{The beam}
 \label{sec:beam}
 The standard beam is a spread-out Bragg peak (SOBP): several proton
-energies combined so the dose is flat across a target volume rather than a single
-sharp peak. The energy layers and their weights are designed separately; the method
+energies combined so the dose is flat across the whole target volume. The energy layers and their weights are designed separately; the method
 and the commands are in \texttt{02\_beam\_design.tex} and \texttt{field\_design/}. A single
 mono-energetic pencil beam is also available.
 
 \subsection{The phantom}
 \label{sec:phantom}
-For the standard study the phantom is a cylinder of one homogeneous material, with its
-axis along the beam. A homogeneous phantom gives a clean ground truth and avoids
-tissue-heterogeneity and washout effects. A layered phantom can be substituted when
-those effects are the point.
+\texttt{ptcryspg4} provides three phantoms, in increasing order of realism. All
+share the same beam axis ($z$) and the same target-box dose normalisation; they
+differ in shape and in how many materials they contain.
 
-The standard material is brain tissue (\texttt{G4\_BRAIN\_ICRP}) in a cylinder
-\SI{16}{cm} across and \SI{16}{cm} long --- a simple stand-in for a head, chosen so
-the isotope yields can be checked against the published numbers of Parodi et al.\
-(2008)~\cite{parodi2008comparison}. The material is selectable: soft tissue, PMMA
-(carbon-rich), and water (which gives an almost pure-$\Ox{15}$ source) are also
+\paragraph{Cylinder (the standard).} A single homogeneous cylinder with its axis
+along the beam. This is the default for the reference study: a uniform
+medium gives a clean ground truth, the simplest case before tissue heterogeneity
+and biological washout enter the picture. The standard material is brain tissue (\texttt{G4\_BRAIN\_ICRP}) in a
+cylinder \SI{16}{cm} across and \SI{16}{cm} long --- a simple stand-in for a head,
+chosen so the isotope yields can be checked against the published numbers of Parodi
+et al.\ (2008)~\cite{parodi2008comparison}. The material is selectable: soft tissue,
+PMMA (carbon-rich), and water (which gives an almost pure-$\Ox{15}$ source) are also
 available. The carbon and oxygen content sets the mix of isotopes; the
-$\Ox{15}/\Cl{11}$ ratio is read from the simulation, never assumed.
+$\Ox{15}/\Cl{11}$ ratio is computed directly from the simulation.
+
+\paragraph{Uniform head.} A head-shaped ellipsoid (about \SI{17}{cm} and
+\SI{20}{cm} across, \SI{14}{cm} along the beam) filled with a single material, brain
+tissue by default. It keeps the homogeneous, clean-ground-truth character of the
+cylinder but adds the realistic outer shape, so the beam now traverses a varying
+thickness of material across its cross-section.
+
+\paragraph{MIRD head.} A layered, anatomically realistic head built from three
+nested ellipsoids: a soft-tissue scalp (\texttt{G4\_TISSUE\_SOFT\_ICRP}), a
+cortical-bone skull (\texttt{G4\_BONE\_CORTICAL\_ICRP}), and a brain-tissue core
+(\texttt{G4\_BRAIN\_ICRP}). This is the heterogeneous case: the dense bone layer
+shifts the proton range, so the SOBP field has to be designed through the actual
+scalp/skull/brain path (in water-equivalent depth) to land the dose plateau on the
+target. It is the realistic counterpart to the homogeneous phantoms above.
 
 \subsection{The physics}
 \label{sec:physics}
-We use \texttt{QGSP\_BIC\_HP}, a hadronic physics list suited to proton-induced
+The physics list is \texttt{QGSP\_BIC\_HP}, a hadronic list suited to proton-induced
 isotope production, with electromagnetic physics and radioactive decay switched on\footnote{Geant4's isotope-production cross sections are not
 as finely tuned as those of FLUKA or dedicated data-driven models, so the absolute yields carry
 some bias. The same bias applies to every detector, so it cancels in a ranking; the source
@@ -240,7 +250,7 @@ As a proton slows down it occasionally undergoes a nuclear reaction with a carbo
 oxygen nucleus, for example $\Ox{16}(p,pn)\Ox{15}$ or $\Cl{12}(p,pn)\Cl{11}$. The
 leftover nucleus, created essentially at rest, is sometimes one of the positron
 emitters in Table~\ref{tab:iso}. It later decays, the positron is transported over
-its short range, and it annihilates. For each emitter we store two points:
+its short range, and it annihilates. For each emitter, two points are recorded:
 \begin{itemize}[nosep]
 \item the \textbf{production point} --- where the emitter was made (the truth map of
 where the beam created activity);
@@ -250,8 +260,8 @@ where the beam created activity);
 The distance between the two is the positron range for that event, so the file already
 carries the resolution floor that the positron range imposes.
 
-The decay time is not stored. An emitter does not move between production and decay, so
-where it annihilates does not depend on when, and the timing is handled by the handoff
+An emitter stays put between production and decay, so its annihilation point is fixed
+by geometry alone, and its timing is supplied later by the handoff
 (Sec.~\ref{sec:handoff}). (For completeness: the prompt de-excitation $\gamma$ of
 $\Cl{10}$ and $\Ox{14}$, and secondary neutrons, are not tracked here --- small
 omissions, noted in Sec.~\ref{sec:caveats}.)
@@ -276,20 +286,20 @@ $\Ox{14}$ & \SI{70.6}{s}  & 1.81 & prompt $\gamma$ \\
 
 \subsection{Setting the absolute scale}
 \label{sec:norm}
-The number of protons we simulate is arbitrary, so on its own the emitter count has
-no absolute meaning. To fix the scale we also score the dose deposited in a target box
-inside the phantom. The ratio of the two --- emitters per unit dose --- lets us quote
-production for a clinical dose. The standard scale is 1 Gy in the target:
-from the simulated dose we compute how many protons that would take
-($N_p(\SI{1}{Gy})$) and scale the production accordingly. This is the bridge from
+The number of simulated protons is arbitrary, so on its own the emitter count has
+no absolute meaning. To fix the scale, the dose deposited in a target box
+inside the phantom is also scored. The ratio of the two --- emitters per unit dose ---
+gives the production for a clinical dose. The standard scale is 1 Gy in the target:
+from the simulated dose, the number of protons needed to deliver it
+($N_p(\SI{1}{Gy})$) is computed, and the production is scaled accordingly. This is the bridge from
 ``some simulated protons'' to ``the absolute number of emitters for a 1 Gy
-treatment'', and it is the $P_j$ that Eq.~\eqref{eq:nmeas} consumes.
+treatment'', and it provides the $P_j$ that Eq.~\eqref{eq:nmeas} consumes.
 
 \section{Step 2 --- the handoff (how many decays are measured)}
 \label{sec:handoff}
 
-The proton run tells us how many emitters are \emph{produced}. A scanner measures
-fewer, because it starts after the beam and watches for a finite time. The handoff
+The proton run gives the number of emitters \emph{produced}. A scanner measures
+fewer, because it starts after the beam and acquires for a finite time. The handoff
 applies Eq.~\eqref{eq:nmeas} from Sec.~\ref{sec:kinetics} to turn the produced count
 $P_j$ into the measured count $N_j$, for a chosen timing.
 
