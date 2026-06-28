@@ -125,11 +125,13 @@ The full derivation, including pulsed (synchrotron) deliveries, is in
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{dose_activity.png}
-\caption{Dose (red) and total $\bplus$ activity (blue) for a \SI{100}{MeV} proton
-pencil beam propagating in biological tissue, both in arbitrary units (each curve
-normalised to its own peak). The dose rises slowly and then peaks sharply at the
-Bragg peak, whereas the $\bplus$ activity is roughly flat along the track and falls
-away just before it.}
+\caption{Dose (red) and total $\bplus$ activity (blue), in arbitrary units (each
+curve normalised to its own peak), for two beams in the same soft-tissue cylinder.
+\emph{Left:} a \SI{100}{MeV} pencil --- a single Bragg peak. \emph{Right:} a
+spread-out Bragg peak (SOBP), several energies combined into a flat dose plateau
+across a target at \SIrange{5.5}{10.5}{cm} depth. In both cases the $\bplus$
+activity is roughly flat along the proton track and falls to zero just before the
+distal dose edge; that fall-off, $A(x)\to 0$, marks the beam's distal reach.}
 \label{fig:source}
 \end{figure}
 
@@ -147,50 +149,41 @@ away just before it.}
 %\label{fig:source}
 %\end{figure}
 
-Consider, for illustration purposes, a pencil beam depositing a dose $D$ in biological tissue (Figure~\ref{fig:source}). Notice the sharp Bragg peak that defines the maximum of dose deposition. The figure also shows the total $\beta^+$ activity (this would correspond to the measurement of an ideal PET starting the acquisition right after the beam stops).
+Consider, for illustration purposes, a pencil beam depositing a dose $D$ in biological tissue (left panel of Figure~\ref{fig:source}). Notice the sharp Bragg peak that defines the maximum of dose deposition. The figure also shows the total $\beta^+$ activity (this would correspond to the measurement of an ideal PET starting the acquisition right after the beam stops).
 
-Notice that the activity curve and the dose behave in different ways. While the proton beam propagates through the tissue, before the target region (and the Bragg peak), the dose is low and slowly rising, and the $\beta^+$ activity is relatively flat. As the proton beam goes through the Bragg peak, it quickly loses energy, quenching the nuclear reactions. Therefore the $\beta^+$ activity drops just where the Bragg ionisation rises.
+Notice that the activity curve and the dose behave in different ways. While the proton beam propagates through the tissue, before the target region (and the Bragg peak), the dose is low and slowly rising, and the $\beta^+$ activity is relatively flat. As the proton beam goes through the Bragg peak, it quickly loses energy, quenching the nuclear reactions. Therefore the $\beta^+$ activity drops just where the Bragg ionisation rises, and reaches zero in the trailing edge of the peak. Thus, nominally, if $A(x)$ is the activity along the beam line, the estimator of the distal reach of the beam is $x' \rightarrow A(x') =0$.
 
-%Figure~\ref{fig:source} shows what the pipeline actually produces for the standard
-%field. Two features set the limits of any range measurement built on this source.
-%First, the activity is created a few millimetres before the Bragg peak,
-%because making an emitter needs a proton above the reaction threshold --- so the
-%activity distal edge tracks the range but sits slightly proximal to it. Second, the
-%positron travels a short distance before annihilating, which blurs the source; that
-%blur is largest for $\Ox{15}$, the dominant in-room species. Both are built into the
-%files (Sec.~\ref{sec:production}), so a detector study inherits them automatically.
+The right panel of Figure~\ref{fig:source} repeats the exercise for a spread-out Bragg peak --- the field actually used in treatment, where several proton energies combine to deliver a flat dose plateau across the target volume. The same logic applies: the $\beta^+$ activity is roughly flat across the plateau and falls to zero just past its distal edge, so $A(x) \rightarrow 0$ now estimates the distal edge of the target rather than a single range.
 
-\section{Simulating the \texorpdfstring{$\bplus$}{beta+} trail}
+Several real-life complications must be added to this simple picture.  The first is that a PET scanner does not measure directly activity, just pairs of gammas. Activity must be reconstructed from the data, a non-trivial task. Furthermore, a PET does not measure all produce gamma pairs, but only a fraction, once we fold it geometrical and detector efficiency. Finally, $\beta^+$ reach (the distance the positrons travel before annihilation) introduce a genuine physical uncertainty in the determination of the distal  edge of the beam. 
+
+The examples we have just described is also idealised (a cylinder filled with biological tissue). In real life, the proton beam propagates through an heterogenous medium, complicating further the picture.  
+
+
+\section{Simulating the \texorpdfstring{$\bplus$}{beta+} trail in \texttt{ptcryspg4}}
 \label{sec:pipeline}
 
-What we do is a Geant4 simulation of a proton beam stopping in a phantom, set up to
-record the trail of positron emitters it leaves along the way. Two ingredients define
+The approach is to run a Geant4 simulation of a proton beam stopping in a phantom, recording the trail of positron emitters it leaves along the way. Two ingredients define
 the run:
+
 \begin{itemize}[nosep]
-\item a \textbf{beam} --- protons; in the standard case a spread-out Bragg peak, a
-combination of energies that delivers a flat dose across a target volume rather than a
-single sharp peak (a single pencil beam is available for simpler tests);
-\item a \textbf{phantom} --- a body of material that stands in for the region being
-treated, chosen to represent the clinical problem. In the standard example, a dose
-delivered to the head is represented by a homogeneous brain-tissue cylinder,
-\SI{16}{cm} across and \SI{16}{cm} long; a different problem (a different site, or a
-layered geometry) would use a different phantom.
+\item \textbf{A beam} --- protons; either a simple pencil beam of the more realistic SOBP (Spread Out Breagg Peak) case.  
+\item \textbf{A phantom} --- a body of material that stands in for the region being
+treated, chosen to represent the clinical problem. Currently, \texttt{ptcryspg4} implements  a homogeneous brain-tissue cylinder (used for the examples above), an homogenous head, filled with brain tissue, and a MIRD-head, using three different materials (scalp, bone and brain tissus). 
 \end{itemize}
 
-The work then splits in two parts:
+The code, then, performs the following actions:  
 \begin{enumerate}[nosep]
 \item \textbf{Propagation and production --- in space.} Geant4 transports the protons
 and records where each positron emitter is produced and where its positron
-annihilates. This part is purely spatial: it answers ``where is the activity created?''
-but not ``how much of it does a scanner see?''.
-\item \textbf{Lifetime --- in time.} An analytic step folds in the radioactive
-half-lives and the scanner's acquisition timing (Sec.~\ref{sec:kinetics}), turning the
-emitters that were \emph{produced} into the number of decays actually \emph{measured}.
+annihilates. 
+\item \textbf{Lifetime.} An analytic step folds in the radioactive
+half-lives and the scanner's acquisition timing (Sec.~\ref{sec:kinetics}), computing for each one of the emission points the number of decays corresponding to a given dose. 
 We call this second step the handoff.
 \end{enumerate}
 
-The handoff takes the (detector-independent) source produced by
-Geant4 and applies ion decay and timing, preparing the count budget for a subsequent detector study.  The result is frozen as a named scenario.
+The handoff takes the (scanner-independent) source produced by
+Geant4 and applies ion decay and timing, preparing the count budget for a subsequent detector study.  The result is frozen as a {\em scenario}.
 
 \begin{center}
 \fbox{\parbox{0.95\textwidth}{\ttfamily\small
@@ -210,19 +203,13 @@ Geant4 and applies ion decay and timing, preparing the count budget for a subseq
 \section{Step 1 --- the proton run (Geant4)}
 \label{sec:transport}
 
-This step needs only three Geant4 ingredients: a beam, a phantom, and a physics
-list. The particle we launch is the proton; the positron emitters are made
-by its nuclear interactions along the way.
-
 \subsection{The beam}
 \label{sec:beam}
 The standard beam is a spread-out Bragg peak (SOBP): several proton
 energies combined so the dose is flat across a target volume rather than a single
 sharp peak. The energy layers and their weights are designed separately; the method
 and the commands are in \texttt{02\_beam\_design.tex} and \texttt{field\_design/}. A single
-mono-energetic pencil beam is also available as a simpler test case, but it paints a
-thin track rather than a realistic target volume, so it is used for shape checks, not
-for absolute rates.
+mono-energetic pencil beam is also available.
 
 \subsection{The phantom}
 \label{sec:phantom}
