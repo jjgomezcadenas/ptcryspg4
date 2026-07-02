@@ -26,6 +26,7 @@ import pandas as pd  # noqa: E402
 REG_COLOURS = {
     "phantom": "#9db8d2", "head": "#9db8d2",
     "brain": "#7e9ed6", "skull": "#e8e4cf", "scalp": "#d8b89a",
+    "tumour": "#d23b3b",
 }
 _FALLBACK = ["#9db8d2", "#e8e4cf", "#d8b89a", "#a8c6a0", "#d2a0a0"]
 
@@ -85,8 +86,10 @@ def main():
     fig, axes = plt.subplots(1, 2, figsize=(13, 6.5))
     draw_plane(axes[0], regions, meta, "cx_mm", "a_mm", "x [mm]")
     draw_plane(axes[1], regions, meta, "cy_mm", "b_mm", "y [mm]")
-    axes[0].set_title("z-x plane (beam + L/R)")
-    axes[1].set_title("z-y plane (beam + A/P)")
+    # The world transverse axes map to different anatomy per head orientation
+    # (lateral vs posterior beam), so name the planes by the world axes only.
+    axes[0].set_title("z-x plane (beam + transverse x)")
+    axes[1].set_title("z-y plane (beam + transverse y)")
     handles, labels = axes[0].get_legend_handles_labels()
     seen = dict(zip(labels, handles))  # dedupe
     axes[0].legend(seen.values(), seen.keys(), loc="upper right", fontsize=8)

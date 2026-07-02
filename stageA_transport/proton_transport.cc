@@ -4,8 +4,10 @@
 // and the prod_anh.h5 writer come in later milestones.
 //
 // Usage:
-//   ./proton_transport              -> interactive Qt session (executes vis.mac)
-//   ./proton_transport run.mac      -> batch, runs the given macro
+//   ./proton_transport                 -> interactive Qt session (executes vis.mac)
+//   ./proton_transport -i [macro]      -> interactive Qt session running [macro]
+//                                         (default vis.mac) — for headep_vis.mac etc.
+//   ./proton_transport run.mac         -> batch, runs the given macro
 
 #include "DetectorConstruction.hh"
 #include "ActionInitialization.hh"
@@ -20,12 +22,19 @@
 #include "QGSP_BIC_HP.hh"  // hadronic list suited to proton isotope production
 
 int main(int argc, char** argv) {
-  // Detect interactive mode (no macro argument) and open the UI session first,
-  // so G4UIExecutive can pick the Qt session this build provides.
-  G4UIExecutive* uiExec = nullptr;
-  if (argc == 1) {
-    uiExec = new G4UIExecutive(argc, argv);
-  }
+  // Invocation modes:
+  //   (no args)        interactive Qt, runs vis.mac
+  //   -i [macro]       interactive Qt, runs [macro] (default vis.mac)
+  //   macro            batch, runs macro
+  const bool interactive = (argc == 1) || (argc >= 2 && G4String(argv[1]) == "-i");
+  const G4String macro =
+      interactive ? (argc >= 3 ? G4String(argv[2]) : G4String("vis.mac"))
+                  : G4String(argv[1]);
+
+  // Open the UI session first (with only argv[0], so the extra flag/macro do not
+  // confuse the session-type autodetection), so G4UIExecutive can pick the Qt
+  // session this build provides before any graphics system is created.
+  G4UIExecutive* uiExec = interactive ? new G4UIExecutive(1, argv) : nullptr;
 
   // Tasking run manager (G4's default MT engine; scales well on Apple Silicon).
   auto* runManager =
@@ -49,15 +58,11 @@ int main(int argc, char** argv) {
 
   auto* ui = G4UImanager::GetUIpointer();
 
+  ui->ApplyCommand(G4String("/control/execute ") + macro);
   if (uiExec) {
-    // Interactive: set up the viewer and shoot a few protons to inspect.
-    // Macros are copied next to the binary by CMake, so reference them by name.
-    ui->ApplyCommand("/control/execute vis.mac");
+    // Interactive: keep the Qt window open for inspection after the macro runs.
     uiExec->SessionStart();
     delete uiExec;
-  } else {
-    // Batch: execute the supplied macro.
-    ui->ApplyCommand(G4String("/control/execute ") + argv[1]);
   }
 
   delete visManager;

@@ -120,11 +120,15 @@ def main():
     add("regions within bounding box", bbox_ok,
         "ok" if bbox_ok else f"region '{worst}' exceeds bbox")
 
-    # 6b. Head carve order: brain before skull before scalp (priority ascending).
+    # 6b. Head carve order (priority ascending): the inner region wins each point.
     if geom == "mird_head":
         order = list(regions.sort_values("priority")["region"])
         add("head carve order brain<skull<scalp", order == ["brain", "skull", "scalp"],
             " -> ".join(order))
+    elif geom == "headep":
+        order = list(regions.sort_values("priority")["region"])
+        add("head carve order tumour<brain<skull<scalp",
+            order == ["tumour", "brain", "skull", "scalp"], " -> ".join(order))
 
     # 7. Central-axis depth dose (Step 1): the core is a subset of the full plane,
     #    and dose_core is the independent edep_core / (rho * pi r_core^2 dz) recompute.

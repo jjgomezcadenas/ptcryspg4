@@ -42,6 +42,7 @@ inline constexpr double kCoreRadiusMM = 5.0;
 inline constexpr const char* kGeometryCylinder = "cylinder";
 inline constexpr const char* kGeometryUniformHead = "uniform_head";  // 1 region
 inline constexpr const char* kGeometryMirdHead = "mird_head";        // 3 regions
+inline constexpr const char* kGeometryHeadEP = "headep";             // 4 regions
 inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
 
 // Head-local frame origin = skull/scalp centre; the brain sits +kBrainOffsetZMM
@@ -68,6 +69,22 @@ inline constexpr double kBrainOffsetZMM = 10.0;  // brain centre vs skull centre
 inline constexpr const char* kScalpMaterial = "G4_TISSUE_SOFT_ICRP";
 inline constexpr const char* kSkullMaterial = "G4_BONE_CORTICAL_ICRP";
 inline constexpr const char* kBrainMaterial = "G4_BRAIN_ICRP";
+
+// --- HeadEP variant: MIRD head + a posterior-fossa ependymoma --------------
+// The MIRD head with one added tumour region, irradiated by a straight posterior
+// (occiput → anterior) beam aimed at the tumour: the head A-P axis is placed
+// along the beam and the tumour is centred on the beam axis. Selected by
+// /stageA/phantom/geometry headep. The tumour ellipsoid is in the head-local
+// frame (x = L-R, y = A-P, z = S-I) — midline, posterior, inferior: the
+// 4th-ventricle / posterior-fossa site of the reference MRI ependymoma.
+// Kept fully inside the brain ellipsoid (no protrusion into skull/air).
+inline constexpr double kTumourPosXMM = 0.0;    // L-R centre (midline)
+inline constexpr double kTumourPosYMM = -25.0;  // A-P centre (posterior); sets depth
+inline constexpr double kTumourPosZMM = -30.0;  // S-I centre (inferior)
+inline constexpr double kTumourAxMM = 18.0;     // L-R semi-axis
+inline constexpr double kTumourByMM = 20.0;     // A-P semi-axis (along the beam)
+inline constexpr double kTumourCzMM = 18.0;     // S-I semi-axis
+inline constexpr const char* kTumourMaterial = "G4_TISSUE_SOFT_ICRP";
 
 // Physics
 inline constexpr const char* kPhysicsList = "QGSP_BIC_HP";

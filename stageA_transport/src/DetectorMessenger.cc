@@ -25,10 +25,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* det) : fDet(det) {
 
   fGeomCmd = new G4UIcmdWithAString("/stageA/phantom/geometry", this);
   fGeomCmd->SetGuidance("Phantom geometry: 'cylinder' (default, homogeneous), "
-                        "'uniform_head' (head-shaped, all brain), or 'mird_head' "
-                        "(heterogeneous scalp/skull/brain).");
+                        "'uniform_head' (head-shaped, all brain), 'mird_head' "
+                        "(heterogeneous scalp/skull/brain), or 'headep' (mird_head "
+                        "+ posterior-fossa tumour, posterior beam aimed at it).");
   fGeomCmd->SetParameterName("name", false);
-  fGeomCmd->SetCandidates("cylinder uniform_head mird_head");
+  fGeomCmd->SetCandidates("cylinder uniform_head mird_head headep");
   fGeomCmd->AvailableForStates(G4State_PreInit);
 
   // --- target box (dose-normalization scoring region) -----------------------

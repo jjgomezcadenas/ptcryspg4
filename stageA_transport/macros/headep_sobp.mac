@@ -1,0 +1,23 @@
+# Stage A — HeadEP SOBP run: a WEPL-designed posterior field through the head
+# (scalp/skull/brain), aimed at the posterior-fossa tumour. The bone offset is
+# absorbed in the field design. Generate the field first:
+#   python3 field_design/sobp.py --from-run data/runs/headep_pencil_1e5
+
+/run/numberOfThreads 18
+
+/stageA/phantom/geometry headep
+# SOBP energy layers for THIS phantom (WEPL-designed through the posterior path).
+/stageA/beam/layers ../../data/field/headep_sobp_layers.csv
+# Lateral fluence: uniform disk over the tumour cross-section.
+/stageA/beam/disk 20 mm
+# Dose target = the tumour (depth window from the occiput entrance).
+/stageA/target/radius 20 mm
+/stageA/target/proximal 57 mm
+/stageA/target/distal 97 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+/run/printProgress 200000
+/run/beamOn 1000000

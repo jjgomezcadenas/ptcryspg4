@@ -3,6 +3,7 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "G4ThreeVector.hh"
+#include "G4Transform3D.hh"
 #include "globals.hh"
 
 #include <vector>
@@ -92,6 +93,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   void BuildCylinder(G4LogicalVolume* worldLV);
   void BuildUniformHead(G4LogicalVolume* worldLV);  // 1-region brain ellipsoid
   void BuildMirdHead(G4LogicalVolume* worldLV);     // 3-region scalp/skull/brain
+  void BuildHeadEP(G4LogicalVolume* worldLV);       // MIRD head + tumour, posterior
+  // Build the scalp/skull/brain envelope into worldLV with the given placement
+  // transform (which fixes the head's orientation relative to the +z beam);
+  // returns the head and brain logical volumes for daughters and scoring.
+  void BuildHeadEnvelope(G4LogicalVolume* worldLV, const G4Transform3D& tf,
+                         G4LogicalVolume** headLVout,
+                         G4LogicalVolume** brainLVout);
 
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)

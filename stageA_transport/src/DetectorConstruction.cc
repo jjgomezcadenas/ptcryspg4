@@ -22,16 +22,36 @@
 #include "G4PhysicalConstants.hh"
 
 namespace {
-// Map a head-local ellipsoid (centre, semi-axes) to a world-frame PhantomRegion.
-// The lateral placement world = (z_loc - kBrainOffsetZ, y_loc, -x_loc) is a 90°
-// rotation, so axis-aligned stays axis-aligned: world centre = (cz - off, cy,
-// -cx), world semi-axes = (sz, sy, sx). Euler angles 0.
+// Head orientation relative to the fixed +z beam: which head-local axis lies
+// along the beam. Lateral (L-R along +z) is the mird_head / uniform_head base
+// case; Posterior (A-P along +z, beam through the occiput) is the headep case.
+enum class HeadAxis { Lateral, Posterior };
+
+// Map a head-local ellipsoid (centre c, semi-axes s) to a world-frame
+// PhantomRegion, applying the same 90° rotation + translation T [mm] that places
+// the head. A 90° rotation keeps an axis-aligned ellipsoid axis-aligned, so only
+// the axes and centre are permuted/signed:
+//   Lateral   world = ( cz, cy, -cx) + T ,  semi = (sz, sy, sx)
+//   Posterior world = ( cx, -cz, cy) + T ,  semi = (sx, sz, sy)
+PhantomRegion HeadRegionOriented(HeadAxis axis, G4double Tx, G4double Ty,
+                                 G4double Tz, const char* name, const char* mat,
+                                 G4double cx, G4double cy, G4double cz,
+                                 G4double sx, G4double sy, G4double sz) {
+  auto nz = [](G4double v) { return v == 0. ? 0. : v; };  // avoid -0.0 in the CSV
+  if (axis == HeadAxis::Lateral)
+    return PhantomRegion{name, mat, "ellipsoid", sz, sy, sx,
+                         nz(cz + Tx), nz(cy + Ty), nz(-cx + Tz), 0., 0., 0.};
+  return PhantomRegion{name, mat, "ellipsoid", sx, sz, sy,
+                       nz(cx + Tx), nz(-cz + Ty), nz(cy + Tz), 0., 0., 0.};
+}
+
+// Lateral head region (the base case): translation T = (-kBrainOffsetZ, 0, 0),
+// which centres the brain on the beam axis (world x = y = 0).
 PhantomRegion HeadRegion(const char* name, const char* mat, G4double cx,
                          G4double cy, G4double cz, G4double sx, G4double sy,
                          G4double sz) {
-  const G4double off = stageA::kBrainOffsetZMM;
-  return PhantomRegion{name, mat, "ellipsoid", sz, sy, sx,
-                       cz - off, cy, (cx == 0. ? 0. : -cx), 0., 0., 0.};
+  return HeadRegionOriented(HeadAxis::Lateral, -stageA::kBrainOffsetZMM, 0., 0.,
+                            name, mat, cx, cy, cz, sx, sy, sz);
 }
 }  // namespace
 
@@ -51,7 +71,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   G4Material* air = nist->FindOrBuildMaterial("G4_AIR");
 
   const bool head = (fGeometry == stageA::kGeometryMirdHead ||
-                     fGeometry == stageA::kGeometryUniformHead);
+                     fGeometry == stageA::kGeometryUniformHead ||
+                     fGeometry == stageA::kGeometryHeadEP);
 
   // --- world: an air box sized to contain whichever geometry, with a margin.
   // The world is the top volume; tracks die when they leave it.
@@ -74,6 +95,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 
   if (fGeometry == stageA::kGeometryMirdHead)
     BuildMirdHead(worldLV);
+  else if (fGeometry == stageA::kGeometryHeadEP)
+    BuildHeadEP(worldLV);
   else if (fGeometry == stageA::kGeometryUniformHead)
     BuildUniformHead(worldLV);
   else
@@ -98,12 +121,16 @@ void DetectorConstruction::BuildCylinder(G4LogicalVolume* worldLV) {
                fHalfZ / mm, 0., 0., 0., 0., 0., 0.}};
 }
 
-// Heterogeneous head (Phase 1): a soft-tissue scalp ellipsoid ⊃ bone skull shell
-// ⊃ brain (skull/brain are the MIRD ellipsoids; the MIRD face/neck is dropped —
-// the lateral field never crosses it). Built in the head-local frame (x = L-R,
-// y = A-P, z = S-I) with the origin at the skull/scalp centre; then placed so the
-// brain centre is at the world origin and the L-R axis lies along the beam (+z).
-void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
+// Build the scalp/skull/brain envelope into worldLV with the given placement
+// transform (which sets the head's orientation relative to the +z beam). The
+// head is a soft-tissue scalp ellipsoid ⊃ bone skull shell ⊃ brain (skull/brain
+// are the MIRD ellipsoids; the MIRD face/neck is dropped). Built in the
+// head-local frame (x = L-R, y = A-P, z = S-I), origin at the skull/scalp centre.
+// Returns the head (scoring) and brain (for daughters) logical volumes.
+void DetectorConstruction::BuildHeadEnvelope(G4LogicalVolume* worldLV,
+                                             const G4Transform3D& tf,
+                                             G4LogicalVolume** headLVout,
+                                             G4LogicalVolume** brainLVout) {
   using namespace stageA;
   auto* nist = G4NistManager::Instance();
   G4Material* scalp = nist->FindOrBuildMaterial(kScalpMaterial);
@@ -115,11 +142,6 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
                                     kScalpCzMM * mm);
   auto* headLV = new G4LogicalVolume(headSolid, scalp, "Head");
   headLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.9, 0.8, 0.7, 0.2)));
-
-  // Lateral placement: rotate local x → world z, then translate the brain centre
-  // (head-local (0,0,kBrainOffsetZ)) to the world origin.
-  const G4Transform3D tf =
-      G4Translate3D(-kBrainOffsetZMM * mm, 0., 0.) * G4RotateY3D(90. * deg);
   new G4PVPlacement(tf, headLV, "Head", worldLV, false, 0, true);
 
   // Skull cranium shell (outer − inner ellipsoid), centred at the head origin;
@@ -142,6 +164,20 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
   new G4PVPlacement(nullptr, G4ThreeVector(0, 0, kBrainOffsetZMM * mm), brainLV,
                     "Brain", headLV, false, 0, true);
 
+  *headLVout = headLV;
+  *brainLVout = brainLV;
+}
+
+// Heterogeneous head (Phase 1): the scalp/skull/brain envelope placed laterally,
+// so the L-R axis lies along the beam (+z) and the brain centre is at the world
+// origin. The base case, unchanged.
+void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
+  using namespace stageA;
+  const G4Transform3D tf =
+      G4Translate3D(-kBrainOffsetZMM * mm, 0., 0.) * G4RotateY3D(90. * deg);
+  G4LogicalVolume *headLV, *brainLV;
+  BuildHeadEnvelope(worldLV, tf, &headLV, &brainLV);
+
   fPhantomLV = headLV;  // scoring volume = whole head (GetMass includes daughters)
   fBeamHalfExtent = kScalpAxMM * mm;  // L-R semi-axis, now along +z
   // Depth reference = the entrance face. The beam enters the scalp at -fHalfZ, so
@@ -158,6 +194,58 @@ void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
                  kSkullOutByMM, kSkullOutCzMM),
       HeadRegion("scalp", kScalpMaterial, 0., 0., 0., kScalpAxMM, kScalpByMM,
                  kScalpCzMM),
+  };
+}
+
+// HeadEP: the MIRD head plus a posterior-fossa tumour, oriented so the beam runs
+// straight through the occiput — the head A-P axis lies along +z (RotateX 90°),
+// beam entering the back of the head travelling anterior. The translation T
+// centres the tumour on the beam axis: under world = (x, -z, y), the tumour's
+// transverse coords are (x, -z), so they are cancelled; Tz = 0 keeps the head
+// centred along the beam (entrance at -A-P semi-axis).
+void DetectorConstruction::BuildHeadEP(G4LogicalVolume* worldLV) {
+  using namespace stageA;
+  auto* nist = G4NistManager::Instance();
+
+  const G4double Tx = -kTumourPosXMM;
+  const G4double Ty = kTumourPosZMM;  // = -(-kTumourPosZMM), cancels world y
+  const G4double Tz = 0.;
+  const G4Transform3D tf =
+      G4Translate3D(Tx * mm, Ty * mm, Tz * mm) * G4RotateX3D(90. * deg);
+
+  G4LogicalVolume *headLV, *brainLV;
+  BuildHeadEnvelope(worldLV, tf, &headLV, &brainLV);
+
+  // Tumour ellipsoid, fully inside the brain (daughter of the brain LV). The
+  // brain LV frame is the head-local frame shifted by -kBrainOffsetZ in z.
+  G4Material* tumourMat = nist->FindOrBuildMaterial(kTumourMaterial);
+  auto* tumSolid = new G4Ellipsoid("Tumour", kTumourAxMM * mm, kTumourByMM * mm,
+                                   kTumourCzMM * mm);
+  auto* tumLV = new G4LogicalVolume(tumSolid, tumourMat, "Tumour");
+  tumLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.9, 0.2, 0.2, 0.6)));
+  new G4PVPlacement(
+      nullptr,
+      G4ThreeVector(kTumourPosXMM * mm, kTumourPosYMM * mm,
+                    (kTumourPosZMM - kBrainOffsetZMM) * mm),
+      tumLV, "Tumour", brainLV, false, 0, true);
+
+  fPhantomLV = headLV;
+  fBeamHalfExtent = kScalpByMM * mm;  // A-P semi-axis, now along +z
+  fHalfZ = fBeamHalfExtent;
+
+  // Medium regions (world frame), priority-ordered: tumour carves the brain,
+  // brain the skull shell, skull the scalp.
+  fRegions = {
+      HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, Tz, "tumour",
+                         kTumourMaterial, kTumourPosXMM, kTumourPosYMM,
+                         kTumourPosZMM, kTumourAxMM, kTumourByMM, kTumourCzMM),
+      HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, Tz, "brain", kBrainMaterial,
+                         0., 0., kBrainOffsetZMM, kBrainAxMM, kBrainByMM,
+                         kBrainCzMM),
+      HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, Tz, "skull", kSkullMaterial,
+                         0., 0., 0., kSkullOutAxMM, kSkullOutByMM, kSkullOutCzMM),
+      HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, Tz, "scalp", kScalpMaterial,
+                         0., 0., 0., kScalpAxMM, kScalpByMM, kScalpCzMM),
   };
 }
 

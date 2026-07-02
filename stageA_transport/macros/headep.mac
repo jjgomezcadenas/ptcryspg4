@@ -1,0 +1,23 @@
+# Stage A — HeadEP geometry proof: the MIRD head plus a posterior-fossa tumour,
+# irradiated by a straight posterior beam aimed at the tumour (the head A-P axis
+# is along the beam; the tumour is centred on the beam axis). A single proton
+# pencil enters the occiput, crossing scalp → skull → cerebellum → tumour. The
+# dose target is the tumour. Writes emitters.csv + run_meta.csv + depth_dose.csv.
+
+/run/numberOfThreads 18
+
+# Select the HeadEP geometry (must precede /run/initialize).
+/stageA/phantom/geometry headep
+# Dose target = the tumour: bracket it along the beam (depth from the occiput
+# entrance) and cover its transverse extent.
+/stageA/target/radius 20 mm
+/stageA/target/proximal 57 mm
+/stageA/target/distal 97 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+# 1e5 protons: a quick geometry/shape proof (single 100 MeV pencil).
+/run/printProgress 20000
+/run/beamOn 100000
