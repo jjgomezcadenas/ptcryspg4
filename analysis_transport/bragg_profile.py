@@ -8,7 +8,7 @@ ranges out where expected and the depth profile is smooth -- complements the
 PNG plots from validate_transport.py.
 
 Usage:
-    python analysis_transport/bragg_profile.py [data_dir] [--step MM] [--width N]
+    python analysis_transport/bragg_profile.py <run_dir> [--step MM] [--width N]
 """
 
 import argparse
@@ -21,9 +21,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("data_dir", nargs="?",
-                    default=os.path.join(_HERE, "..", "data"),
-                    help="directory holding depth_dose.csv")
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--step", type=float, default=2.0,
                     help="depth spacing between printed rows [mm]")
     ap.add_argument("--width", type=int, default=48,

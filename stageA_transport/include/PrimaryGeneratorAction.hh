@@ -26,8 +26,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
   const DetectorConstruction* fDet = nullptr;
   const BeamConfig* fBeam = nullptr;  // shared; SOBP layers if loaded
 
-  G4double fEnergy = 100. * 1.0;   // MeV, single-energy fallback (set in ctor)
-  G4double fSigmaXY = 3. * 1.0;    // mm, transverse Gaussian sigma
+  G4double fEnergy = 0.;   // single-energy fallback; set in the ctor (G4 units)
+  G4double fSigmaXY = 0.;  // transverse Gaussian sigma; set in the ctor
 };
 
 #endif  // STAGEA_PRIMARYGENERATORACTION_HH

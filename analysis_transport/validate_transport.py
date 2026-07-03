@@ -11,7 +11,7 @@ Reads the CSVs written to data/ and renders one figure
 The same per-isotope table is also printed to stdout. Uses the system Python.
 
 Usage:
-    python analysis_transport/validate_transport.py [data_dir]
+    python analysis_transport/validate_transport.py <run_dir>
 """
 
 import os
@@ -198,5 +198,6 @@ def main(data_dir):
 
 
 if __name__ == "__main__":
-    ddir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(_HERE, "..", "data")
-    main(ddir)
+    if len(sys.argv) < 2:
+        sys.exit("usage: python analysis_transport/validate_transport.py <run_dir>")
+    main(sys.argv[1])

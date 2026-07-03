@@ -8,7 +8,7 @@ Stage-A run (latex/ptcrysp_physics.tex). The integral of A_j over the acquisitio
 equals the measured decays N_j of Eq. 1.
 
 Usage:
-    python decay_sampling/activity_plot.py [data_dir] [--dose GY] [--t-irr S]
+    python decay_sampling/activity_plot.py <run_dir> [--dose GY] [--t-irr S]
         [--t-del S] [--t-meas S] [--t-max MIN]
 """
 
@@ -30,7 +30,7 @@ from isotopes import ISOTOPES  # noqa: E402
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("data_dir", nargs="?", default=os.path.join(_HERE, "..", "data"))
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--dose", type=float, default=1.0, help="delivered dose D [Gy]")
     ap.add_argument("--t-irr", type=float, default=60.0, help="irradiation time [s]")
     ap.add_argument("--t-del", type=float, default=120.0, help="transport delay [s]")

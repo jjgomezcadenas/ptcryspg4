@@ -15,7 +15,7 @@ Writes:
   data/sampling_realizations_<scenario>_meta.csv  (n_realizations, master_seed, source)
 
 Usage:
-    python decay_sampling/budget_gen.py [data_dir] [--scenario NAME]
+    python decay_sampling/budget_gen.py <run_dir> [--scenario NAME]
         [--realizations Z] [--seed S]
 """
 
@@ -30,7 +30,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     _here = os.path.dirname(os.path.abspath(__file__))
-    ap.add_argument("data_dir", nargs="?", default=os.path.join(_here, "..", "data"))
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--scenario", default="inroom")
     ap.add_argument("--realizations", type=int, default=100)
     ap.add_argument("--seed", type=int, default=1234)

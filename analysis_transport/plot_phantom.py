@@ -16,6 +16,7 @@ Usage:
 
 import argparse
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -23,11 +24,10 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import Ellipse, Rectangle  # noqa: E402
 import pandas as pd  # noqa: E402
 
-REG_COLOURS = {
-    "phantom": "#9db8d2", "head": "#9db8d2",
-    "brain": "#7e9ed6", "skull": "#e8e4cf", "scalp": "#d8b89a",
-    "tumour": "#d23b3b",
-}
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_HERE, "..", "common"))
+from regions import REGION_COLOURS as REG_COLOURS  # noqa: E402
+
 _FALLBACK = ["#9db8d2", "#e8e4cf", "#d8b89a", "#a8c6a0", "#d2a0a0"]
 
 

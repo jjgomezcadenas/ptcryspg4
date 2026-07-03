@@ -13,7 +13,7 @@ moves there later). Writes:
 See latex/ptcrysp_physics.tex.
 
 Usage:
-    python decay_sampling/budget.py [data_dir] [--scenario NAME] [--dose GY]
+    python decay_sampling/budget.py <run_dir> [--scenario NAME] [--dose GY]
         [--t-irr S] [--t-del S] [--t-meas S]
 """
 
@@ -40,7 +40,7 @@ def survival(lam, t_irr, t_del, t_meas):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("data_dir", nargs="?", default=os.path.join(_HERE, "..", "data"))
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--scenario", default="inroom")
     ap.add_argument("--dose", type=float, default=1.0, help="delivered dose D [Gy]")
     ap.add_argument("--t-irr", type=float, default=60.0)
@@ -48,7 +48,8 @@ def main():
     ap.add_argument("--t-meas", type=float, default=1200.0)
     args = ap.parse_args()
 
-    emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"))
+    emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"),
+                       usecols=["isotope_id"])  # counts only — skip the positions
     meta = pd.read_csv(os.path.join(args.data_dir, "run_meta.csv")).iloc[0]
     t_dose = float(meta["target_dose_Gy"])
     counts = emit["isotope_id"].value_counts()

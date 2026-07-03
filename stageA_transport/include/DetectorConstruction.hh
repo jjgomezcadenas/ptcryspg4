@@ -23,10 +23,12 @@ struct PhantomRegion {
   G4double ex, ey, ez;     // deg, intrinsic XYZ Euler (0 = axis-aligned)
 };
 
-// Stage A geometry (spec sec 2.2): a homogeneous right-circular cylinder, axis
-// along +z, that serves both as the β⁺ production target and as the passive
-// 511 keV attenuator. Geant4 calls the two virtuals below automatically: it is
-// the mandatory "what does the apparatus look like" user class.
+// Stage A geometry: the phantom that serves both as the β⁺ production target
+// and as the passive 511 keV attenuator, beam along +z. Four macro-selectable
+// cases: the homogeneous cylinder (default), the uniform head, the MIRD head
+// (scalp/skull/brain), and headep (MIRD head + posterior-fossa tumour).
+// Geant4 calls the two virtuals below automatically: it is the mandatory
+// "what does the apparatus look like" user class.
 class DetectorConstruction : public G4VUserDetectorConstruction {
  public:
   DetectorConstruction();             // builds the messenger; sets default material
@@ -45,9 +47,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   void SetMaterialName(const G4String& name) { fMaterialName = name; }
   const G4String& MaterialName() const { return fMaterialName; }
 
-  // Geometry selector: "cylinder" (default) or "mird_head". Set from a macro
-  // before /run/initialize. The label written to run_meta.csv is the NIST
-  // material for the cylinder, or "MIRD_head" for the head.
+  // Geometry selector: cylinder (default) | uniform_head | mird_head | headep.
+  // Set from a macro before /run/initialize. run_meta.csv's phantom_material
+  // is the single NIST material, or "multi" for the layered heads.
   void SetGeometry(const G4String& name) { fGeometry = name; }
   const G4String& Geometry() const { return fGeometry; }
   G4String PhantomLabel() const;
@@ -109,7 +111,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   // each (a sensitive detector does not propagate to daughter volumes).
   std::vector<G4LogicalVolume*> fScoringLVs;
   G4String fMaterialName;                 // NIST name; default set in the ctor
-  G4String fGeometry;                     // "cylinder" | "mird_head"
+  G4String fGeometry;  // cylinder | uniform_head | mird_head | headep
   G4double fTargetRadius = 0.;            // target box, defaults set in the ctor
   G4double fTargetProxDepth = 0.;
   G4double fTargetDistDepth = 0.;

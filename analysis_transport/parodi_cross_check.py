@@ -12,7 +12,7 @@ G4 cross-section bias plus our homogeneous brain vs the real heterogeneous head
 (brain is more oxygen-rich, so it overproduces 15O).
 
 Usage:
-    python analysis_transport/parodi_cross_check.py [data_dir]
+    python analysis_transport/parodi_cross_check.py <run_dir>
 """
 
 import os
@@ -55,9 +55,11 @@ def main(data_dir: str) -> None:
     for iid in sorted(ISOTOPES):
         name = ISOTOPES[iid].name
         ours = counts.get(iid, 0) / t_dose          # P_j(1 Gy)
-        parodi = PARODI_HEAD_PER_GY.get(iid, float("nan"))
-        ratio = ours / parodi if parodi else float("nan")
-        print(f"{name:>5} {ours:>12.3e} {parodi:>12.3e} {ratio:>6.1f}x")
+        if iid not in PARODI_HEAD_PER_GY:           # isotope without a reference
+            print(f"{name:>5} {ours:>12.3e} {'—':>12} {'—':>7}")
+            continue
+        parodi = PARODI_HEAD_PER_GY[iid]
+        print(f"{name:>5} {ours:>12.3e} {parodi:>12.3e} {ours / parodi:>6.1f}x")
         tot_ours += ours
         tot_parodi += parodi
     print("-" * 40)
@@ -67,5 +69,6 @@ def main(data_dir: str) -> None:
 
 
 if __name__ == "__main__":
-    ddir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(_HERE, "..", "data")
-    main(ddir)
+    if len(sys.argv) < 2:
+        sys.exit("usage: python analysis_transport/parodi_cross_check.py <run_dir>")
+    main(sys.argv[1])

@@ -19,6 +19,9 @@
 /stageA/target/distal 97 mm
 /run/initialize
 
+# Interactive shots write their run dir under data/runs like any batch run.
+/stageA/output/dir ../../data/runs
+
 # --- open the viewer -------------------------------------------------------
 /vis/open TSG_QT_ZB
 /vis/verbose errors

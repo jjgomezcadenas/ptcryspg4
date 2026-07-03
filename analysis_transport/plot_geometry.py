@@ -9,7 +9,7 @@ phantom is centred at the origin, its axis is +z (the beam direction), and the
 beam enters at the z = -L/2 face. Used in latex/ptcrysp_guide.tex.
 
 Usage:
-    python analysis_transport/plot_geometry.py [data_dir] [--out PNG] [--n N]
+    python analysis_transport/plot_geometry.py <run_dir> [--out PNG] [--n N]
 """
 
 import argparse
@@ -31,7 +31,7 @@ from isotopes import ISOTOPES  # noqa: E402
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("data_dir", nargs="?", default=os.path.join(_HERE, "..", "data"))
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--out", default=None, help="output PNG (default data/scenario_geometry.png)")
     ap.add_argument("--n", type=int, default=15000, help="annihilation points to scatter")
     args = ap.parse_args()
@@ -87,7 +87,9 @@ def main():
             h.set_alpha(1.0)
     fig.tight_layout()
 
-    out = args.out or os.path.join(args.data_dir, "scenario_geometry.png")
+    figdir = os.path.join(args.data_dir, "figures")
+    os.makedirs(figdir, exist_ok=True)
+    out = args.out or os.path.join(figdir, "scenario_geometry.png")
     fig.savefig(out, dpi=130)
     print(f"saved {out}")
 

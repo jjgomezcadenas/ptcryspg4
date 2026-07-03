@@ -13,6 +13,14 @@ for a cylinder (a,b,c) = (radius, radius, half-length).
 
 import numpy as np
 
+# One colour per region name, shared by every phantom plotter (plot_phantom,
+# plot_mird_head) so the same region looks the same in every figure.
+REGION_COLOURS = {
+    "phantom": "#9db8d2", "head": "#9db8d2",
+    "brain": "#7e9ed6", "skull": "#e8e4cf", "scalp": "#d8b89a",
+    "tumour": "#d23b3b",
+}
+
 
 def contains(region, x, y, z):
     """True if world point (x, y, z) [mm] is inside `region`."""

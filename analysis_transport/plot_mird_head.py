@@ -10,7 +10,7 @@ hardcoded here. Renders, from a head run's emitters.csv:
   (D) the production profile along the beam.
 
 Usage:
-    python analysis_transport/plot_mird_head.py [data_dir] [--out PNG]
+    python analysis_transport/plot_mird_head.py <run_dir> [--out PNG]
 """
 
 import argparse
@@ -26,11 +26,10 @@ from matplotlib.patches import Ellipse  # noqa: E402
 _HERE = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.path.insert(0, os.path.join(_HERE, "..", "common"))
-from regions import classify  # noqa: E402  (shared point->material rule)
+from regions import classify, REGION_COLOURS as REG_COLOURS  # noqa: E402
+from isotopes import ISOTOPES  # noqa: E402
 
-NAMES = {0: "O15", 1: "C11", 2: "N13", 3: "C10", 4: "O14"}
-REG_COLOURS = {"brain": "#9aa8e0", "skull": "#e8e8e0", "scalp": "#d9b38c",
-               "head": "#9aa8e0"}  # uniform-head single region
+NAMES = {iid: iso.name for iid, iso in ISOTOPES.items()}
 
 
 def _draw_regions(ax, regions, fill):
@@ -57,7 +56,7 @@ def _beam_arrow(ax):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("data_dir", nargs="?", default=os.path.join(_HERE, "..", "data"))
+    ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--out", default=None,
                     help="output PNG (default <data_dir>/figures/mird_head.png)")
     args = ap.parse_args()
