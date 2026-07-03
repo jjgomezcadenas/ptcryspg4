@@ -10,8 +10,8 @@ Dispatch:
   any geometry          transport_validation.png  (Stage-A dashboard)
                         dose_activity.png         (dose vs beta+ activity overlay)
                         activity.png              (decay/activity curves)
-  cylinder              + sobp_g4.png             (realized depth-dose plateau)
-  uniform_head/mird_head + mird_head.png          (phantom + beam + emitter trail)
+  cylinder (SOBP only)  + sobp_g4.png             (realized depth-dose plateau)
+  heads                 + mird_head.png           (phantom + beam + emitter trail)
 
 Plotters that need a budget (none here) or other optional inputs are skipped
 silently if their inputs are absent.
@@ -57,10 +57,12 @@ def main():
     run_plotter("analysis_transport/plot_dose_activity.py", args.run_dir)
     run_plotter("analysis_transport/validate_transport.py", args.run_dir)
     run_plotter("decay_sampling/activity_plot.py", args.run_dir)
-    # Geometry-specific control plot.
+    # Geometry-specific control plot (plot_sobp grades a plateau, so only for
+    # cylinder runs that carry a field).
     if geometry == "cylinder":
-        run_plotter("field_design/plot_sobp.py", args.run_dir)
-    else:  # uniform_head | mird_head
+        if os.path.exists(os.path.join(args.run_dir, "sobp_layers.csv")):
+            run_plotter("field_design/plot_sobp.py", args.run_dir)
+    else:  # uniform_head | mird_head | headep
         run_plotter("analysis_transport/plot_mird_head.py", args.run_dir)
     # SOBP runs (those carrying a field) also get the annotated plateau plot.
     if os.path.exists(os.path.join(args.run_dir, "sobp_layers_meta.csv")):

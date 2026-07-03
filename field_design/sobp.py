@@ -7,10 +7,9 @@ density; flattening weights are the bin-integrated
 
     w_i ∝ (Rd - Ri + Δ/2)^(1/p) - (Rd - Ri - Δ/2)^(1/p)
 
-of the continuous fluence Phi(R) ∝ (Rd - R)^(1/p - 1). Writes
-data/sobp_layers.csv (energy_MeV, weight) for the Geant4 gun and a sanity plot
-of the analytic SOBP (idealized peaks + range straggling; the G4 depth-dose is
-the real check).
+of the continuous fluence Phi(R) ∝ (Rd - R)^(1/p - 1). Writes the layer table
+(energy_MeV, weight) for the Geant4 gun and a sanity plot of the analytic SOBP
+(idealized peaks + range straggling; the G4 depth-dose is the real check).
 
 The field is phantom-specific (the medium enters via WEPL, the target window
 too), so each design is written per field as data/field/<label>_sobp_layers.csv
@@ -19,8 +18,8 @@ too), so each design is written per field as data/field/<label>_sobp_layers.csv
 Two modes:
   * homogeneous (default): the cylinder/brain field, range scaled by --rho-rel.
   * WEPL (--from-run RUN_DIR): design through the run's heterogeneous phantom by
-    ray-tracing water-equivalent path length (Sec. 5 of the doc), so the bone
-    offset of the MIRD head is absorbed by construction.
+    ray-tracing water-equivalent path length (the WEPL section of the doc), so
+    the bone offset of the MIRD head is absorbed by construction.
 
 Usage:
     python field_design/sobp.py [--d-prox CM] [--d-dist CM] [--n-layers N]
@@ -73,6 +72,13 @@ def energy_for_range(R_cm, rho_rel):
 
 def design(d_prox, d_dist, n_layers, rho_rel, mu):
     """Return per-layer ranges [cm], energies [MeV] and normalized weights."""
+    if n_layers < 2:
+        sys.exit(f"--n-layers must be >= 2 (got {n_layers})")
+    if not 0 < d_prox < d_dist:
+        sys.exit(f"target window invalid: proximal {d_prox:g} cm must be positive "
+                 f"and shallower than distal {d_dist:g} cm")
+    if rho_rel <= 0:
+        sys.exit(f"--rho-rel must be positive (got {rho_rel:g})")
     R = np.linspace(d_prox, d_dist, n_layers)   # peak ranges, proximal->distal
     Rd = d_dist
     delta = (d_dist - d_prox) / (n_layers - 1)
@@ -128,6 +134,11 @@ def main():
     args = ap.parse_args()
 
     if args.from_run:  # ---- WEPL mode: design through the run's phantom --------
+        if not os.path.isdir(args.from_run):
+            sys.exit(f"run directory not found: {args.from_run}")
+        for fn in ("phantom_regions.csv", "run_meta.csv"):
+            if not os.path.exists(os.path.join(args.from_run, fn)):
+                sys.exit(f"{args.from_run} has no {fn} — not a Stage-A run directory")
         regions = pd.read_csv(os.path.join(args.from_run, "phantom_regions.csv"))
         rmeta = pd.read_csv(os.path.join(args.from_run, "run_meta.csv")).iloc[0]
         geometry = str(rmeta["geometry"])

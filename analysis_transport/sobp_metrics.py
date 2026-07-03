@@ -51,10 +51,13 @@ def crossing(depth, dose, level, lo, hi):
 
 
 def metrics(run_dir):
+    """Raises ValueError when the run predates the central-axis tally, so a
+    caller embedding this in a larger report (check_run) can record a FAIL
+    instead of dying mid-table."""
     d = pd.read_csv(os.path.join(run_dir, "depth_dose.csv"))
     if "dose_core_Gy" not in d.columns:
-        sys.exit(f"{run_dir}/depth_dose.csv has no dose_core_Gy "
-                 "(re-run Stage A; needs the Step-1 central-axis tally)")
+        raise ValueError(f"{run_dir}/depth_dose.csv has no dose_core_Gy "
+                         "(re-run Stage A; needs the central-axis tally)")
     m = pd.read_csv(os.path.join(run_dir, "run_meta.csv")).iloc[0]
     half = 0.5 * float(m["phantom_length_mm"])
     depth = (d["z_mm"].to_numpy() + half) / 10.0          # cm from the entrance
@@ -114,7 +117,10 @@ def main():
                     help="skip the annotated figures/sobp_plateau.png")
     args = ap.parse_args()
 
-    r = metrics(args.run_dir)
+    try:
+        r = metrics(args.run_dir)
+    except ValueError as e:
+        sys.exit(str(e))
     print(f"plateau metrics: {args.run_dir}  ({r['geometry']})")
     print(f"  target window        : {r['prox']:.2f} - {r['dist']:.2f} cm")
     print(f"  plateau dose (core)  : {r['plateau_Gy']:.3e} Gy")

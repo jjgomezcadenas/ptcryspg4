@@ -181,14 +181,21 @@ def main():
             f"run [{prox:g},{dist:g}] mm")
 
         # The realized plateau must be flat enough and land R80 on the target
-        # (sobp_metrics; see analysis_transport/sobp_metrics.py).
-        pm = plateau_metrics(args.run_dir)
-        add("plateau flat enough", pm["uniformity_pct"] <= MAX_UNIFORMITY_PCT,
-            f"uniformity {pm['uniformity_pct']:.1f}% (<= {MAX_UNIFORMITY_PCT:g}%)")
-        if pm["r80_distal"] is not None:
-            off = (pm["r80_distal"] - pm["dist"]) * 10.0
-            add("R80 on target distal edge", abs(off) <= R80_TOL_MM,
-                f"R80 {pm['r80_distal']:.2f} cm ({off:+.0f} mm, <= {R80_TOL_MM:g} mm)")
+        # (sobp_metrics; see analysis_transport/sobp_metrics.py). A run that
+        # cannot be graded (no central-axis tally) is a FAIL row, and the
+        # remaining checks still report.
+        try:
+            pm = plateau_metrics(args.run_dir)
+        except ValueError as e:
+            add("plateau metrics computable", False, str(e))
+            pm = None
+        if pm is not None:
+            add("plateau flat enough", pm["uniformity_pct"] <= MAX_UNIFORMITY_PCT,
+                f"uniformity {pm['uniformity_pct']:.1f}% (<= {MAX_UNIFORMITY_PCT:g}%)")
+            if pm["r80_distal"] is not None:
+                off = (pm["r80_distal"] - pm["dist"]) * 10.0
+                add("R80 on target distal edge", abs(off) <= R80_TOL_MM,
+                    f"R80 {pm['r80_distal']:.2f} cm ({off:+.0f} mm, <= {R80_TOL_MM:g} mm)")
 
     # --- report --------------------------------------------------------------
     width = max(len(n) for n, _, _ in checks)
