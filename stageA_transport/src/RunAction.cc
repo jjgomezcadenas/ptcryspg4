@@ -236,7 +236,7 @@ void RunAction::WriteRegionsCsv() const {
 // honest total-energy Bragg curve). edep_core is the thin on-axis core
 // (r <= kCoreRadiusMM); dose_core converts it to dose-to-medium per bin using
 // the density of the medium on the axis there — the clean central-axis depth
-// dose graded for SOBP plateau flatness / R80 (see latex/02_beam_design.tex).
+// dose graded for SOBP plateau flatness / R80 (see latex/ptcrysp_physics.tex).
 void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
   const auto& tot = run->EdepZTotal();
   const auto& prim = run->EdepZPrimary();

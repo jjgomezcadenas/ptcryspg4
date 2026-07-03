@@ -91,7 +91,7 @@ operational design and verification are in Sec.~\ref{sec:field}.
 
 \subsection{The phantoms}
 \label{sec:phantom}
-The three phantoms share the same beam axis ($z$) and the same target-box dose
+The four phantoms share the same beam axis ($z$) and the same target-box dose
 normalisation; they differ in shape and in how many materials they contain.
 
 \paragraph{Cylinder.} A single homogeneous cylinder with its axis along the beam.
@@ -115,6 +115,18 @@ cortical-bone skull (\file{G4\_BONE\_CORTICAL\_ICRP}), and a brain-tissue core
 (\file{G4\_BRAIN\_ICRP}). The dense bone layer shifts the proton range, so the
 SOBP field is designed through the actual scalp/skull/brain path in
 water-equivalent depth to land the dose plateau on the target.
+
+\paragraph{HeadEP.} The MIRD head with a tumour: a soft-tissue ellipsoid of
+semi-axes $18\times20\times\SI{18}{mm}$ at the posterior-fossa site of a
+reference ependymoma --- midline, posterior, inferior (the 4th-ventricle
+region), fully inside the brain. The head is turned so its
+anterior--posterior axis lies along the beam and the tumour centre sits on
+the beam axis: the beam enters through the occiput and travels anterior,
+straight at the tumour. The dose target is the tumour itself
+(\SI{40}{mm} diameter $\times$ \SI{40}{mm}, at \SI{57}{}--\SI{97}{mm} depth
+from the occiput entrance), and the SOBP field is WEPL-designed through the
+posterior scalp/skull/brain path. In \file{phantom\_regions.csv} the tumour
+is a fourth region that carves the brain.
 
 \subsection{The physics list}
 \label{sec:physics}
@@ -207,8 +219,8 @@ primary. A uniform fluence over a disk (\file{/stageA/beam/disk}) matched to the
 target radius turns the depth plateau into a dose box.
 
 \paragraph{The field is phantom-specific.} Because both the medium (through WEPL)
-and the target window enter the design, the cylinder, \file{mird\_head} and
-\file{uniform\_head} fields are different tables. Each design is written per field,
+and the target window enter the design, the cylinder, \file{mird\_head},
+\file{uniform\_head} and \file{headep} fields are different tables. Each design is written per field,
 \file{data/field/<label>\_sobp\_layers.csv}, with a companion \file{\_meta.csv}
 stamping what it was designed for (\file{design\_geometry}, materials, the
 geometric and WEPL windows, $\mu$, $N$). Each geometry's SOBP macro loads its own
@@ -407,10 +419,11 @@ The absolute normalisation scales production to a clinical dose $D$ via
 per isotope: \file{isotope\_id} and \file{N\_expected}, the expected measured
 decays for \SI{1}{Gy} at this timing. The companion \file{*\_meta.csv} carries
 \file{scenario}, \file{source\_file}, \file{dose\_Gy}, and the acquisition timing
-\file{t\_irr\_s}, \file{t\_del\_s}, \file{t\_meas\_s}. The standard set is
-\file{inroom} (baseline, $\tdel=\SI{120}{s}$), \file{fast} ($\tdel=\SI{60}{s}$),
-and \file{offline} ($\tdel=\SI{300}{s}$, $\tmeas=\SI{1800}{s}$); shorter delay
-keeps more short-lived $\Ox{15}$.
+\file{t\_irr\_s}, \file{t\_del\_s}, \file{t\_meas\_s}. The baseline
+\file{inroom} budget ($\tdel=\SI{120}{s}$) is the \file{budget.py} default;
+further budgets are made by passing a label and the timing, e.g.\
+\file{-{}-scenario fast -{}-t-del 60} or \file{-{}-scenario offline -{}-t-del
+300 -{}-t-meas 1800}. Shorter delay keeps more short-lived $\Ox{15}$.
 
 \paragraph{\file{phantom\_regions.csv} $+$ \file{phantom\_material\_*} --- the
 medium.} The source is detector-independent but not medium-independent: a PET
@@ -509,6 +522,12 @@ scenario:
   ./proton_transport cylinder_sobp.mac         # Geant4 run -> data/runs/<tag>/
   python3 decay_sampling/budget.py data/runs/<tag>   # -> sampling_budget_inroom.csv
   python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze into the scenarios repo
+\end{verbatim}
+For a head case the field is designed in WEPL through that phantom (from a
+pencil run of its geometry), then its own macro is run:
+\begin{verbatim}
+  python3 field_design/sobp.py --from-run data/runs/headep_pencil_1e5
+  ./proton_transport headep_sobp.mac   # also mird_head_sobp.mac, uniform_head_sobp.mac
 \end{verbatim}
 Full build and run instructions are in \file{CLAUDE.md}; the file columns are in
 \file{common/SCHEMA.md}. A frozen run is checked with

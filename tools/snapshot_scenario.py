@@ -48,10 +48,7 @@ CORE_FILES = [
 # Documentation PDFs copied from latex/ into the snapshot's docs/ (build first
 # with latex/build_latex.py). The full doc set travels with the frozen scenario.
 LATEX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "latex")
-DOC_PDFS = [
-    "01_user_guide.pdf", "02_beam_design.pdf",
-    "03_decay_kinetics.pdf", "04_source_reference.pdf",
-]
+DOC_PDFS = ["ptcrysp_guide.pdf", "ptcrysp_physics.pdf"]
 
 
 def collect_data_files(run_dir):

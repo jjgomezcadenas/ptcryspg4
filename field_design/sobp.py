@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Design a Spread-Out Bragg Peak (SOBP): proton energy-layer weights.
 
-Implements latex/02_beam_design.tex. Pristine-peak ranges span the target depth; energies
+Implements latex/ptcrysp_physics.tex. Pristine-peak ranges span the target depth; energies
 come from the Bortfeld power law R = alpha*E^p (water), scaled to the material by
 density; flattening weights are the bin-integrated
 

@@ -151,7 +151,7 @@ def relative_stopping_power(material: Material, energy_MeV: float = 150.0) -> fl
     """Proton stopping power relative to water (RSP), from the Bethe ratio at
     energy_MeV. Water = 1 by construction; brain ~1.03, cortical bone ~1.6.
     The medium enters the SOBP design only through this (WEPL); see
-    latex/02_beam_design.tex Sec. 5. Weakly energy-dependent over the therapeutic
+    latex/ptcrysp_physics.tex Sec. 5. Weakly energy-dependent over the therapeutic
     band, so the default 150 MeV is representative."""
     water = MATERIALS["G4_WATER"]
     gamma = 1.0 + energy_MeV / _M_PROTON_MeV

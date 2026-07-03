@@ -26,7 +26,7 @@ class BeamConfig {
   const G4String& LayerPath() const { return fLayerPath; }
 
   // Sample one layer's energy [MeV] in proportion to its weight, using the
-  // calling worker thread's RNG (stochastic delivery, see latex/02_beam_design.tex).
+  // calling worker thread's RNG (stochastic delivery, see latex/ptcrysp_physics.tex).
   G4double SampleEnergyMeV() const;
 
   // Lateral profile: a uniform disk of this radius (G4 internal length units,

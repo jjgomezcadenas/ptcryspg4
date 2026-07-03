@@ -9,7 +9,7 @@ figures.
 
 Usage:
     python latex/build_latex.py              # build all docs, then clean
-    python latex/build_latex.py 02_beam_design   # build one (name or .tex path)
+    python latex/build_latex.py ptcrysp_physics  # build one (name or .tex path)
     python latex/build_latex.py --clean      # only remove clutter, do not build
     python latex/build_latex.py --no-clean   # build but keep the aux files
 """

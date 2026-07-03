@@ -10,13 +10,10 @@ separate downstream simulation reads it and models a PET detector.
 
 | File | Role |
 |------|------|
-| `latex/01_user_guide.tex` | **User guide** — physics and pipeline (read first) |
-| `latex/04_source_reference.tex` | Consumer interface contract: the scenario data product |
+| `latex/ptcrysp_guide.tex` | **User guide** — the pipeline, the phantoms, the scenario data product (read first) |
+| `latex/ptcrysp_physics.tex` | The physics: induced activity, decay kinetics, SOBP field design |
 | `CLAUDE.md` | Orientation + implementation decisions |
 | `common/SCHEMA.md` | CSV file formats, isotope encoding, units |
-
-The full doc set (numbered in reading order: `01_user_guide`, `02_beam_design`,
-`03_decay_kinetics`, `04_source_reference`) lives in `latex/`.
 
 ## Pipeline
 
@@ -40,7 +37,7 @@ decay_sampling/      Python: time-decay budget (budget.py) + realizations (budge
 analysis_transport/  Python: validate Stage A output (dashboard + diagnostics)
 tools/               snapshot_scenario.py: freeze a run into the scenarios repo
 common/              schemas + isotope table (C++/Python mirrors)
-latex/               LaTeX docs (01_user_guide … 04_source_reference) + figures + biblio
+latex/               LaTeX docs (ptcrysp_guide, ptcrysp_physics) + figures + biblio
 docs/                reference papers only (.pdf, .txt)
 data/                Generated CSV files (gitignored)
 ```

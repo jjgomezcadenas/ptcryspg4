@@ -34,28 +34,26 @@ a detector. This repo stops at the source.
 
 ## The documentation (`latex/`)
 
-Our LaTeX documentation lives in `latex/`, numbered in reading order; `docs/`
-holds only reference papers (`.pdf`, `.txt`). Build any of them with `pdflatex`.
+Our LaTeX documentation is two documents in `latex/`; `docs/` holds only
+reference papers (`.pdf`, `.txt`). Build with `python3 latex/build_latex.py`
+(or `pdflatex` directly).
 
-- `latex/01_user_guide.tex` — the user guide: the physics (induced activity and
-  its time evolution, the decay kinetics that set the measured counts, what the
-  generated source looks like, with figures) and how to run the pipeline. **Read
-  it first.**
-- `latex/02_beam_design.tex` — how the SOBP depth field is designed
-  (Bortfeld + Abel-inversion weights + attenuation correction), as built.
-- `latex/03_decay_kinetics.tex` — the decay-plus-timing model that turns produced
-  emitters into measured decays, and the σ(range) figure of merit.
-- `latex/04_source_reference.tex` — the downstream-consumer interface contract:
-  the scenario data product (files, columns, metadata, coordinate frame) and the
-  recipe for turning it into a PET acquisition, with the head/brain case worked
-  through. The canonical, annotated form of the per-snapshot `SCHEMA.md`.
+- `latex/ptcrysp_guide.tex` — the **user guide**: the pipeline, the beam and
+  the phantoms, how an emitter is recorded, the handoff, the scenario data
+  product (files, columns, coordinate frame, consumer recipe — the annotated
+  form of the per-snapshot `SCHEMA.md`), the worked `cylinder_sobp_1e7`
+  example, and how to run everything. **Read it first.**
+- `latex/ptcrysp_physics.tex` — the **physics note**: induced β⁺ activity and
+  its time evolution, the decay kinetics that set the measured counts, activity
+  vs dose, and the SOBP field design (Bortfeld + Abel-inversion weights +
+  attenuation correction + WEPL for heterogeneous phantoms).
 
 > **Terminology — "decay kinetics" = "the handoff".** The decay-kinetics step
-> (doc `03_decay_kinetics`, code `decay_sampling/`) is exactly what the
+> (physics note §decay kinetics, code `decay_sampling/`) is exactly what the
 > architecture diagram below and the rest of this file call **the handoff**
 > (Stage B0): the radioactive-decay + acquisition-timing model that turns
 > produced emitters `P_j` into measured decays `N_j`. The two names are
-> interchangeable; the doc was renamed for clarity, the concept kept its name.
+> interchangeable.
 
 This file (CLAUDE.md) records the implementation decisions, parameters, and
 build/run details a coding session needs, and refers to the guide for the physics
@@ -193,8 +191,8 @@ delay = less ¹⁵O). *Conservative/offline variant:* t_del=300, t_meas=1800 s
 (where the Parodi Table 4 measured-decay check applies). The positron-range floor
 (¹⁵O longest) matters at any of these.
 
-The factors are explained in the user guide (§decay kinetics); the full
-derivation, including pulsed deliveries, is in `latex/03_decay_kinetics.tex`. Absolute
+The factors are explained in `latex/ptcrysp_physics.tex` (§decay kinetics),
+which also covers pulsed deliveries. Absolute
 normalization `P_j(D)=count_j·D/target_dose`; the budget N_j is computed by
 `decay_sampling/budget.py`.
 
@@ -220,7 +218,7 @@ decay_sampling/      # Python: time-decay budget (budget.py) + realizations (bud
 analysis_transport/  # Python: validate Stage A (validate_transport.py) + make_figures.py
 tools/               # snapshot_scenario.py: freeze a run into the scenarios repo
 common/              # shared schema, units, isotope table
-latex/               # our LaTeX docs (01_user_guide … 04_source_reference) + figures + biblio
+latex/               # our LaTeX docs (ptcrysp_guide, ptcrysp_physics) + figures + biblio
 docs/                # reference papers only (.pdf, .txt)
 data/runs/<run_tag>/ # generated CSV, one self-contained dir per run (gitignored)
 ```
@@ -228,7 +226,7 @@ data/runs/<run_tag>/ # generated CSV, one self-contained dir per run (gitignored
 Frozen Stage-A runs live in the `ptcrysp-scenarios` data repo, one named directory
 per scenario; the downstream detector simulation reads from there.
 
-## Beam: SOBP field (`field_design/`, method in `latex/02_beam_design.tex`)
+## Beam: SOBP field (`field_design/`, method in `latex/ptcrysp_physics.tex`)
 
 The standard scenario uses a **Spread-Out Bragg Peak**, not a single pencil. The
 depth field is implemented and verified:
@@ -237,7 +235,7 @@ depth field is implemented and verified:
   `--mu` tuned) → `data/field/<label>_sobp_layers.csv` (+ a provenance `_meta.csv`).
   **The field is phantom-specific**, not universal: homogeneous mode designs the
   cylinder/brain field; `--from-run <run_dir>` designs in **WEPL** through a
-  heterogeneous phantom (RSP ray-trace, see `latex/02_beam_design.tex` §5), so the
+  heterogeneous phantom (RSP ray-trace, `latex/ptcrysp_physics.tex` §WEPL), so the
   head's bone offset is absorbed. Each geometry's SOBP macro loads its own table.
 - The gun (`BeamConfig` + `/stageA/beam/layers <file>`) samples a layer energy
   per primary (stochastic; per-layer Poisson noise ≲0.2% at ≥10⁷ protons); the run
@@ -270,7 +268,8 @@ Run:
 ```bash
 ./proton_transport            # interactive Qt viewer; runs vis.mac,
                               #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
-./proton_transport cylinder_sobp.mac   # batch (18 threads); also mird_head_sobp.mac, uniform_head_sobp.mac
+./proton_transport cylinder_sobp.mac   # batch (18 threads); also uniform_head_sobp.mac,
+                                       #   mird_head_sobp.mac, headep_sobp.mac (head + tumour)
 ```
 
 **Each run owns a directory.** Macros set the base `/stageA/output/dir
@@ -290,6 +289,9 @@ python3 field_design/sobp.py --mu 0.025          # -> data/field/cylinder_sobp_l
 # head SOBP: design in WEPL from a head run's geometry, then run the head macro
 python3 field_design/sobp.py --from-run data/runs/mird_head_pencil_1e5
 ./proton_transport mird_head_sobp.mac            # -> data/runs/mird_head_sobp_1e7/
+# headep (MIRD head + posterior-fossa tumour, posterior beam): same pattern
+python3 field_design/sobp.py --from-run data/runs/headep_pencil_1e5
+./proton_transport headep_sobp.mac               # -> data/runs/headep_sobp_1e7/
 ```
 
 `build/compile_commands.json` (the `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` flag)
@@ -319,7 +321,7 @@ python3 decay_sampling/budget.py     $RUN              # -> $RUN/sampling_budget
 python3 decay_sampling/budget.py     $RUN --scenario fast --t-del 60
 python3 decay_sampling/budget_gen.py $RUN              # -> $RUN/sampling_realizations_inroom.csv (Poisson draws)
 python3 analysis_transport/make_figures.py $RUN        # -> $RUN/figures/ (geometry-aware control plots)
-python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze that run into ../ptcrysp-scenarios
+python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze into ~/Projects/ptcrysp-scenarios
 ```
 
 `budget.py` writes the per-isotope measured count N_j (no random numbers).
@@ -342,7 +344,7 @@ curve, endpoint-ordered positron ranges). The handoff is done (`budget.py` +
 `ptcrysp-scenarios` repo. The source side is complete; the detector study is a
 separate downstream repo.
 
-1. Read the user guide `latex/01_user_guide.tex` end to end.
+1. Read the user guide `latex/ptcrysp_guide.tex` end to end.
 2. Stand up the Stage-A app; confirm proton range and dose in the phantom.
 3. Write `emitters.csv` (+ `run_meta.csv`); rely on standard radioactive decay
    (no prompt-decay override); check yields-per-proton against the literature.

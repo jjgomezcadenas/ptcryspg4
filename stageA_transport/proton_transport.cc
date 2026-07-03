@@ -1,7 +1,8 @@
-// Stage A: proton transport in a PMMA phantom, producing the detector-
-// independent beta+ emitter source (spec sec 2). Milestone 1: geometry, gun,
-// physics, MT transport, and interactive Qt visualization. PROD/ANH capture
-// and the prod_anh.h5 writer come in later milestones.
+// Stage A: proton transport through a phantom (brain cylinder or one of the
+// head geometries), producing the detector-independent beta+ emitter source:
+// emitters.csv + run_meta.csv + phantom_regions.csv + depth_dose.csv, one
+// self-contained directory per run. MT transport with interactive Qt
+// visualization in the no-argument mode.
 //
 // Usage:
 //   ./proton_transport                 -> interactive Qt session (executes vis.mac)

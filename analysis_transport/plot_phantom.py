@@ -8,7 +8,7 @@ agnostic. A target box poking outside the medium is then obvious by eye — the
 visual companion to check_run.py. Writes <run_dir>/figures/phantom.png.
 
 (Distinct from plot_geometry.py, which is the cylinder scenario-frame figure with
-the source cloud, used in latex/04_source_reference.tex.)
+the source cloud, used in latex/ptcrysp_guide.tex.)
 
 Usage:
     python analysis_transport/plot_phantom.py <run_dir> [--out PNG]

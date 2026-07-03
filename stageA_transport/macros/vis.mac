@@ -1,5 +1,5 @@
 # Stage A — interactive visualization macro.
-# Opens the Qt viewer, draws the PMMA phantom, and shoots protons at the target
+# Opens the Qt viewer, draws the phantom (default: the brain cylinder), and shoots protons at the target
 # so you can visually confirm the beam enters the cylinder and slows down.
 # Executed automatically when you run ./proton_transport with no arguments.
 #
