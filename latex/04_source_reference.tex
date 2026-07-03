@@ -29,7 +29,7 @@ This note specifies the scenario as a data product --- its files, their columns
 and metadata, the shared coordinate frame, and the recipe a consumer follows to
 build an acquisition from it --- so that a scenario directory can be used from
 its own contents alone. The format is generic; the standard skull-base case
-(\file{head\_sobp\_1e7}: a brain-filled head cylinder) is worked through as a
+(\file{cylinder\_sobp\_1e7}: a brain-filled head cylinder) is worked through as a
 running example in Sec.~\ref{sec:example}. The physics behind the source is in
 the user guide (\file{01\_user\_guide.tex}) and the decay bookkeeping in
 \file{03\_decay\_kinetics.tex}; this note is the consumer-facing interface contract.
@@ -70,7 +70,7 @@ point list, so it is materialized explicitly.
   beam direction; the beam enters at the $z=-L/2$ face. The source cloud fills
   the proton path and tapers at the distal edge; it is laterally confined to the
   irradiated disk. The dashed box is the dose-normalisation target. This is the
-  standard \file{head\_sobp\_1e7} case.}
+  standard \file{cylinder\_sobp\_1e7} case.}
   \label{fig:frame}
 \end{figure}
 
@@ -139,7 +139,7 @@ column & type & meaning \\
 \file{beam\_energy\_MeV} & float & nominal proton energy; for a SOBP run, the \\
  & & fallback single energy (real spectrum in \file{sobp\_layers.csv}) \\
 \file{beam\_sigma\_mm} & float & Gaussian beam $\sigma$ at entrance (pencil mode) \\
-\file{geometry} & string & phantom case: \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \\
+\file{geometry} & string & phantom case: \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \textbar{} \file{headep} \\
 \file{phantom\_material} & string & single material, or \file{multi} (medium per-region in \file{phantom\_regions.csv}) \\
 \file{phantom\_diameter\_mm}, \file{phantom\_length\_mm} & float & phantom cylinder size \\
 \file{phantom\_mass\_g} & float & phantom mass \\
@@ -259,7 +259,7 @@ the scenario itself is deterministic and seed-free, so the source is reproducibl
 across studies. The spread of the recovered proton range over realizations,
 $\sigma(\text{range})$, is the figure of merit (\file{03\_decay\_kinetics.tex}).
 
-\section{Worked example: \file{head\_sobp\_1e7}}
+\section{Worked example: \file{cylinder\_sobp\_1e7}}
 \label{sec:example}
 
 The standard skull-base reference: a proton SOBP field delivering \SI{1}{Gy} to

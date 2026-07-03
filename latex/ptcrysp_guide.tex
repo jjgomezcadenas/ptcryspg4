@@ -385,7 +385,7 @@ column & type & meaning \\
 \file{n\_protons} & int & primaries simulated \\
 \file{beam\_energy\_MeV} & float & nominal proton energy (SOBP: fallback single energy) \\
 \file{beam\_sigma\_mm} & float & Gaussian beam $\sigma$ at entrance (pencil mode) \\
-\file{geometry} & string & \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \\
+\file{geometry} & string & \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \textbar{} \file{headep} \\
 \file{phantom\_material} & string & single material, or \file{multi} (per-region in \file{phantom\_regions.csv}) \\
 \file{phantom\_diameter\_mm}, \file{phantom\_length\_mm} & float & phantom cylinder size \\
 \file{phantom\_mass\_g} & float & phantom mass \\
@@ -460,7 +460,7 @@ All randomness (the Poisson draw, the emission directions) lives in the consumer
 the scenario itself is deterministic and seed-free, so the source is reproducible
 across studies.
 
-\subsection{Worked example: \file{head\_sobp\_1e7}}
+\subsection{Worked example: \file{cylinder\_sobp\_1e7}}
 \label{sec:example}
 
 The standard skull-base reference: a proton SOBP field delivering \SI{1}{Gy} to a

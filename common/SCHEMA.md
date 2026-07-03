@@ -76,7 +76,7 @@ that would escape the phantom into air are killed at the boundary, so their
 | `n_protons` | int | primaries run |
 | `beam_energy_MeV` | float | nominal proton energy; for a SOBP run this is the fallback single energy (real spectrum in `sobp_layers.csv`) |
 | `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
-| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` |
+| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` \| `headep` |
 | `phantom_material` | string | single material (cylinder, uniform head) or `"multi"` (the medium is per-region in `phantom_regions.csv`) |
 | `phantom_diameter_mm`, `phantom_length_mm` | float | overall bounding box (transverse, beam); detail in `phantom_regions.csv` |
 | `phantom_mass_g` | float | phantom mass (for dose) |
@@ -217,7 +217,7 @@ brain-first ordering carves the skull shell, so no boolean solids are needed.
 
 | column | type | meaning |
 |--------|------|---------|
-| `region` | string | name (`brain`/`skull`/`scalp`; `phantom` for the cylinder) |
+| `region` | string | name (`brain`/`skull`/`scalp`, plus `tumour` for headep; `phantom` for the cylinder) |
 | `priority` | int | lower = checked first |
 | `material` | string | NIST name → `phantom_material_<material>.csv` |
 | `solid` | string | `ellipsoid` \| `cylinder` |
@@ -227,7 +227,8 @@ brain-first ordering carves the skull shell, so no boolean solids are needed.
 
 Regions are axis-aligned here (Euler angles 0); ellipsoid membership is
 `((x−cx)/a)² + ((y−cy)/b)² + ((z−cz)/c)² ≤ 1`. The cylinder writes one row; the
-MIRD head writes brain/skull/scalp. Compositions are the authoritative Geant4
+MIRD head writes brain/skull/scalp; headep writes tumour/brain/skull/scalp
+(the tumour carves the brain). Compositions are the authoritative Geant4
 NIST definitions; `μ` is Compton/Klein-Nishina (coherent + photoelectric ~1–2 %,
 not included).
 

@@ -33,7 +33,7 @@ their `anh` pinned to the phantom boundary.
                            fallback single energy — the real spectrum is in
                            sobp_layers.csv
     beam_sigma_mm          Gaussian beam sigma at entrance (pencil mode)
-    geometry               phantom case: cylinder | uniform_head | mird_head
+    geometry               phantom case: cylinder | uniform_head | mird_head | headep
     phantom_material       single material, or "multi" (medium in phantom_regions.csv)
     phantom_diameter_mm    phantom cylinder diameter
     phantom_length_mm      phantom cylinder length (along z)
@@ -47,6 +47,16 @@ their `anh` pinned to the phantom boundary.
     target_dist_depth_mm   far face of the target box, depth from entrance
     Np_per_Gy              protons for 1 Gy (= n_protons / target_dose_Gy)
     geant4_version, physics_list, random_seed
+
+## depth_dose.csv — depth-dose profile along the beam
+    z_mm               bin centre along the beam axis (same frame as emitters.csv)
+    edep_total_MeV     energy deposit in the bin, whole transverse plane
+    edep_primary_MeV   energy deposit by the primary proton only
+    edep_core_MeV      energy deposit in the thin on-axis core (r <= 5 mm)
+    dose_core_Gy       edep_core as dose to the on-axis medium in that bin
+
+The core columns are the central-axis depth dose (the SOBP plateau / R80
+profile); the total/primary columns are the full-plane Bragg tally.
 
 ## sampling_budget_<scenario>.csv — measured decays per isotope
     isotope_id    isotope code
@@ -84,7 +94,7 @@ propagate the 511 keV annihilation photons through the phantom and needs the
 material at each point (for attenuation + scatter, and for reconstruction
 attenuation correction). This file is the medium: one row per region, in the
 SAME world frame as emitters.csv.
-    region        name (e.g. brain, skull, scalp; or phantom for the cylinder)
+    region        name (e.g. brain, skull, scalp, tumour; or phantom for the cylinder)
     priority      lower = checked first
     material      NIST name -> see phantom_material_<material>.csv
     solid         ellipsoid | cylinder

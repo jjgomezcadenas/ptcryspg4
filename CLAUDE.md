@@ -338,7 +338,7 @@ in `analysis_transport/requirements.txt` and `decay_sampling/requirements.txt`
 **Status:** Stage A is done and validated (custom `stageA_transport/`, MT on 18
 threads; `emitters.csv` + `run_meta.csv` + `depth_dose.csv`; yields sane, Bragg
 curve, endpoint-ordered positron ranges). The handoff is done (`budget.py` +
-`budget_gen.py`). The standard run (`head_sobp_1e7`, 10⁷ protons) is frozen in the
+`budget_gen.py`). The standard run (`cylinder_sobp_1e7`, 10⁷ protons) is frozen in the
 `ptcrysp-scenarios` repo. The source side is complete; the detector study is a
 separate downstream repo.
 

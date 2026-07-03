@@ -41,7 +41,7 @@ ANNIHILATION_keV = 511.0
 # so each is optional -- we copy what is there, not a hardcoded must-have list.
 CORE_FILES = [
     "emitters.csv", "run_meta.csv", "depth_dose.csv",
-    "phantom_regions.csv", "sobp_layers.csv",
+    "phantom_regions.csv", "sobp_layers.csv", "sobp_layers_meta.csv",
 ]
 # Plus every sampling_budget_*.csv (+ _meta) found in the run dir (glob).
 
