@@ -11,13 +11,10 @@
 #include <cmath>
 #include <string>
 
-namespace {
-// Depth binning along z (phantom centred at origin, axis along z).
-constexpr G4double kZMin = -0.5 * stageA::kPhantomLengthMM;  // mm
-constexpr G4double kBinW = stageA::kPhantomLengthMM / StageARun::kNZBins;  // mm
-}  // namespace
-
-StageARun::StageARun() = default;
+// Depth binning along z (phantom centred at origin, axis along z): the window
+// is the phantom's beam-axis extent, passed in by RunAction::GenerateRun.
+StageARun::StageARun(G4double halfZ_mm)
+    : fZMinMM(-halfZ_mm), fBinWMM(2. * halfZ_mm / kNZBins) {}
 
 // Called by the run manager for every event (after EndOfEventAction). We use it
 // to pull the per-event scorer result; emitter rows and depth-dose are filled
@@ -51,7 +48,7 @@ void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
 
   // Degenerate (zero-length) step: assign to its single bin.
   if (len < 1e-9) {
-    const int bin = static_cast<int>((zlo - kZMin) / kBinW);
+    const int bin = static_cast<int>((zlo - fZMinMM) / fBinWMM);
     if (bin >= 0 && bin < kNZBins) {
       fEdepZTotal[bin] += edep;
       if (primary) fEdepZPrimary[bin] += edep;
@@ -61,13 +58,13 @@ void StageARun::AddEdepAlongStep(G4double z1, G4double z2, G4double edep,
   }
 
   // Spread edep over the spanned bins, in proportion to the overlap length.
-  int binLo = static_cast<int>(std::floor((zlo - kZMin) / kBinW));
-  int binHi = static_cast<int>(std::floor((zhi - kZMin) / kBinW));
+  int binLo = static_cast<int>(std::floor((zlo - fZMinMM) / fBinWMM));
+  int binHi = static_cast<int>(std::floor((zhi - fZMinMM) / fBinWMM));
   binLo = std::max(binLo, 0);
   binHi = std::min(binHi, kNZBins - 1);
   for (int b = binLo; b <= binHi; ++b) {
-    const G4double bz0 = kZMin + b * kBinW;
-    const G4double overlap = std::min(zhi, bz0 + kBinW) - std::max(zlo, bz0);
+    const G4double bz0 = fZMinMM + b * fBinWMM;
+    const G4double overlap = std::min(zhi, bz0 + fBinWMM) - std::max(zlo, bz0);
     if (overlap <= 0.) continue;
     const G4double e = edep * (overlap / len);
     fEdepZTotal[b] += e;

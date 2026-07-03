@@ -104,7 +104,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double fRadius = 0.;   // cylinder radius, set in Construct()
   G4double fHalfZ = 0.;    // cylinder half-length (G4Tubs uses half-z)
   G4double fBeamHalfExtent = 0.;          // phantom half-extent along +z
-  G4LogicalVolume* fPhantomLV = nullptr;  // scoring volume (cylinder or head)
+  G4LogicalVolume* fPhantomLV = nullptr;  // phantom mother (mass, fallbacks)
+  // Every phantom logical volume, mother and daughters: the edep scorer binds to
+  // each (a sensitive detector does not propagate to daughter volumes).
+  std::vector<G4LogicalVolume*> fScoringLVs;
   G4String fMaterialName;                 // NIST name; default set in the ctor
   G4String fGeometry;                     // "cylinder" | "mird_head"
   G4double fTargetRadius = 0.;            // target box, defaults set in the ctor

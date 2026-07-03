@@ -93,6 +93,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   auto* worldPV = new G4PVPlacement(nullptr, {}, worldLV, "World",
                                     nullptr, false, 0, true);
 
+  fScoringLVs.clear();
   if (fGeometry == stageA::kGeometryMirdHead)
     BuildMirdHead(worldLV);
   else if (fGeometry == stageA::kGeometryHeadEP)
@@ -114,6 +115,7 @@ void DetectorConstruction::BuildCylinder(G4LogicalVolume* worldLV) {
   fPhantomLV = new G4LogicalVolume(phantomSolid, phantomMat, "Phantom");
   fPhantomLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.6, 0.6, 0.9, 0.3)));
   new G4PVPlacement(nullptr, {}, fPhantomLV, "Phantom", worldLV, false, 0, true);
+  fScoringLVs.push_back(fPhantomLV);
   fBeamHalfExtent = fHalfZ;
 
   // One homogeneous region (world frame): a cylinder centred at the origin.
@@ -164,6 +166,7 @@ void DetectorConstruction::BuildHeadEnvelope(G4LogicalVolume* worldLV,
   new G4PVPlacement(nullptr, G4ThreeVector(0, 0, kBrainOffsetZMM * mm), brainLV,
                     "Brain", headLV, false, 0, true);
 
+  fScoringLVs.insert(fScoringLVs.end(), {headLV, skullLV, brainLV});
   *headLVout = headLV;
   *brainLVout = brainLV;
 }
@@ -228,6 +231,7 @@ void DetectorConstruction::BuildHeadEP(G4LogicalVolume* worldLV) {
       G4ThreeVector(kTumourPosXMM * mm, kTumourPosYMM * mm,
                     (kTumourPosZMM - kBrainOffsetZMM) * mm),
       tumLV, "Tumour", brainLV, false, 0, true);
+  fScoringLVs.push_back(tumLV);
 
   fPhantomLV = headLV;
   fBeamHalfExtent = kScalpByMM * mm;  // A-P semi-axis, now along +z
@@ -266,6 +270,7 @@ void DetectorConstruction::BuildUniformHead(G4LogicalVolume* worldLV) {
   const G4Transform3D tf =
       G4Translate3D(-kBrainOffsetZMM * mm, 0., 0.) * G4RotateY3D(90. * deg);
   new G4PVPlacement(tf, fPhantomLV, "Head", worldLV, false, 0, true);
+  fScoringLVs.push_back(fPhantomLV);
   fBeamHalfExtent = kScalpAxMM * mm;
   fHalfZ = fBeamHalfExtent;  // depth reference = entrance face (see BuildMirdHead)
 
@@ -276,11 +281,13 @@ void DetectorConstruction::BuildUniformHead(G4LogicalVolume* worldLV) {
 void DetectorConstruction::ConstructSDandField() {
   // A multifunctional detector is a container of "primitive scorers"; here a
   // single G4PSEnergyDeposit sums the energy deposited in the phantom each
-  // event. G4 merges its hits map across threads automatically.
+  // event. G4 merges its hits map across threads automatically. Binding to a
+  // volume covers that volume only, so every phantom volume (mother and
+  // daughters) is bound.
   auto* mfd = new G4MultiFunctionalDetector(stageA::kScorerMFD);
   G4SDManager::GetSDMpointer()->AddNewDetector(mfd);
   mfd->RegisterPrimitive(new G4PSEnergyDeposit(stageA::kScorerEdep));
-  SetSensitiveDetector(fPhantomLV, mfd);  // bind the scorer to the phantom volume
+  for (auto* lv : fScoringLVs) SetSensitiveDetector(lv, mfd);
 }
 
 G4String DetectorConstruction::PhantomLabel() const {

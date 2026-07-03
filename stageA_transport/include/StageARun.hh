@@ -14,9 +14,11 @@
 // locking. The master's merged instance is what RunAction writes to CSV.
 class StageARun : public G4Run {
  public:
-  static constexpr int kNZBins = 200;  // z-bins over kPhantomLengthMM (0.8 mm)
+  static constexpr int kNZBins = 200;  // z-bins over the phantom's beam extent
 
-  StageARun();
+  // halfZ_mm: the phantom's beam-axis half-extent — the depth binning covers
+  // z in [-halfZ, +halfZ], whatever the geometry.
+  explicit StageARun(G4double halfZ_mm);
   ~StageARun() override = default;
 
   void RecordEvent(const G4Event* event) override;  // accumulate total dose
@@ -46,6 +48,8 @@ class StageARun : public G4Run {
 
  private:
   ptcrysp::EmitterData fEmitters;
+  G4double fZMinMM = 0.;  // depth-binning window start (= -halfZ), mm
+  G4double fBinWMM = 0.;  // depth-bin width, mm
   G4double fEdep = 0.;
   G4double fTargetEdep = 0.;  // energy deposited inside the target box
   G4int fCollID = -1;  // cached scorer collection ID

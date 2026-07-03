@@ -50,9 +50,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
   // capture: the TrackingAction records ANH at this boundary point instead
   // (keep-at-surface). The annihilation photons are not generated, but Stage A
   // does not use them -- Stage B regenerates the pair from anh_xyz.
+  // "In air" = in the world volume, the only volume with no mother; every
+  // phantom volume of every geometry is nested inside it.
   if (track->GetDefinition() == G4Positron::Definition()) {
     const auto* postVol = step->GetPostStepPoint()->GetPhysicalVolume();
-    if (postVol == nullptr || postVol->GetName() != "Phantom") {
+    if (postVol == nullptr || postVol->GetMotherLogical() == nullptr) {
       track->SetTrackStatus(fStopAndKill);
     }
   }

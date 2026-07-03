@@ -51,7 +51,11 @@ RunAction::~RunAction() { delete fMessenger; }
 
 // Called by the run manager (on master and on each worker) to create the run
 // object. Returning our subclass is how we attach custom per-run accumulators.
-G4Run* RunAction::GenerateRun() { return new StageARun; }
+// The geometry is built by now (/run/initialize precedes /run/beamOn), so the
+// phantom's beam-axis half-extent sets the depth-binning window.
+G4Run* RunAction::GenerateRun() {
+  return new StageARun(fDet->PhantomHalfLength() / mm);
+}
 
 // Called when a run finishes. In MT each worker's EndOfRunAction fires first,
 // then G4 merges the worker runs into the master's run and calls this on the
@@ -237,8 +241,10 @@ void RunAction::WriteDepthDoseCsv(const StageARun* run) const {
   const auto& tot = run->EdepZTotal();
   const auto& prim = run->EdepZPrimary();
   const auto& core = run->EdepZCore();
-  const double zmin = -0.5 * stageA::kPhantomLengthMM;
-  const double binw = stageA::kPhantomLengthMM / StageARun::kNZBins;
+  // Same binning window the run accumulated with (see RunAction::GenerateRun).
+  const double halfZ = fDet->PhantomHalfLength() / mm;
+  const double zmin = -halfZ;
+  const double binw = 2. * halfZ / StageARun::kNZBins;
   // Core-bin volume = π r² Δz (in G4 units), for dose = edep / (ρ·V).
   const double rcore = stageA::kCoreRadiusMM * mm;
   const double vbin = pi * rcore * rcore * (binw * mm);
