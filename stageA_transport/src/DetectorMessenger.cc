@@ -29,7 +29,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* det) : fDet(det) {
                         "(heterogeneous scalp/skull/brain), or 'headep' (mird_head "
                         "+ posterior-fossa tumour, posterior beam aimed at it).");
   fGeomCmd->SetParameterName("name", false);
-  fGeomCmd->SetCandidates("cylinder uniform_head mird_head headep");
+  fGeomCmd->SetCandidates("cylinder uniform_head mird_head headep uniform_headep");
   fGeomCmd->AvailableForStates(G4State_PreInit);
 
   // --- target box (dose-normalization scoring region) -----------------------

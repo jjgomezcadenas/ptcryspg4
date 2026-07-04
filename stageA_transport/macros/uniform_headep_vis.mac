@@ -1,18 +1,19 @@
-# Stage A — interactive visualization of the HeadEP phantom.
-# Opens the Qt viewer, draws the scalp/skull/brain/tumour head, and shoots a few
-# protons down the posterior beam so the occiput → cerebellum → tumour path is
-# visible. Interactive (needs the -i flag to open the Qt session):
-#   ./proton_transport -i ../macros/headep_vis.mac
+# Stage A — interactive visualization of the uniform HeadEP phantom.
+# Opens the Qt viewer, draws the homogeneous (brain-only) head in the headep
+# posterior placement, and shoots a few hundred SOBP protons down the beam so
+# the entry point at the occiput and the stopping band over the target window
+# are visible. Interactive (needs the -i flag to open the Qt session):
+#   ./proton_transport -i ../macros/uniform_headep_vis.mac
 #
-# Re-shoot from the Qt command line, e.g.:  /run/beamOn 20
+# Re-shoot from the Qt command line, e.g.:  /run/beamOn 100
 
 /run/numberOfThreads 1
 
-/stageA/phantom/geometry headep
-# SOBP field (spread energies) + a disk over the tumour cross-section, so the
-# beam fills the whole tumour depth instead of stopping at a single Bragg peak.
-# Design it first:  python3 field_design/sobp.py --from-run data/runs/headep_pencil_1e5
-/stageA/beam/layers ../../data/field/headep_sobp_layers.csv
+/stageA/phantom/geometry uniform_headep
+# SOBP field (spread energies) + a disk over the target cross-section.
+# Design it first:
+#   python3 field_design/sobp.py --from-run data/runs/uniform_headep_pencil_1e5
+/stageA/beam/layers ../../data/field/uniform_headep_sobp_layers.csv
 /stageA/beam/disk 20 mm
 /stageA/target/radius 20 mm
 /stageA/target/proximal 57 mm
@@ -28,28 +29,20 @@
 
 # --- draw geometry ---------------------------------------------------------
 /vis/drawVolume
-# Side view onto the z-y (sagittal) plane: beam along +z, tumour toward the back.
+# Side view onto the z-y (sagittal) plane: beam along +z, occiput at -z.
 /vis/viewer/set/viewpointThetaPhi 90 0
 /vis/viewer/set/style surface
 /vis/viewer/set/auxiliaryEdge true
 /vis/viewer/zoom 1.3
-# Draw only the outer head and the tumour, both as wireframe, so the beam path
-# from the occiput to the tumour is clean and unobstructed. The skull and brain
-# shells are hidden.
+# The head as wireframe so the beam path and stopping band are unobstructed.
 /vis/geometry/set/forceWireframe Head 0 true
 /vis/geometry/set/colour Head 0 1 0.6 0.5 0.4
-/vis/geometry/set/visibility Skull 0 false
-/vis/geometry/set/visibility Brain 0 false
-/vis/geometry/set/forceWireframe Tumour 0 true
-/vis/geometry/set/colour Tumour 0 1 1 0.1 0.1 1
-/vis/geometry/set/lineWidth Tumour 0 3
 
 # --- trajectories ----------------------------------------------------------
 /vis/scene/add/trajectories smooth
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/default/setLineWidth 1
-# Draw only the proton beam; suppress the secondary gammas/neutrons (the thick
-# green neutral tracks that otherwise clutter the view).
+# Draw only the proton beam; suppress the secondary gammas/neutrons.
 /vis/filtering/trajectories/create/particleFilter beamProtons
 /vis/filtering/trajectories/beamProtons/add proton
 /vis/scene/endOfEventAction accumulate
@@ -57,11 +50,15 @@
 /tracking/storeTrajectory 2
 
 # --- annotations -----------------------------------------------------------
+# The target window (the headep tumour site): world z in [-45, -5] mm on the
+# beam axis. Marked by text since the homogeneous phantom has no tumour volume.
+/vis/scene/add/text 0 45 -45 mm 12 0 0 target 57 mm
+/vis/scene/add/text 0 45 -5 mm 12 0 0 target 97 mm
 /vis/scene/add/axes 0 0 0 50 mm
 /vis/scene/add/text 0 0 -130 mm 16 0 0 posterior beam
 /vis/scene/add/frame
 /vis/viewer/flush
 
 # A few hundred protons: enough to show the entry spot and the SOBP stopping
-# band filling the tumour.
+# band filling the target window.
 /run/beamOn 300

@@ -1,0 +1,22 @@
+# Stage A — uniform HeadEP geometry proof: the headep envelope and posterior
+# placement (head A-P axis along the beam, tumour site on the beam axis) filled
+# homogeneously with brain — the homogeneity control for headep. A single
+# proton pencil enters the occiput. The dose target is the headep tumour
+# window. Writes emitters.csv + run_meta.csv + depth_dose.csv.
+
+/run/numberOfThreads 18
+
+# Select the geometry (must precede /run/initialize).
+/stageA/phantom/geometry uniform_headep
+# Dose target = the headep tumour window (depth from the occiput entrance).
+/stageA/target/radius 20 mm
+/stageA/target/proximal 57 mm
+/stageA/target/distal 97 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+# 1e5 protons: a quick geometry/shape proof (single 100 MeV pencil).
+/run/printProgress 20000
+/run/beamOn 100000

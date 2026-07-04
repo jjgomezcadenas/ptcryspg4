@@ -19,5 +19,6 @@
 /stageA/output/dir ../../data/runs
 /random/setSeeds 12345 67890
 
-/run/printProgress 200000
-/run/beamOn 10000000
+# 1e8 protons: σ_R-study statistics (dense distal emitter pool).
+/run/printProgress 2000000
+/run/beamOn 100000000

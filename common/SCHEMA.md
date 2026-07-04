@@ -76,7 +76,7 @@ that would escape the phantom into air are killed at the boundary, so their
 | `n_protons` | int | primaries run |
 | `beam_energy_MeV` | float | nominal proton energy; for a SOBP run this is the fallback single energy (real spectrum in `sobp_layers.csv`) |
 | `beam_sigma_mm` | float | pencil-beam Gaussian σ at entrance |
-| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` \| `headep` |
+| `geometry` | string | the phantom case: `cylinder` \| `uniform_head` \| `mird_head` \| `headep` \| `uniform_headep` |
 | `phantom_material` | string | single material (cylinder, uniform head) or `"multi"` (the medium is per-region in `phantom_regions.csv`) |
 | `phantom_diameter_mm`, `phantom_length_mm` | float | overall bounding box (transverse, beam); detail in `phantom_regions.csv` |
 | `phantom_mass_g` | float | phantom mass (for dose) |

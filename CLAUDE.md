@@ -269,7 +269,8 @@ Run:
 ./proton_transport            # interactive Qt viewer; runs vis.mac,
                               #   draws the phantom + shoots 1 proton (more: /run/beamOn N)
 ./proton_transport cylinder_sobp.mac   # batch (18 threads); also uniform_head_sobp.mac,
-                                       #   mird_head_sobp.mac, headep_sobp.mac (head + tumour)
+                                       #   mird_head_sobp.mac, headep_sobp.mac (head + tumour),
+                                       #   uniform_headep_sobp.mac (headep's homogeneous control)
 ```
 
 **Each run owns a directory.** Macros set the base `/stageA/output/dir

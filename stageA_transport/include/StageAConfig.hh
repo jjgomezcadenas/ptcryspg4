@@ -43,6 +43,10 @@ inline constexpr const char* kGeometryCylinder = "cylinder";
 inline constexpr const char* kGeometryUniformHead = "uniform_head";  // 1 region
 inline constexpr const char* kGeometryMirdHead = "mird_head";        // 3 regions
 inline constexpr const char* kGeometryHeadEP = "headep";             // 4 regions
+// headep's homogeneity control: the same envelope, posterior placement and
+// target as headep, but brain throughout (1 region). σ_R(headep) −
+// σ_R(uniform_headep) isolates what the tissue layering does to the range.
+inline constexpr const char* kGeometryUniformHeadEP = "uniform_headep";
 inline constexpr const char* kDefaultGeometry = kGeometryCylinder;
 
 // Head-local frame origin = skull/scalp centre; the brain sits +kBrainOffsetZMM

@@ -96,6 +96,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   void BuildUniformHead(G4LogicalVolume* worldLV);  // 1-region brain ellipsoid
   void BuildMirdHead(G4LogicalVolume* worldLV);     // 3-region scalp/skull/brain
   void BuildHeadEP(G4LogicalVolume* worldLV);       // MIRD head + tumour, posterior
+  void BuildUniformHeadEP(G4LogicalVolume* worldLV);  // headep envelope, brain only
   // Build the scalp/skull/brain envelope into worldLV with the given placement
   // transform (which fixes the head's orientation relative to the +z beam);
   // returns the head and brain logical volumes for daughters and scoring.

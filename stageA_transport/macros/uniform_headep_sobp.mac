@@ -1,0 +1,24 @@
+# Stage A — uniform HeadEP SOBP run: the homogeneous control for the headep
+# σ_R study. Same posterior beam and tumour target window as headep, brain
+# throughout. Generate the field first (WEPL through the homogeneous head):
+#   python3 field_design/sobp.py --from-run data/runs/uniform_headep_pencil_1e5
+
+/run/numberOfThreads 18
+
+/stageA/phantom/geometry uniform_headep
+# SOBP energy layers for THIS phantom.
+/stageA/beam/layers ../../data/field/uniform_headep_sobp_layers.csv
+# Lateral fluence: uniform disk over the target cross-section.
+/stageA/beam/disk 20 mm
+# Dose target = the headep tumour window (depth from the occiput entrance).
+/stageA/target/radius 20 mm
+/stageA/target/proximal 57 mm
+/stageA/target/distal 97 mm
+/run/initialize
+
+/stageA/output/dir ../../data/runs
+/random/setSeeds 12345 67890
+
+# 1e8 protons: σ_R-study statistics (dense distal emitter pool).
+/run/printProgress 2000000
+/run/beamOn 100000000

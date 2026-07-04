@@ -33,7 +33,7 @@ their `anh` pinned to the phantom boundary.
                            fallback single energy — the real spectrum is in
                            sobp_layers.csv
     beam_sigma_mm          Gaussian beam sigma at entrance (pencil mode)
-    geometry               phantom case: cylinder | uniform_head | mird_head | headep
+    geometry               phantom case: cylinder | uniform_head | mird_head | headep | uniform_headep
     phantom_material       single material, or "multi" (medium in phantom_regions.csv)
     phantom_diameter_mm    phantom cylinder diameter
     phantom_length_mm      phantom cylinder length (along z)

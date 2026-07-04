@@ -72,7 +72,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 
   const bool head = (fGeometry == stageA::kGeometryMirdHead ||
                      fGeometry == stageA::kGeometryUniformHead ||
-                     fGeometry == stageA::kGeometryHeadEP);
+                     fGeometry == stageA::kGeometryHeadEP ||
+                     fGeometry == stageA::kGeometryUniformHeadEP);
 
   // --- world: an air box sized to contain whichever geometry, with a margin.
   // The world is the top volume; tracks die when they leave it.
@@ -98,6 +99,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     BuildMirdHead(worldLV);
   else if (fGeometry == stageA::kGeometryHeadEP)
     BuildHeadEP(worldLV);
+  else if (fGeometry == stageA::kGeometryUniformHeadEP)
+    BuildUniformHeadEP(worldLV);
   else if (fGeometry == stageA::kGeometryUniformHead)
     BuildUniformHead(worldLV);
   else
@@ -251,6 +254,38 @@ void DetectorConstruction::BuildHeadEP(G4LogicalVolume* worldLV) {
       HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, Tz, "scalp", kScalpMaterial,
                          0., 0., 0., kScalpAxMM, kScalpByMM, kScalpCzMM),
   };
+}
+
+// Uniform HeadEP: the SAME envelope, posterior placement, and target as headep
+// — the scalp ellipsoid with its A-P axis along the beam, translated so the
+// headep tumour site sits on the beam axis — but brain throughout, no layers,
+// no tumour region. The homogeneity control for the σ_R study: comparing
+// headep against this isolates what the tissue layering does to the distal
+// range, with the orientation, target window, and outer attenuation shell
+// held identical. One medium region.
+void DetectorConstruction::BuildUniformHeadEP(G4LogicalVolume* worldLV) {
+  using namespace stageA;
+  auto* nist = G4NistManager::Instance();
+  G4Material* brainMat = nist->FindOrBuildMaterial(kBrainMaterial);
+
+  auto* headSolid = new G4Ellipsoid("Head", kScalpAxMM * mm, kScalpByMM * mm,
+                                    kScalpCzMM * mm);
+  fPhantomLV = new G4LogicalVolume(headSolid, brainMat, "Head");
+  fPhantomLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.6, 0.6, 0.9, 0.3)));
+
+  // The headep placement, verbatim (see BuildHeadEP for the translation logic).
+  const G4double Tx = -kTumourPosXMM;
+  const G4double Ty = kTumourPosZMM;
+  const G4Transform3D tf =
+      G4Translate3D(Tx * mm, Ty * mm, 0.) * G4RotateX3D(90. * deg);
+  new G4PVPlacement(tf, fPhantomLV, "Head", worldLV, false, 0, true);
+  fScoringLVs.push_back(fPhantomLV);
+  fBeamHalfExtent = kScalpByMM * mm;  // A-P semi-axis, now along +z
+  fHalfZ = fBeamHalfExtent;
+
+  fRegions = {HeadRegionOriented(HeadAxis::Posterior, Tx, Ty, 0., "head",
+                                 kBrainMaterial, 0., 0., 0., kScalpAxMM,
+                                 kScalpByMM, kScalpCzMM)};
 }
 
 // Uniform head (Phase 2): the SAME outer envelope as the MIRD head (the scalp

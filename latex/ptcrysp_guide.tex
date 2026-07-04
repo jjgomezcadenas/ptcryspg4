@@ -91,7 +91,7 @@ operational design and verification are in Sec.~\ref{sec:field}.
 
 \subsection{The phantoms}
 \label{sec:phantom}
-The four phantoms share the same beam axis ($z$) and the same target-box dose
+The five phantoms share the same beam axis ($z$) and the same target-box dose
 normalisation; they differ in shape and in how many materials they contain.
 
 \paragraph{Cylinder.} A single homogeneous cylinder with its axis along the beam.
@@ -127,6 +127,13 @@ straight at the tumour. The dose target is the tumour itself
 from the occiput entrance), and the SOBP field is WEPL-designed through the
 posterior scalp/skull/brain path. In \file{phantom\_regions.csv} the tumour
 is a fourth region that carves the brain.
+
+\paragraph{Uniform HeadEP.} The homogeneity control for HeadEP: the same
+envelope, posterior placement, and target window, but brain throughout ---
+no scalp/skull layers and no tumour region. Comparing the range-recovery
+spread $\sigma_R$ between \file{headep} and \file{uniform\_headep} isolates
+what the tissue layering does to the distal edge, with the orientation,
+target, and outer attenuation shell held identical.
 
 \subsection{The physics list}
 \label{sec:physics}
