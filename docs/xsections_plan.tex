@@ -35,17 +35,24 @@ validation and production sequence.
 
 \section{Objective}
 
-For a cross-section model $m$, the quantity to be propagated is the displacement
-of the reconstructed distal activity edge relative to the nominal prediction,
+For a cross-section model $m$, two distal-edge displacements are reported.  The
+production-profile displacement available in this repository is
 \begin{equation}
-  b_{\mathrm{xs}}^{(m)} =
-  R_{50}^{(m)}-R_{50}^{(\mathrm{nominal})}.
+  b_{\mathrm{prod}}^{(m)} =
+  R_{50,\mathrm{prod}}^{(m)}-R_{50,\mathrm{prod}}^{(\mathrm{nominal})},
+  \label{eq:bias-prod}
+\end{equation}
+where $R_{50,\mathrm{prod}}$ is obtained from the emitter-production depth
+profile.  The final range-verification observable is
+\begin{equation}
+  b_{\mathrm{reco}}^{(m)} =
+  R_{50,\mathrm{reco}}^{(m)}-R_{50,\mathrm{reco}}^{(\mathrm{nominal})},
   \label{eq:bias}
 \end{equation}
-Here $R_{50}$ is obtained with the same acquisition, detector simulation,
-reconstruction and edge estimator used in the range-verification study.  The
-set of shifts $b_{\mathrm{xs}}^{(m)}$ defines the cross-section contribution to
-the distal-edge systematic uncertainty.
+where $R_{50,\mathrm{reco}}$ uses the same acquisition, detector simulation,
+reconstruction and edge estimator as the nominal prediction.  The paired sets
+of production and reconstructed shifts show how the cross-section variation is
+transmitted through the downstream measurement.
 
 The implementation separates two related effects:
 \begin{enumerate}[nosep]
@@ -119,19 +126,23 @@ For example,
   \quad\Longrightarrow\quad
   \Ox{16}(p,pn)\Ox{15}.
 \end{equation}
-The frozen first implementation contains the four production channels that
+The frozen first implementation contains the five production channels that
 contribute in the approved beam-off acquisition windows:
 \begin{align}
   \Ox{16}(p,x)\Ox{15},\qquad
   \Cl{12}(p,x)\Cl{11},\qquad
   \Ox{16}(p,x)\Cl{11},\qquad
-  \Ni{14}(p,x)\Ni{13}.
+  \Ni{14}(p,x)\Ni{13},\qquad
+  \Ox{16}(p,x)\Ni{13}.
   \label{eq:channels}
 \end{align}
 The channel notation is inclusive because the imported measurements and the
 Geant4 residual-production curves identify the target and residual nucleus,
 rather than a unique set of emitted particles.  The approved acquisition-window
-scope defines this selection.
+scope defines this selection.  Near the distal end, the last channel is
+dominated by $\Ox{16}(p,\alpha)\Ni{13}$, whose threshold is approximately
+\SI{5.5}{MeV}.  Its low-energy production gives it spatial leverage beyond its
+fraction of the integral isotope yield.
 
 \subsection{Capture inside Geant4}
 
@@ -193,8 +204,8 @@ convention.
 
 \subsection{Public cross-section inputs}
 
-The alternative production curves will be assembled from three public nuclear
-data sources.  The imported curves form the numerator of
+The alternative production curves will be assembled from the public nuclear
+data sources below.  The imported curves form the numerator of
 Eq.~\eqref{eq:weight}; the Geant4 denominator is measured with the thin-target
 runs described below.
 
@@ -210,6 +221,7 @@ initial selection is
 cx4/p/C12/x/sig/*prodC11*.cx4
 cx4/p/O16/x/sig/*prodO15*.cx4
 cx4/p/O16/x/sig/*prodC11*.cx4
+cx4/p/O16/x/sig/*prodN13*.cx4
 cx4/p/N14/x/sig/*prodN13*.cx4
 \end{verbatim}
 The corresponding EXFOR entry metadata are available from the
@@ -255,12 +267,23 @@ updates concern Be-9, Al-27, Nb-93 and Au-197.  The first implementation uses
 the downloaded JENDL-4.0/HE C-12, N-14 and O-16 tables as one JENDL evaluation
 lineage.
 
+\subsubsection*{IAEA recommended $\Ox{16}(p,\alpha)\Ni{13}$ curve}
+The IAEA charged-particle cross-section database for medical radioisotope
+production provides a recommended excitation function for
+$\Ox{16}(p,\alpha)\Ni{13}$.  It will be imported with its tabulated uncertainty
+and evaluation provenance as the principal low-energy evaluated curve for
+$\Ox{16}(p,x)\Ni{13}$.  The corresponding low-energy measurements of
+Rodr\'iguez-Gonz\'alez et al.\ cover the distal-falloff interval up to
+approximately \SI{18}{MeV}.  The IAEA distribution is available from
+\href{https://nucleus.iaea.org/Pages/charged-particle-cross-section-database.aspx}
+{the charged-particle cross-section database}.
+
 ICRU Report 63 remains a useful historical comparator because it was used in
 the Espa\~na study.  Its official distribution is attached to the purchased
 report.  The reproducible public input ensemble is therefore the selected
-EXFOR measurements, the LANL/ENDF evaluations distributed through TENDL-2023,
-and JENDL-4.0/HE.  An ICRU curve can be added when its licensed numerical files
-are available.
+EXFOR measurements, the IAEA recommended $\Ox{16}(p,\alpha)\Ni{13}$ curve, the
+LANL/ENDF evaluations distributed through TENDL-2023, and JENDL-4.0/HE.  An
+ICRU curve can be added when its licensed numerical files are available.
 
 For every imported table, the local provenance record will contain the source
 library and release, retrieval date, source URL, dataset or subentry identifier,
@@ -289,6 +312,7 @@ data/xsections/
     exfor/2026-06-29/       pinned CX4 files and SOURCE.md
     tendl/2023/             distributed LANL/ENDF files and SOURCE.md
     jendl/4.0he/            JENDL residual tables and SOURCE.md
+    iaea/medical/           recommended O-16(p,alpha)N-13 curve and SOURCE.md
   normalized/              one source series per common point table
   models/
     models.csv              catalog of interpolation-ready curves
@@ -314,6 +338,12 @@ $\Ni{14}(p,x)\Ni{13}$.  A CX4 series supplies central incident energy, a single
 reported incident-energy width or uncertainty, cross section and cross-section
 uncertainty.  The original article remains the authority for the meaning and
 correlation of those fields.
+
+The pinned selection will be extended with the available
+$\Ox{16}(p,x)\Ni{13}$ EXFOR series.  The expanded snapshot will record its new
+series count and the source commit.  The IAEA recommended
+$\Ox{16}(p,\alpha)\Ni{13}$ curve enters as a separate evaluated dataset rather
+than as an experimental series.
 
 Table~\ref{tab:rodriguez-data} records the Rodr\'iguez-Gonz\'alez series already
 present in the snapshot.  The 2022 and 2023 $\Ox{16}(p,x)\Cl{11}$ series occupy
@@ -379,17 +409,18 @@ Geant4 exposes the total inelastic interaction cross section, while a
 residual-specific production cross section is generated by the interaction
 model.  Effective Geant4 channel curves will therefore be measured with
 thin-target simulations at fixed proton energies.  Carbon, oxygen and nitrogen
-targets provide the four channels in Eq.~\eqref{eq:channels}.  The calculation
+targets provide the five channels in Eq.~\eqref{eq:channels}.  The calculation
 will use the same Geant4 version and nominal physics list as the treatment
 simulation.
 
 \subsection{Energy grid}
 
-The initial scan uses the common 30-point grid in
+The initial scan uses the common 36-point grid in
 Table~\ref{tab:energy-grid}.  It extends below the production thresholds and
-beyond the maximum energy of the current SOBP.  The fine spacing between
-\SI{12}{MeV} and \SI{30}{MeV} resolves the channel turn-on, while
-\SI{5}{MeV} spacing covers the distal-edge and treatment-energy regions.
+beyond the maximum energy of the current SOBP.  The fine spacing from
+\SIrange{5}{30}{MeV} resolves the low-threshold
+$\Ox{16}(p,\alpha)\Ni{13}$ structure and the turn-on of the other channels,
+while \SI{5}{MeV} spacing covers the distal-edge and treatment-energy regions.
 
 \begin{table}[htbp]
   \centering
@@ -402,12 +433,12 @@ beyond the maximum energy of the current SOBP.  The fine spacing between
     \toprule
     Region & Proton energies (MeV) & Purpose \\
     \midrule
-    Below threshold
-      & 5, 10
-      & Confirm zero production \\
+    N-13 threshold region
+      & 5, 5.5, 6, 7, 8, 9, 10, 11
+      & Resolve $\Ox{16}(p,\alpha)\Ni{13}$ \\
     Threshold region
       & 12, 14, 16, 18, 20, 22, 24, 26, 28, 30
-      & Resolve channel turn-on \\
+      & Resolve the higher-threshold channels \\
     Distal-edge region
       & 35, 40, 45, 50, 55, 60
       & Dense low-energy coverage \\
@@ -418,21 +449,23 @@ beyond the maximum energy of the current SOBP.  The fine spacing between
   \end{tabular}
 \end{table}
 
-After the first pass, additional \SI{1}{MeV} points will be inserted around a
-sharply resolved threshold or peak.  The cross-section table will use the
-actual proton kinetic energy immediately before the producing interaction,
-rather than the nominal energy at the target entrance.
+The one-MeV low-energy spacing targets the effective transport curve rather
+than individual narrow resonances.  After the first pass, additional points
+will be inserted where the comparison reveals unresolved structure.  The
+cross-section table will use the actual proton kinetic energy immediately
+before the producing interaction, rather than the nominal energy at the target
+entrance.
 
 \subsection{Target thickness}
 
-The baseline target areal thickness is
-\begin{equation}
-  \tau = \SI{5}{mg/cm^2}.
-  \label{eq:areal-thickness}
-\end{equation}
+The scan uses an energy-dependent target areal thickness $\tau(E)$.  At each
+energy, the selected thickness is the largest value that satisfies the
+thin-target acceptance criteria in Eq.~\eqref{eq:target-acceptance}.  A
+\SI{5}{mg/cm^2} target is the reference point for geometry construction and the
+initial pilot.
 For material density $\rho$, the physical thickness is
 \begin{equation}
-  \ell = \frac{\tau}{\rho}.
+  \ell(E) = \frac{\tau(E)}{\rho}.
   \label{eq:physical-thickness}
 \end{equation}
 Table~\ref{tab:targets} gives representative physical thicknesses and nuclear
@@ -479,9 +512,26 @@ The target design is accepted when
   \langle\Delta E\rangle < \SI{0.5}{MeV}.
   \label{eq:target-acceptance}
 \end{equation}
-If the low-energy samples exceed the energy-loss criterion, the areal thickness
-below \SI{30}{MeV} will be reduced to \SI{2}{mg/cm^2}; the
-\SI{5}{mg/cm^2} target will be retained at and above \SI{30}{MeV}.
+The pilot evaluates both limits for every target and energy.  The tracked scan
+configuration records the resulting $\tau(E)$ table, material density and
+physical thickness.  This permits thicker targets at high energy and thinner
+targets near threshold while preserving the thin-target estimator.
+
+\subsection{Run statistics}
+
+Runs proceed in reproducible batches until every active residual channel on a
+target accumulates at least 400 nuclei or the run reaches
+\num{5e8} incident protons.  Four hundred residuals correspond to a counting
+uncertainty of approximately five percent.  Points that reach the proton cap
+with fewer residuals retain their exact Poisson interval and a precision flag;
+zero-count points receive a one-sided 95\% Poisson upper limit.  The run
+manifest records the event count, residual count, achieved precision and
+stopping condition at every grid point.
+
+The first implementation obtains the statistical gain through the
+energy-dependent physical target.  Cross-section enhancement is an
+optional runtime optimization after the unbiased thin-target scan establishes
+the reference curves and closure tests.
 
 \section{First-pass statistical procedure}
 
@@ -495,6 +545,9 @@ when applicable, and bibliographic provenance.  The first-pass roles are:
         densely sampled energy dependence;
   \item the 2022 low-energy $\Ox{16}(p,x)\Cl{11}$ series extends that channel
         from \SIrange{5.0}{15.8}{MeV};
+  \item the low-energy $\Ox{16}(p,\alpha)\Ni{13}$ measurements and IAEA
+        recommendation constrain the channel produced closest to the proton
+        range end;
   \item vetted independent experiments constrain the threshold region,
         normalization and between-campaign spread;
   \item the B\"acker result in Eq.~\eqref{eq:backer} checks the absolute
@@ -511,7 +564,7 @@ normalization information.
 
 \subsection{Uncertainty replicas and recommended curves}
 
-For each of the four channels, the first implementation constructs an ensemble
+For each of the five channels, the first implementation constructs an ensemble
 of smooth, non-negative excitation-function fits.  One replica is generated by
 the following sequence:
 \begin{enumerate}[nosep]
@@ -531,6 +584,25 @@ The median of the replica curves defines the recommended cross section.  The
 number of replicas, spline knots and curvature penalty are recorded in the
 model metadata and fixed before the production propagation.
 
+For the propagated reconstructed-edge shifts, the median of
+$b_{\mathrm{reco}}^{(m)}$ is the reported cross-section bias.  If $q_{16}$ and
+$q_{84}$ are the 16th and 84th percentiles of the paired replica distribution,
+the result is reported with asymmetric one-standard-deviation components
+\begin{equation}
+  \delta b_- = \operatorname{median}(b_{\mathrm{reco}})-q_{16},
+  \qquad
+  \delta b_+ = q_{84}-\operatorname{median}(b_{\mathrm{reco}}).
+  \label{eq:edge-interval}
+\end{equation}
+When one scalar cross-section uncertainty is required, the adopted estimator is
+\begin{equation}
+  u_{\mathrm{xs}} = \frac{q_{84}-q_{16}}{2}.
+  \label{eq:edge-uncertainty}
+\end{equation}
+The corresponding $b_{\mathrm{prod}}$ distribution is reported separately.
+Shifts obtained from individual evaluated-library curves remain named
+diagnostics rather than additional samples of the replica distribution.
+
 The normalization component from an IAEA monitor evaluation is common to all
 points whose proton fluence was obtained from that monitor in the same
 campaign.  A published total cross-section uncertainty remains a total; a
@@ -548,7 +620,7 @@ before applying spectrum averaging or correlated horizontal shifts.
 
 \subsection{Cross-section comparison figures}
 
-The main data figure has one panel for each of the four channels and shows the
+The main data figure has one panel for each of the five channels and shows the
 individual experimental campaigns, recommended curve and 68\% uncertainty
 band.  Evaluated curves are labelled by both distribution and underlying
 evaluation lineage.
@@ -565,22 +637,34 @@ recommended curve and band, and the Cucinotta--Pak parametrization as a dashed
 line.  A lower panel shows the ratio of the parametrization to the recommended
 curve.  The corresponding article is
 \href{https://doi.org/10.1016/j.nimb.2022.11.005}
-{Nuclear Instruments and Methods B 534 (2023) 26--34}.  Its parametrization covers proton
-interactions with C-12 and O-16, so the N-14 channel appears in the main data
-figure and has no Cucinotta--Pak ratio panel.  This comparison diagnoses smooth
+{Nuclear Instruments and Methods B 534 (2023) 26--34}.  The three published
+parametrizations listed above define the ratio panels; both N-13 production
+channels appear in the main data figure.  This comparison diagnoses smooth
 high-energy behaviour and low-energy threshold differences; the experimental
 replica ensemble defines the uncertainty propagated to the activity edge.
 
 \section{Cross-section-only reweighting}
 
 Let emitter $i$ be produced through channel $c_i$ at projectile energy $E_i$.
-For cross-section model $m$, assign the weight
+Let $\mathcal{C}$ be the five supported proton-induced channels and
+$\mathcal{D}_{c}$ the documented valid energy interval of channel $c$.  For
+cross-section model $m$, assign the weight
 \begin{equation}
   w_i^{(m)} =
-  \frac{\sigma_{c_i}^{(m)}(E_i)}
-       {\sigma_{c_i}^{(\mathrm{G4})}(E_i)}.
+  \begin{cases}
+    \displaystyle
+    \frac{\sigma_{c_i}^{(m)}(E_i)}
+         {\sigma_{c_i}^{(\mathrm{G4})}(E_i)},
+      & c_i\in\mathcal{C},\ E_i\in\mathcal{D}_{c_i},\\
+    1, & \text{for every other classified production route}.
+  \end{cases}
   \label{eq:weight}
 \end{equation}
+A secondary proton is reweightable when its target, residual and interaction
+energy identify a supported channel.  Neutron- and ion-induced production,
+unmodelled target--residual combinations and listed emitters without an
+alternative curve retain unit weight.  The analysis reports provenance
+completeness and the reweightable emitter fraction as separate counters.
 The model-dependent production of isotope $j$, normalized to a delivered dose
 $D$, is then
 \begin{equation}
@@ -602,13 +686,24 @@ budget and the depth-dependent source shape.  Radioactive decay, acquisition
 timing, positron transport, detector response and reconstruction retain their
 existing treatment.
 
+Cross-section-only reweighting interprets the residual-production variations
+as changes in channel branching at fixed nominal proton transport, total
+inelastic attenuation and dose.  A tracked diagnostic compares each partial
+cross-section variation with the Geant4 total inelastic cross section and
+calculates a conservative first-order bound on the omitted fluence-attenuation
+change.  The complete alternative-physics-list runs include transport and
+final-state changes together in the separately reported hadronic-model
+envelope.
+
 A Python tool in \file{analysis\_transport/} will read the emitter provenance
 and cross-section tables and write
 \begin{itemize}[nosep]
   \item one per-emitter weight vector for each model;
   \item weighted production summaries by isotope and reaction channel;
   \item weighted acquisition budgets for the requested timing scenarios;
-  \item nominal and alternative depth profiles with their distal-edge shifts.
+  \item nominal and alternative production-depth profiles with
+        $b_{\mathrm{prod}}$;
+  \item downstream reconstructed-edge results with $b_{\mathrm{reco}}$.
 \end{itemize}
 The downstream source sampler will use Eq.~\eqref{eq:sampling}.  Common random
 numbers will pair nominal and alternative acquisitions, reducing the Monte Carlo
@@ -616,19 +711,24 @@ noise in Eq.~\eqref{eq:bias}.
 
 For every approved beam energy and beam-off acquisition window, the propagated
 outputs are the uncertainty band on the activity-depth profile, the uncertainty
-in total detected activity, and the distribution of reconstructed distal-edge
-displacements in millimetres.  The cross-section replica result and the Geant4
-hadronic-model envelope are reported as separate contributions.
+in total detected activity, the distribution of production-profile shifts and
+the distribution of reconstructed distal-edge displacements in millimetres.
+The cross-section replica result and the Geant4 hadronic-model envelope are
+reported as separate contributions.  Relative to nominal BIC, the hadronic
+envelope is the largest absolute reconstructed-edge shift obtained with INCL++
+or Bertini; the two signed shifts are also reported individually.
 
 \section{Frozen scope of the first implementation}
 
 The first implementation is frozen to the following deliverable:
 \begin{enumerate}[nosep]
-  \item four channels: $\Ox{16}(p,x)\Ox{15}$,
-        $\Cl{12}(p,x)\Cl{11}$, $\Ox{16}(p,x)\Cl{11}$, and
-        $\Ni{14}(p,x)\Ni{13}$;
-  \item the pinned EXFOR snapshot, one LANL/ENDF evaluation lineage, one JENDL
-        evaluation lineage, and the effective Geant4 thin-target curves;
+  \item five channels: $\Ox{16}(p,x)\Ox{15}$,
+        $\Cl{12}(p,x)\Cl{11}$, $\Ox{16}(p,x)\Cl{11}$,
+        $\Ni{14}(p,x)\Ni{13}$, and $\Ox{16}(p,x)\Ni{13}$;
+  \item the expanded pinned EXFOR snapshot, the IAEA recommended
+        $\Ox{16}(p,\alpha)\Ni{13}$ curve, one LANL/ENDF evaluation lineage,
+        one JENDL evaluation lineage, and the effective Geant4 thin-target
+        curves;
   \item modern measurements for the principal energy dependence, vetted older
         experiments for threshold and between-campaign information, the B\"acker
         absolute check, and the Masuda shape check;
@@ -636,7 +736,7 @@ The first implementation is frozen to the following deliverable:
         normalization components;
   \item event reweighting through the established beam-off handoff and distal
         edge estimator;
-  \item the four-channel experimental figure, the three-channel
+  \item the five-channel experimental figure, the three-channel
         Cucinotta--Pak comparison and ratio figure, and the propagated activity
         and edge-uncertainty results;
   \item a separately reported BIC, INCL++ and Bertini hadronic-model envelope.
@@ -654,8 +754,9 @@ need for them.
 
 The following checks define acceptance of the implementation:
 \begin{enumerate}
-  \item Every listed emitter has a valid residual-production record, apart from
-        explicitly classified production routes.
+  \item Every listed emitter is assigned a complete production record or an
+        explicit route classification; provenance completeness and the
+        reweightable fraction are reported separately.
   \item Setting all weights to unity reproduces the current isotope counts,
         budgets and spatial profiles.
   \item Thin-target yields reproduce the effective Geant4 channel curves used
@@ -664,6 +765,9 @@ The following checks define acceptance of the implementation:
         and energy dependence.
   \item The nominal depth-dose distribution and $D_{\mathrm{sim}}$ are invariant
         under emitter weighting.
+  \item The fixed-transport diagnostic reports the conservative
+        fluence-attenuation bound associated with every propagated partial
+        cross-section variation.
   \item Alternative physics lists write separate run directories, and the run
         metadata records the selected list.
   \item Existing scenario readers continue to read the established emitter
@@ -681,11 +785,13 @@ The following checks define acceptance of the implementation:
   \item Run a \num{1e6}-proton \file{uniform\_headep} pilot and validate
         provenance completeness, channel classification and backward-compatible
         output.
-  \item Normalize the pinned source data, assign dataset and evaluation-lineage
-        metadata, and construct the four recommended curves and replica bands.
+  \item Extend the pinned EXFOR selection with $\Ox{16}(p,x)\Ni{13}$, import
+        the IAEA recommendation, normalize the source data, assign dataset and
+        evaluation-lineage metadata, and construct the five recommended curves
+        and replica bands.
   \item Produce the thin-target Geant4 channel curves on the approved energy
         grid and target-thickness schedule.
-  \item Generate the four-channel data figure and the Cucinotta--Pak comparison
+  \item Generate the five-channel data figure and the Cucinotta--Pak comparison
         and ratio figure.
   \item Implement the weight and weighted-budget calculation, including the
         unity-weight regression test.
@@ -696,8 +802,10 @@ The following checks define acceptance of the implementation:
         \file{uniform\_headep\_sobp} source with production provenance.
   \item Generate the BIC, INCL++ and Bertini comparison runs and compute the
         hadronic-model envelope.
-  \item Report the individual $b_{\mathrm{xs}}^{(m)}$, the adopted cross-section
-        uncertainty and the broader hadronic-model envelope.
+  \item Report the individual $b_{\mathrm{prod}}^{(m)}$ and
+        $b_{\mathrm{reco}}^{(m)}$, the median reconstructed bias, the asymmetric
+        68\% interval, $u_{\mathrm{xs}}$ and the broader hadronic-model
+        envelope.
 \end{enumerate}
 
 \section{Principal code changes}
