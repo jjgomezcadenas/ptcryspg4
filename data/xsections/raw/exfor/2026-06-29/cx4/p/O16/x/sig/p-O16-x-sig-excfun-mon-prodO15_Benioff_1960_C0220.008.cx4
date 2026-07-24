@@ -1,0 +1,22 @@
+# EXFOR #         : C0220.008  
+# EXFOR Ver.      : 20140418
+# TRANS #         : C141
+# Author          : P.A.Benioff
+# Reference       : Phys.Rev. 119 (1960) 316
+# DOI             : 10.1103/PhysRev.119.316
+# Quantity        : 16O(p,x)15O independent production cross section
+# REACTION        : 8-O-16(P,X)8-O-15,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodO15_Benioff_1960_c0220.008
+#
+# npts            : 1           
+# xmin            :   5.7000E+09
+# xmax            :   5.7000E+09
+# ymin            :   3.3000E-02
+# ymax            :   3.3000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  5.7000E+09  0.0000E+00  3.3000E-02  2.2000E-03
+#---------------------------------------------------

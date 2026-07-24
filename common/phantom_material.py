@@ -117,7 +117,7 @@ MATERIALS: dict[str, Material] = {
         },
         note="PMMA; carbon-rich (11C-dominated) cross-check material.",
     ),
-    # Cortical bone -- the MIRD-head skull (Phase 2). Dense, Ca/P-rich.
+    # Cortical bone -- the MIRD-head skull. Dense, Ca/P-rich.
     "G4_BONE_CORTICAL_ICRP": Material(
         name="G4_BONE_CORTICAL_ICRP", density_g_cm3=1.920, mean_excitation_eV=110.0,
         composition={
@@ -182,7 +182,11 @@ def mu_over_rho_cm2_g(material: Material, energy_keV: float) -> float:
 
 
 def attenuation(material: Material, energy_keV: float) -> dict:
-    """mu/rho, mu, and mean free path for a material at a photon energy."""
+    """mu/rho, mu, and mean free path for a material at a photon energy.
+
+    Returns a dict keyed material, energy_keV, density_g_cm3,
+    mean_excitation_eV, mu_rho_cm2_g, mu_cm_inv, mu_mm_inv,
+    mean_free_path_cm."""
     mu_rho = mu_over_rho_cm2_g(material, energy_keV)
     mu_cm = mu_rho * material.density_g_cm3
     return {

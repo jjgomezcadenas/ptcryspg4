@@ -51,9 +51,10 @@ positron emitters it leaves along the way. Two ingredients define the run:
 \item \textbf{A beam} --- protons, either a simple pencil or the more realistic
 spread-out Bragg peak (SOBP).
 \item \textbf{A phantom} --- a body of material standing in for the region being
-treated. \texttt{ptcryspg4} implements a homogeneous brain-tissue cylinder, a
-homogeneous head filled with brain tissue, and a MIRD head built from three
-materials (scalp, bone and brain tissue).
+treated. \texttt{ptcryspg4} implements five: a homogeneous brain-tissue cylinder,
+a homogeneous head, a MIRD head built from three materials (scalp, skull and
+brain), the MIRD head with a posterior-fossa tumour (HeadEP), and HeadEP's
+homogeneous control (Sec.~\ref{sec:phantom}).
 \end{itemize}
 
 The run produces the spatial source; a second, analytic step folds in the
@@ -135,6 +136,22 @@ spread $\sigma_R$ between \file{headep} and \file{uniform\_headep} isolates
 what the tissue layering does to the distal edge, with the orientation,
 target, and outer attenuation shell held identical.
 
+\paragraph{Construction.} The heads are nested, axis-aligned ellipsoids taken
+from the Geant4 MIRD adult-head model with the face and neck dropped: scalp
+semi-axes $72\times102\times\SI{87}{mm}$, skull outer surface
+$68\times98\times\SI{83}{mm}$, and brain $60\times90\times\SI{65}{mm}$, the
+brain centre shifted \SI{10}{mm} toward the crown. The skull is the shell
+between its outer ellipsoid and the brain-sized cavity. For the lateral cases
+(\file{uniform\_head}, \file{mird\_head}) the head is rotated so the beam
+crosses it ear to ear; for HeadEP it is rotated about the transverse axis and
+translated so the tumour centre lies on the beam axis, the beam entering
+through the occiput. In Geant4 the skull shell is a subtraction solid; in the
+data model the same geometry is carried by \file{phantom\_regions.csv} as plain
+ellipsoids with a priority each, and one rule serves every consumer --- the
+WEPL ray-trace, the validation gates, and the plots: the lowest-priority
+region containing a point supplies its material, so the brain carves the skull
+shell and the tumour carves the brain with no boolean solids in the data.
+
 \subsection{The physics list}
 \label{sec:physics}
 The physics list is \file{QGSP\_BIC\_HP}, a hadronic list suited to proton-induced
@@ -165,6 +182,21 @@ fixed by geometry alone, and its timing is supplied later by the handoff
 (Sec.~\ref{sec:handoff}). The prompt de-excitation $\gamma$ of $\Cl{10}$ and
 $\Ox{14}$, and secondary neutrons, are not tracked.
 
+\paragraph{How the run records it.} An emitter is identified by the nucleus
+itself: any new track whose $(Z,A)$ matches one of the five isotopes of
+Table~\ref{tab:iso} is tagged, whatever reaction made it. Geant4 decays the
+tagged nucleus through its standard radioactive-decay process, within the same
+event; the positron whose parent is a tagged nucleus supplies both points ---
+its vertex is the production point, and where its track ends is the
+annihilation point. Geant4 samples the true $\bplus$/EC branching, so the
+recorded emitters are the produced nuclei times the $\bplus$ branching ratio
+($\gtrsim\SI{99}{\percent}$ for these species): one row per $\bplus$ decay. A
+positron that crosses from the phantom into the surrounding air is stopped at
+the surface, which pins its annihilation point to the boundary --- the
+$\sim$\SI{0.6}{\percent} pinned fraction quoted in Sec.~\ref{sec:files}. Its
+\SI{511}{keV} photons are not generated here; the downstream simulation emits
+the pair from the recorded point.
+
 \begin{table}[h]
 \centering
 \caption{The positron emitters, with half-lives and the energy that governs the
@@ -194,6 +226,19 @@ target: from the simulated dose, the number of protons needed to deliver it
 production is scaled accordingly. This provides the $P_j$ that the decay kinetics
 consume (\file{ptcrysp\_physics.tex}, Eq.~3).
 
+Two tallies implement the scoring. The whole-phantom dose
+(\file{dose\_total\_Gy}) comes from a Geant4 scorer attached to the phantom
+volumes. The target box is a scoring region rather than a geometry volume --- a
+cylinder of the target's radius and depth span whose mass follows analytically
+from the material at its centre --- and every energy-depositing step whose
+midpoint falls inside it feeds \file{target\_dose\_Gy}. The same per-step tally
+distributes each deposit over \SI{1}{mm} depth bins to build
+\file{depth\_dose.csv}, over the full transverse plane and within a thin
+on-axis core (radius \SI{5}{mm}) whose fixed cross-section makes the core
+columns proportional to the depth--dose proper (Sec.~\ref{sec:field}). A run
+whose target-box centre lands in air is flagged at the end of the run and
+fails \file{check\_run.py}.
+
 \subsection{SOBP field design in practice}
 \label{sec:field}
 The depth field is built by \file{field\_design/sobp.py} from the analytic
@@ -213,7 +258,6 @@ $N$ (\file{-{}-n-layers}) & number of energy layers & $20$ \\
 $\rho_{\mathrm{rel}}$ (\file{-{}-rho-rel}) & material density rel.\ to water & $1.04$ (brain) \\
 \file{-{}-from-run} & run dir for WEPL design through its phantom & none (homogeneous) \\
 $\mu$ (\file{-{}-mu}) & attenuation-correction coefficient & \SI{0.025}{cm^{-1}} \\
-material & phantom material & \file{G4\_BRAIN\_ICRP} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -222,7 +266,8 @@ The algorithm computes the layer ranges $R_i$ and energies $E_i=E(R_i)$, the
 flattening weights, and the attenuation boost; normalises $\sum_i w_i=1$; and
 writes a layer table (\file{energy\_MeV}, \file{weight}) plus a sanity plot. The
 Geant4 gun loads the table (\file{/stageA/beam/layers}) and samples one layer per
-primary. A uniform fluence over a disk (\file{/stageA/beam/disk}) matched to the
+primary, so the layer populations carry Poisson noise --- below
+\SI{0.2}{\percent} per layer at $10^{7}$ protons. A uniform fluence over a disk (\file{/stageA/beam/disk}) matched to the
 target radius turns the depth plateau into a dose box.
 
 \paragraph{The field is phantom-specific.} Because both the medium (through WEPL)
@@ -238,8 +283,10 @@ producing a quietly-wrong plateau.
 
 \paragraph{Verification.} The proton transport is run with the SOBP gun and the
 \emph{simulated} depth--dose inspected (\file{depth\_dose.csv}).
-\file{analysis\_transport/make\_figures.py} renders it and reports the plateau
-flatness. Acceptance is by \textbf{R80}, the distal \SI{80}{\percent}-dose depth
+\file{analysis\_transport/sobp\_metrics.py} computes the plateau numbers and
+draws the annotated curve (\file{figures/sobp\_plateau.png});
+\file{check\_run.py} enforces them as gates (Sec.~\ref{sec:validation}).
+Acceptance is by \textbf{R80}, the distal \SI{80}{\percent}-dose depth
 (nearly independent of the energy spread), landing within a few mm of $\Rd$, and by
 plateau \textbf{uniformity} ($\lesssim\pm\SI{5}{\percent}$) across the target. For
 the heterogeneous head the plateau is graded on the central-axis dose (a thin
@@ -299,9 +346,11 @@ $N_j$) is added later, by the downstream study.
 \paragraph{Source sampling.} The detector requires $N_j$ annihilation points per
 isotope. They are drawn from \file{emitters.csv} by sampling with replacement,
 reproducing the spatial shape at the required count. The handoff writes only the
-deterministic budget; the Poisson realisations and the sampling of annihilation
-points are done by the downstream detector study, so the same budget and seed
-yield an identical source for every detector.
+deterministic budget. The Poisson realisations are drawn by
+\file{decay\_sampling/budget\_gen.py}, seeded as
+$\text{master\_seed}+\text{realization}$ so every detector configuration sees
+the identical source (a step that moves to the downstream study); the sampling
+of annihilation points is done by the detector study itself.
 
 \paragraph{Figure of merit.} The precision of the recovered proton range,
 $\sigma(\text{range})$, is the error bar on a single measurement. One realisation
@@ -310,6 +359,13 @@ detector and the reconstruction, and fits the distal fall-off to a range estimat
 $R_z$. Over $Z\sim100$ realisations,
 $\sigma(\text{range})=\operatorname{std}\{R_1,\dots,R_Z\}$. The detector with the
 smallest $\sigma(\text{range})$ at a fixed budget is preferred.
+
+Each realisation resamples \file{emitters.csv} with replacement, so the
+recovered range is only as well defined as the pool of \emph{distinct} emitters
+near the distal edge --- the run statistics set that pool density, while the
+measured counts $N_j$ are fixed by the dose and timing alone. The pool argument
+and its gate, \file{analysis\_transport/distal\_pool.py}, are described in
+Sec.~\ref{sec:validation}; the statistics are derived in the physics note.
 
 \section{The scenario data product}
 \label{sec:scenario}
@@ -402,9 +458,9 @@ geometry, dosimetry, and provenance.
 column & type & meaning \\
 \midrule
 \file{n\_protons} & int & primaries simulated \\
-\file{beam\_energy\_MeV} & float & nominal proton energy (SOBP: fallback single energy) \\
+\file{beam\_energy\_MeV} & float & pencil energy constant (an SOBP run's beam is its copied \file{sobp\_layers.csv}) \\
 \file{beam\_sigma\_mm} & float & Gaussian beam $\sigma$ at entrance (pencil mode) \\
-\file{geometry} & string & \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \textbar{} \file{headep} \\
+\file{geometry} & string & \file{cylinder} \textbar{} \file{uniform\_head} \textbar{} \file{mird\_head} \textbar{} \file{headep} \textbar{} \file{uniform\_headep} \\
 \file{phantom\_material} & string & single material, or \file{multi} (per-region in \file{phantom\_regions.csv}) \\
 \file{phantom\_diameter\_mm}, \file{phantom\_length\_mm} & float & phantom cylinder size \\
 \file{phantom\_mass\_g} & float & phantom mass \\
@@ -421,6 +477,15 @@ column & type & meaning \\
 \end{center}
 The absolute normalisation scales production to a clinical dose $D$ via
 \file{target\_dose\_Gy}: $P_j(D)=\file{count}_j\cdot D/\file{target\_dose\_Gy}$.
+
+\paragraph{\file{depth\_dose.csv} --- the realised depth field.} One row per
+\SI{1}{mm} depth bin: \file{z\_mm} (bin centre), \file{edep\_total\_MeV} and
+\file{edep\_primary\_MeV} (energy deposit over the whole transverse plane, all
+particles and primary protons respectively), and the on-axis core columns
+\file{edep\_core\_MeV} and \file{dose\_core\_Gy} (deposit within
+$r\le\SI{5}{mm}$, the latter converted to dose with the on-axis material
+density). This is the run's realised Bragg/SOBP curve; the plateau metrics and
+the depth-dose figures read \file{dose\_core\_Gy}.
 
 \paragraph{\file{sampling\_budget\_<scenario>.csv} --- measured decays.} One row
 per isotope: \file{isotope\_id} and \file{N\_expected}, the expected measured
@@ -453,8 +518,10 @@ with a companion \file{*\_meta.csv} carrying \file{density\_g\_cm3},
 (\file{name}, \file{half\_life\_s}, \file{endpoint\_MeV}, \file{prompt\_gamma}).
 \file{sobp\_layers.csv} is the beam definition. \file{SCHEMA.md} is the terse
 column reference; \file{README.md} is the scenario writeup with numbers filled in;
-\file{figures/} holds the realised depth-dose, the validation dashboard, and the
-activity curves.
+\file{figures/} holds the run's control plots --- the phantom drawing, the
+realised depth-dose, the dose--activity overlay, the validation dashboard, the
+activity curves, and for SOBP runs the annotated plateau
+(Sec.~\ref{sec:validation} lists which script makes which).
 
 \subsection{How a consumer builds an acquisition}
 \label{sec:use}
@@ -537,9 +604,97 @@ pencil run of its geometry), then its own macro is run:
   ./proton_transport headep_sobp.mac   # also mird_head_sobp.mac, uniform_head_sobp.mac
 \end{verbatim}
 Full build and run instructions are in \file{CLAUDE.md}; the file columns are in
-\file{common/SCHEMA.md}. A frozen run is checked with
-\file{analysis\_transport/check\_run.py} and against the Parodi 2008 yields with
-\file{analysis\_transport/parodi\_cross\_check.py}.
+\file{common/SCHEMA.md}. A run is validated before it is frozen; the gates and
+control figures are the subject of the next section.
+
+\section{Validating a run}
+\label{sec:validation}
+
+\subsection{The run directory}
+Every run owns a directory, \file{data/runs/<tag>/}, holding everything the run
+produced: \file{emitters.csv}, \file{run\_meta.csv}, \file{depth\_dose.csv},
+\file{phantom\_regions.csv} with the material files, the copied SOBP layer
+table and its provenance meta, and \file{figures/}. The tag is derived from the
+run itself --- \file{<geometry>\_<beam>\_<N>}, with the beam \file{sobp} when a
+layer table is loaded and \file{pencil} otherwise, and $N$ the proton count
+(e.g.\ \file{cylinder\_sobp\_1e7}) --- so the name cannot disagree with what
+ran, distinct cases coexist under \file{data/runs/}, and re-running a
+configuration overwrites only its own directory. In a multithreaded run the
+worker threads merge into one run and the master alone writes the files.
+
+\subsection{The gates}
+Four scripts turn a finished run into a trusted one; each takes the run
+directory as its argument, and the first two exit non-zero on a violation, so
+they can gate a pipeline.
+
+\paragraph{\file{check\_run.py} --- the invariants gate.} Recomputes the
+geometry and normalisation invariants in plain Python from
+\file{run\_meta.csv} and \file{phantom\_regions.csv}: the target-box centre
+sits in a medium; the reported target mass equals $\pi r^2 L\,\rho$ for the
+material at its centre (to \SI{0.5}{\percent}, tight enough to catch a
+\SI{1}{\percent} density swap); the target dose is at least the whole-phantom
+dose; \file{Np\_per\_Gy} is consistent with
+$\file{n\_protons}/\file{target\_dose\_Gy}$; the target box fits inside the
+phantom and every region inside the reported bounding box; the head regions
+carve in priority order; an independent recompute of the core dose matches;
+and, for an SOBP run, the field provenance (its \file{design\_geometry} and
+target window match the run) and the plateau gates --- uniformity
+$\le\SI{12}{\percent}$ and R80 within \SI{5}{mm} of the target distal edge.
+These are the geometry bugs that carry correct units and would otherwise pass
+silently.
+
+\paragraph{\file{sobp\_metrics.py} --- plateau numbers.} Computes the plateau
+dose and uniformity over the target window, R80, the proximal \SI{80}{\percent}
+rise and the modulation width from \file{dose\_core\_Gy}
+(Sec.~\ref{sec:field}), and draws \file{figures/sobp\_plateau.png}. With
+\file{-{}-max-uniformity} and \file{-{}-r80-tol} it becomes an acceptance test.
+
+\paragraph{\file{validate\_transport.py} --- the physics dashboard.} Renders
+\file{figures/transport\_validation.png}: positron range per isotope
+(endpoint-ordered), depth and radial production profiles, the production map,
+emitter multiplicity, the Bragg curve split into primary and secondary deposit,
+the activity--dose overlay, and the per-isotope summary table (also printed to
+stdout). The sanity criteria are physical: ranges ordered by endpoint, activity
+falling to zero before the Bragg peak, yields per proton at the expected
+$10^{-2}$ scale.
+
+\paragraph{\file{parodi\_cross\_check.py} --- the literature anchor.} Scales
+the run's yields to \SI{1}{Gy} and compares, isotope by isotope, with Parodi
+\emph{et al.}\ (2008) Table~2. Gross agreement (the expected factor
+$\sim$2, Sec.~\ref{sec:example}) validates the absolute scale.
+
+\paragraph{\file{distal\_pool.py} --- statistics for a $\sigma_R$ study.}
+Counts the distinct emitters within $\pm\SI{0.5}{cm}$ of the activity distal
+edge (R80 of the central-axis dose, the same depth \file{check\_run.py} gates
+on) and reports the resulting pool-granularity floor on the recovered range,
+of order $\text{window}/\sqrt{n}$. With \file{-{}-min-o15} it refuses a run
+whose $\Ox{15}$ pool is too sparse for the planned study, before the run is
+frozen.
+
+\subsection{The control figures}
+\file{make\_figures.py} reads the run's geometry and invokes the plotters that
+fit the case; every figure lands in \file{<run\_dir>/figures/} and ships with
+the frozen scenario.
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+figure & script & runs \\
+\midrule
+\file{phantom.png} & \file{analysis\_transport/plot\_phantom.py} & all \\
+\file{depth\_dose.png} & \file{analysis\_transport/plot\_depth\_dose.py} & all \\
+\file{dose\_activity.png} & \file{analysis\_transport/plot\_dose\_activity.py} & all \\
+\file{transport\_validation.png} & \file{analysis\_transport/validate\_transport.py} & all \\
+\file{activity.png} & \file{decay\_sampling/activity\_plot.py} & all \\
+\file{sobp\_g4.png} & \file{field\_design/plot\_sobp.py} & cylinder SOBP \\
+\file{mird\_head.png} & \file{analysis\_transport/plot\_mird\_head.py} & head geometries \\
+\file{sobp\_plateau.png} & \file{analysis\_transport/sobp\_metrics.py} & SOBP runs \\
+\bottomrule
+\end{tabular}
+\end{center}
+Two standalone plotters serve the documentation: \file{plot\_geometry.py}
+draws the annotated scenario frame (Fig.~\ref{fig:frame}) and
+\file{compare\_beams.py} overlays several runs' depth doses
+(Fig.~\ref{fig:compare}).
 
 \section{What to keep in mind}
 \label{sec:caveats}

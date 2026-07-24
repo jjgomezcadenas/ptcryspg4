@@ -11,6 +11,7 @@
 \newcommand{\file}[1]{\texttt{#1}}
 \newcommand{\Ox}[1]{{}^{#1}\mathrm{O}}
 \newcommand{\Cl}[1]{{}^{#1}\mathrm{C}}
+\newcommand{\Ni}[1]{{}^{#1}\mathrm{N}}
 
 \title{Implementation plan for proton-induced\\
 cross-section systematics in \file{ptcryspg4}}
@@ -118,13 +119,19 @@ For example,
   \quad\Longrightarrow\quad
   \Ox{16}(p,pn)\Ox{15}.
 \end{equation}
-The channels required initially are
+The frozen first implementation contains the four production channels that
+contribute in the approved beam-off acquisition windows:
 \begin{align}
-  \Ox{16}(p,pn)\Ox{15},\qquad
-  \Cl{12}(p,pn)\Cl{11},\qquad
-  \Ox{16}(p,3p3n)\Cl{11}.
+  \Ox{16}(p,x)\Ox{15},\qquad
+  \Cl{12}(p,x)\Cl{11},\qquad
+  \Ox{16}(p,x)\Cl{11},\qquad
+  \Ni{14}(p,x)\Ni{13}.
   \label{eq:channels}
 \end{align}
+The channel notation is inclusive because the imported measurements and the
+Geant4 residual-production curves identify the target and residual nucleus,
+rather than a unique set of emitted particles.  The approved acquisition-window
+scope defines this selection.
 
 \subsection{Capture inside Geant4}
 
@@ -203,7 +210,7 @@ initial selection is
 cx4/p/C12/x/sig/*prodC11*.cx4
 cx4/p/O16/x/sig/*prodO15*.cx4
 cx4/p/O16/x/sig/*prodC11*.cx4
-cx4/p/N14/x/sig/*prodN13*.cx4   # optional N-13 extension
+cx4/p/N14/x/sig/*prodN13*.cx4
 \end{verbatim}
 The corresponding EXFOR entry metadata are available from the
 \href{https://github.com/IAEA-NDS/exfor_master}{EXFOR Master Files repository},
@@ -218,17 +225,20 @@ subentries, interpolation and joining energies.  The primary uncertainty
 ensemble will use the individual EXFOR series, including measurements published
 after that study.
 
-\subsubsection*{TENDL evaluated curves}
+\subsubsection*{LANL/ENDF evaluations distributed by TENDL}
+The relevant incident-proton files were retrieved through the
 \href{https://tendl.imperial.ac.uk/tendl_2023/tendl2023.html}{TENDL-2023}
-provides TALYS-based evaluated data up to \SI{200}{MeV}, including covariance
-information.  The relevant incident-proton target files are
+target pages for
 \href{https://tendl.imperial.ac.uk/tendl_2023/proton_html/C/ProtonC12.html}
 {C-12},
 \href{https://tendl.imperial.ac.uk/tendl_2023/proton_html/O/ProtonO16.html}
 {O-16} and
 \href{https://tendl.imperial.ac.uk/tendl_2023/proton_html/N/ProtonN14.html}
-{N-14}.  Residual-production curves for C-11, O-15 and, when included, N-13
-will be extracted from these evaluated ENDF files.
+{N-14}.  Their internal headers identify LANL evaluations dated 1996--1997 and
+distributed as ENDF/B-VII.1.  These files therefore define one LANL/ENDF
+evaluation lineage; the TENDL website is their distribution source.  The
+residual-production curves for C-11, O-15 and N-13 will be extracted from the
+MF=6, MT=5 records.
 
 \subsubsection*{JENDL evaluated curves}
 The
@@ -240,11 +250,16 @@ evaluated file.  Direct proton-target tables are publicly available for
 \href{https://wwwndc.jaea.go.jp/ftpnd/jendl/jendl40he/out_p/C012.txt}{C-12},
 \href{https://wwwndc.jaea.go.jp/ftpnd/jendl/jendl40he/out_p/O016.txt}{O-16} and
 \href{https://wwwndc.jaea.go.jp/ftpnd/jendl/jendl40he/out_p/N014.txt}{N-14}.
+The JENDL-5 proton sublibrary largely carries forward JENDL-4.0/HE.  Its stated
+updates concern Be-9, Al-27, Nb-93 and Au-197.  The first implementation uses
+the downloaded JENDL-4.0/HE C-12, N-14 and O-16 tables as one JENDL evaluation
+lineage.
 
 ICRU Report 63 remains a useful historical comparator because it was used in
 the Espa\~na study.  Its official distribution is attached to the purchased
-report.  The reproducible public input ensemble is therefore EXFOR, TENDL-2023
-and JENDL-4.0/HE; an ICRU curve can be added when its licensed numerical files
+report.  The reproducible public input ensemble is therefore the selected
+EXFOR measurements, the LANL/ENDF evaluations distributed through TENDL-2023,
+and JENDL-4.0/HE.  An ICRU curve can be added when its licensed numerical files
 are available.
 
 For every imported table, the local provenance record will contain the source
@@ -254,13 +269,119 @@ cumulative status, interpolation rule and any transformation applied during
 conversion to the common CSV schema.  Experimental measurements will retain
 their quoted energy and cross-section uncertainties.
 
+Library release names and independent evaluation lineages are recorded
+separately.  Numerically identical or documented carry-over evaluations receive
+one vote in any mean, RMS, covariance estimate or model weighting.  Exact
+duplicates leave a minimum--maximum envelope unchanged.  This lineage rule
+applies to evaluated-library comparisons; the separate Geant4 BIC, INCL++ and
+Bertini runs remain distinct hadronic-model calculations.
+
+\subsection{Local data directory and current snapshot}
+
+The cross-section inputs and derived curves live under
+\file{data/xsections/}:
+\begin{verbatim}
+data/xsections/
+  README.md                 directory overview and snapshot summary
+  SCHEMA.md                 stable identifiers and table schemas
+  sources.csv               source URL, release, revision, checksum and path
+  raw/
+    exfor/2026-06-29/       pinned CX4 files and SOURCE.md
+    tendl/2023/             distributed LANL/ENDF files and SOURCE.md
+    jendl/4.0he/            JENDL residual tables and SOURCE.md
+  normalized/              one source series per common point table
+  models/
+    models.csv              catalog of interpolation-ready curves
+  covariance/              imported or constructed covariance tables
+\end{verbatim}
+The files under \file{raw/} are immutable upstream records.  One-to-one unit
+conversion and column normalization produce the files under
+\file{normalized/}.  Scientific combinations, fits and interpolation rules are
+registered in \file{models/models.csv}; a model row lists its parent datasets,
+valid energy interval, interpolation, extrapolation and local version.
+\file{sources.csv} fixes each upstream release and stores a SHA-256 checksum for
+each individually downloaded file.  Each raw subdirectory also contains a
+human-readable \file{SOURCE.md}.
+
+The current EXFOR snapshot is pinned to the EXFOR Plot File commit dated
+29 June 2026:
+\begin{center}
+  \file{57052199247e2f64862a320e3930d174318f5e6c}.
+\end{center}
+It contains 67 experimental series: 30 for $\Cl{12}(p,x)\Cl{11}$, 12 for
+$\Ox{16}(p,x)\Cl{11}$, 12 for $\Ox{16}(p,x)\Ox{15}$, and 13 for
+$\Ni{14}(p,x)\Ni{13}$.  A CX4 series supplies central incident energy, a single
+reported incident-energy width or uncertainty, cross section and cross-section
+uncertainty.  The original article remains the authority for the meaning and
+correlation of those fields.
+
+Table~\ref{tab:rodriguez-data} records the Rodr\'iguez-Gonz\'alez series already
+present in the snapshot.  The 2022 and 2023 $\Ox{16}(p,x)\Cl{11}$ series occupy
+complementary energy intervals and both enter the first analysis.
+Their publications are
+\href{https://doi.org/10.1016/j.radphyschem.2021.109759}
+{Radiation Physics and Chemistry 190 (2022) 109759} and
+\href{https://doi.org/10.1016/j.nds.2023.01.004}
+{Nuclear Data Sheets 187 (2023) 579--596}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Rodr\'iguez-Gonz\'alez experimental series currently stored.}
+  \label{tab:rodriguez-data}
+  \begin{tabular}{llllr}
+    \toprule
+    EXFOR subentry & Year & Reaction & Energy range (MeV) & Points \\
+    \midrule
+    O2576.003 & 2022 & $\Ox{16}(p,x)\Cl{11}$ & 5.0--15.8   & 13 \\
+    O2582.002 & 2023 & $\Cl{12}(p,x)\Cl{11}$ & 23.6--189.3 & 43 \\
+    O2582.003 & 2023 & $\Ox{16}(p,x)\Cl{11}$ & 20.2--189.1 & 42 \\
+    O2582.005 & 2023 & $\Ox{16}(p,x)\Ox{15}$ & 20.2--189.1 & 42 \\
+    O2582.007 & 2023 & $\Ni{14}(p,x)\Ni{13}$ & 22.7--189.1 & 43 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The
+\href{https://doi.org/10.1016/j.radmeas.2013.07.005}{Akagi 2013}
+measurements are stored as EXFOR E2449 series and constrain the low-energy C-12
+and O-16 excitation functions.  The
+\href{https://doi.org/10.1038/s41598-018-20906-z}{Masuda 2018}
+measurements are stored as E2568 series.  Masuda obtained the three oxygen
+shapes from a common Cherenkov analysis and set their absolute scale through
+the archival $\Ox{16}(p,x)\Ox{15}$ value of \SI{76.8}{mb} at \SI{35}{MeV}.
+They therefore serve as shape-validation data with a shared external
+normalization.
+
+The absolute result of B\"acker et al.\ at therapeutic energy,
+\begin{equation}
+  \sigma\bigl(\mathrm{^{nat}C}(p,x)\Cl{11}\bigr)
+  = \SI{68+-3}{mb}
+  \quad\hbox{at}\quad E_p=\SI{97+-3}{MeV},
+  \label{eq:backer}
+\end{equation}
+is an auxiliary normalization check for the $\Cl{12}(p,x)\Cl{11}$ curve.  Its
+natural-carbon target is 98.93\% C-12; the comparison records this composition
+and uses the datum at its published precision.  The article is available at
+\href{https://doi.org/10.1140/epja/s10050-021-00557-x}
+{doi:10.1140/epja/s10050-021-00557-x}.
+
+The IAEA monitor-reaction recommendations provide the beam-monitor cross
+sections and their energy-dependent uncertainties.  For a measurement campaign
+that derives proton fluence from a monitor reaction, its documented monitor
+uncertainty becomes a campaign-level normalization component.  The reference
+evaluation and tables are available from the
+\href{https://www-nds.iaea.org/medical/monitor_reactions.html}
+{IAEA medical portal}; the underlying recommendation is
+\href{https://doi.org/10.1016/j.nds.2018.02.009}
+{Hermanne et al., Nuclear Data Sheets 148 (2018) 338--382}.
+
 Geant4 exposes the total inelastic interaction cross section, while a
 residual-specific production cross section is generated by the interaction
 model.  Effective Geant4 channel curves will therefore be measured with
-thin-target simulations at fixed proton energies.  Carbon and oxygen targets
-provide the three dominant channels in Eq.~\eqref{eq:channels}; nitrogen can be
-added for the $\mathrm{^{13}N}$ component.  The calculation will use the same
-Geant4 version and nominal physics list as the treatment simulation.
+thin-target simulations at fixed proton energies.  Carbon, oxygen and nitrogen
+targets provide the four channels in Eq.~\eqref{eq:channels}.  The calculation
+will use the same Geant4 version and nominal physics list as the treatment
+simulation.
 
 \subsection{Energy grid}
 
@@ -362,6 +483,94 @@ If the low-energy samples exceed the energy-loss criterion, the areal thickness
 below \SI{30}{MeV} will be reduced to \SI{2}{mg/cm^2}; the
 \SI{5}{mg/cm^2} target will be retained at and above \SI{30}{MeV}.
 
+\section{First-pass statistical procedure}
+
+\subsection{Dataset roles}
+
+Each normalized series receives a campaign identifier, reaction identifier,
+target composition, absolute or relative normalization label, monitor reaction
+when applicable, and bibliographic provenance.  The first-pass roles are:
+\begin{itemize}[nosep]
+  \item the 2023 Rodr\'iguez-Gonz\'alez measurements provide the principal
+        densely sampled energy dependence;
+  \item the 2022 low-energy $\Ox{16}(p,x)\Cl{11}$ series extends that channel
+        from \SIrange{5.0}{15.8}{MeV};
+  \item vetted independent experiments constrain the threshold region,
+        normalization and between-campaign spread;
+  \item the B\"acker result in Eq.~\eqref{eq:backer} checks the absolute
+        $\Cl{12}(p,x)\Cl{11}$ normalization near \SI{100}{MeV};
+  \item the Masuda series validate low-energy shape with their shared archival
+        $\Ox{15}$ normalization recorded in the metadata;
+  \item the LANL/ENDF and JENDL curves provide evaluated-library comparisons.
+\end{itemize}
+
+An experimental campaign contributes as one scientific dataset.  Pointwise
+uncertainties retain the relative information within that campaign, while a
+campaign-normalized contribution separates sampling density from independent
+normalization information.
+
+\subsection{Uncertainty replicas and recommended curves}
+
+For each of the four channels, the first implementation constructs an ensemble
+of smooth, non-negative excitation-function fits.  One replica is generated by
+the following sequence:
+\begin{enumerate}[nosep]
+  \item draw one common normalization displacement for each campaign that
+        reports a monitor, fluence, efficiency or target-thickness scale
+        uncertainty;
+  \item draw the remaining pointwise cross-section fluctuations from the
+        reported uncertainties;
+  \item fit the replica on a common spline basis with a curvature penalty and
+        non-negative cross-section coefficients;
+  \item evaluate the fitted curve on the model grid and register its parent
+        dataset identifiers and construction settings.
+\end{enumerate}
+The median of the replica curves defines the recommended cross section.  The
+16th and 84th percentiles define the primary one-standard-deviation band; the
+2.5th and 97.5th percentiles are retained as a diagnostic interval.  The
+number of replicas, spline knots and curvature penalty are recorded in the
+model metadata and fixed before the production propagation.
+
+The normalization component from an IAEA monitor evaluation is common to all
+points whose proton fluence was obtained from that monitor in the same
+campaign.  A published total cross-section uncertainty remains a total; a
+normalization split follows an explicit decomposition in the source.
+
+\subsection{Incident-energy information}
+
+The normalized tables preserve the reported \file{dEinc} information as
+separate lower and upper energy fields.  CX4 uses this single field for values
+whose original meaning may be beam-energy spread, bin width or calibration
+uncertainty; the selected series contain no campaign energy covariance.  The
+first fit therefore uses the reported central incident energies.  A later
+energy-sensitivity study will classify the original experimental descriptions
+before applying spectrum averaging or correlated horizontal shifts.
+
+\subsection{Cross-section comparison figures}
+
+The main data figure has one panel for each of the four channels and shows the
+individual experimental campaigns, recommended curve and 68\% uncertainty
+band.  Evaluated curves are labelled by both distribution and underlying
+evaluation lineage.
+
+A dedicated Cucinotta--Pak validation figure contains upper panels for the
+following reactions:
+\begin{itemize}[nosep]
+  \item $\Cl{12}(p,x)\Cl{11}$,
+  \item $\Ox{16}(p,x)\Cl{11}$,
+  \item $\Ox{16}(p,x)\Ox{15}$.
+\end{itemize}
+Each panel contains the experimental points,
+recommended curve and band, and the Cucinotta--Pak parametrization as a dashed
+line.  A lower panel shows the ratio of the parametrization to the recommended
+curve.  The corresponding article is
+\href{https://doi.org/10.1016/j.nimb.2022.11.005}
+{Nuclear Instruments and Methods B 534 (2023) 26--34}.  Its parametrization covers proton
+interactions with C-12 and O-16, so the N-14 channel appears in the main data
+figure and has no Cucinotta--Pak ratio panel.  This comparison diagnoses smooth
+high-energy behaviour and low-energy threshold differences; the experimental
+replica ensemble defines the uncertainty propagated to the activity edge.
+
 \section{Cross-section-only reweighting}
 
 Let emitter $i$ be produced through channel $c_i$ at projectile energy $E_i$.
@@ -405,6 +614,42 @@ The downstream source sampler will use Eq.~\eqref{eq:sampling}.  Common random
 numbers will pair nominal and alternative acquisitions, reducing the Monte Carlo
 noise in Eq.~\eqref{eq:bias}.
 
+For every approved beam energy and beam-off acquisition window, the propagated
+outputs are the uncertainty band on the activity-depth profile, the uncertainty
+in total detected activity, and the distribution of reconstructed distal-edge
+displacements in millimetres.  The cross-section replica result and the Geant4
+hadronic-model envelope are reported as separate contributions.
+
+\section{Frozen scope of the first implementation}
+
+The first implementation is frozen to the following deliverable:
+\begin{enumerate}[nosep]
+  \item four channels: $\Ox{16}(p,x)\Ox{15}$,
+        $\Cl{12}(p,x)\Cl{11}$, $\Ox{16}(p,x)\Cl{11}$, and
+        $\Ni{14}(p,x)\Ni{13}$;
+  \item the pinned EXFOR snapshot, one LANL/ENDF evaluation lineage, one JENDL
+        evaluation lineage, and the effective Geant4 thin-target curves;
+  \item modern measurements for the principal energy dependence, vetted older
+        experiments for threshold and between-campaign information, the B\"acker
+        absolute check, and the Masuda shape check;
+  \item smooth positive cross-section replicas with documented campaign-level
+        normalization components;
+  \item event reweighting through the established beam-off handoff and distal
+        edge estimator;
+  \item the four-channel experimental figure, the three-channel
+        Cucinotta--Pak comparison and ratio figure, and the propagated activity
+        and edge-uncertainty results;
+  \item a separately reported BIC, INCL++ and Bertini hadronic-model envelope.
+\end{enumerate}
+
+The deferred refinement list contains the detailed reconstruction of
+experimental energy spectra and horizontal covariance, additional production
+channels outside the approved time windows, full evaluated-library covariance
+processing, a dedicated natural-carbon thin-target run, a numerical audit of
+documented library carry-overs, and a combined cross-section-plus-hadronic
+uncertainty.  These items start after the first result demonstrates a material
+need for them.
+
 \section{Validation}
 
 The following checks define acceptance of the implementation:
@@ -436,12 +681,17 @@ The following checks define acceptance of the implementation:
   \item Run a \num{1e6}-proton \file{uniform\_headep} pilot and validate
         provenance completeness, channel classification and backward-compatible
         output.
-  \item Produce the thin-target Geant4 channel curves and import the alternative
-        cross-section data.
+  \item Normalize the pinned source data, assign dataset and evaluation-lineage
+        metadata, and construct the four recommended curves and replica bands.
+  \item Produce the thin-target Geant4 channel curves on the approved energy
+        grid and target-thickness schedule.
+  \item Generate the four-channel data figure and the Cucinotta--Pak comparison
+        and ratio figure.
   \item Implement the weight and weighted-budget calculation, including the
         unity-weight regression test.
-  \item Propagate pilot samples through the existing acquisition and distal-edge
-        estimator.
+  \item Propagate the replica curves through the existing beam-off acquisition
+        and distal-edge estimator, reporting profile, activity and edge
+        uncertainties.
   \item Generate the new \num{1e8}-proton nominal
         \file{uniform\_headep\_sobp} source with production provenance.
   \item Generate the BIC, INCL++ and Bertini comparison runs and compute the

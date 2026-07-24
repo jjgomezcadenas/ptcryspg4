@@ -1,0 +1,22 @@
+# EXFOR #         : C0208.004.2
+# EXFOR Ver.      : 20160709
+# TRANS #         : C159
+# Author          : V.Parikh
+# Reference       : Nucl.Phys. 18 (1960) 646
+# DOI             : 10.1016/0029-5582(60)90432-6
+# Quantity        : 16O(p,x)15O independent production cross section
+# REACTION        : 8-O-16(P,X)8-O-15,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodO15_Parikh_1960_c0208.004.2
+#
+# npts            : 1           
+# xmin            :   3.6200E+08
+# xmax            :   3.6200E+08
+# ymin            :   2.0200E-02
+# ymax            :   2.0200E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  3.6200E+08  1.5000E+07  2.0200E-02  2.1210E-03
+#---------------------------------------------------

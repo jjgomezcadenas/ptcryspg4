@@ -1,0 +1,22 @@
+# EXFOR #         : C1911.002  
+# EXFOR Ver.      : 20120319
+# TRANS #         : C116
+# Author          : K.R.Hogstrom
+# Reference       : Phys.Rev.C 14 No.2 (1976) 753
+# DOI             : 10.1103/PhysRevC.14.753
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Hogstrom_1976_c1911.002
+#
+# npts            : 1           
+# xmin            :   8.0000E+08
+# xmax            :   8.0000E+08
+# ymin            :   3.2000E-02
+# ymax            :   3.2000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  8.0000E+08  0.0000E+00  3.2000E-02  1.0000E-03
+#---------------------------------------------------

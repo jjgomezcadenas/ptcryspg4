@@ -1,6 +1,9 @@
 # Generated data (HDF5 interface files live here, never in git)
 data/*
 !data/.gitkeep
+# Versioned public inputs for the cross-section uncertainty study
+!data/xsections/
+!data/xsections/**
 *.h5
 
 # Build directories
@@ -37,3 +40,6 @@ docs/*.pdf
 
 # clangd/editor caches
 .cache/
+
+# Generated code reference (tools/build_docs.py)
+docs_api/

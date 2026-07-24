@@ -1,0 +1,22 @@
+# EXFOR #         : C0231.002  
+# EXFOR Ver.      : 20210828
+# TRANS #         : C203
+# Author          : J.B.Cumming et al.
+# Reference       : Phys.Rev. 125 (1962) 2078
+# DOI             : 10.1103/PhysRev.125.2078
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Cumming_1962_c0231.002
+#
+# npts            : 1           
+# xmin            :   2.8000E+10
+# xmax            :   2.8000E+10
+# ymin            :   2.5900E-02
+# ymax            :   2.5900E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  2.8000E+10  0.0000E+00  2.5900E-02  1.2000E-03
+#---------------------------------------------------

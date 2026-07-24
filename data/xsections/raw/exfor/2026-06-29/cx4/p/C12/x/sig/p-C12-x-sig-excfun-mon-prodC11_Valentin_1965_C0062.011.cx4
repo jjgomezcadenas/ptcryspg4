@@ -1,0 +1,22 @@
+# EXFOR #         : C0062.011  
+# EXFOR Ver.      : 20211005
+# TRANS #         : C206
+# Author          : L.Valentin
+# Reference       : Nucl.Phys. 62 (1965) 81
+# DOI             : 10.1016/0029-5582(65)90072-6
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Valentin_1965_c0062.011
+#
+# npts            : 1           
+# xmin            :   5.7000E+09
+# xmax            :   5.7000E+09
+# ymin            :   2.9800E-02
+# ymax            :   2.9800E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  5.7000E+09  1.0000E+06  2.9800E-02  1.6000E-03
+#---------------------------------------------------

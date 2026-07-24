@@ -30,6 +30,12 @@ void TrackingAction::PreUserTrackingAction(const G4Track* track) {
 
   // (1) Listed emitter ion? Tag trackID -> isotope_id. EmitterId only matches
   // our five beta+ emitters, so daughters/targets fall through harmlessly.
+  // The match is by (Z,A) alone -- creator process and excitation state are
+  // irrelevant; any route that makes the nucleus makes an emitter. Geant4
+  // tracks the radioactive decay inside the same event whatever the decay's
+  // global time, and it samples the true beta+/EC branching, so each tagged
+  // ion yields at most one positron and exactly one emitters.csv row per
+  // beta+ decay -- the 1:1 production-proportional invariant.
   const std::int8_t ionID =
       ptcrysp::EmitterId(def->GetAtomicNumber(), def->GetAtomicMass());
   if (ionID >= 0) {

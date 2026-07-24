@@ -1,0 +1,22 @@
+# EXFOR #         : O2067.027  
+# EXFOR Ver.      : 20121028
+# TRANS #         : O050
+# Author          : A.B.Clegg et al.
+# Reference       : Proc.Phys.Soc.(UK) 78 (1961) 681
+# DOI             : 10.1088/0370-1328/78/5/305
+# Quantity        : 14N(p,x)13N independent production cross section
+# REACTION        : 7-N-14(P,X)7-N-13,,SIG
+# File ID         : p-N14-x-sig-excfun-mon-prodN13_Clegg_1961_o2067.027
+#
+# npts            : 1           
+# xmin            :   1.4500E+08
+# xmax            :   1.4500E+08
+# ymin            :   1.4000E-02
+# ymax            :   1.4000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.4500E+08  0.0000E+00  1.4000E-02  1.0000E-03
+#---------------------------------------------------

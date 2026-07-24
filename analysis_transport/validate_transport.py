@@ -28,10 +28,18 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "..", "common"))
 from isotopes import ISOTOPES  # noqa: E402
 
+# Isotopes in descending beta+ endpoint order, so every legend lists them by
+# positron range (largest first) and the range histograms read left to right.
 ISO_BY_ENDPOINT = sorted(ISOTOPES, key=lambda k: -ISOTOPES[k].endpoint_MeV)
 
 
 def load(data_dir):
+    """Read a run's three CSVs and derive the per-emitter columns the panels use.
+
+    Returns (meta, emit, depth): the run_meta.csv row, the emitters table with
+    two added columns — range_mm = |anh - prod| (the 3-D positron range) and
+    prod_r_mm = transverse production radius [mm] — and the depth_dose.csv table.
+    """
     meta = pd.read_csv(os.path.join(data_dir, "run_meta.csv")).iloc[0]
     emit = pd.read_csv(os.path.join(data_dir, "emitters.csv"))
     prod = emit[["prod_x_mm", "prod_y_mm", "prod_z_mm"]].to_numpy()
@@ -47,6 +55,9 @@ def _name(iid):
 
 
 def summary_rows(meta, emit):
+    """Per-isotope table rows: name, T1/2 [s], endpoint [MeV], count, yield per
+    proton, mean and median positron range [mm]. One row per isotope in
+    endpoint order; feeds both the stdout table and the dashboard table panel."""
     rows = []
     for iid in ISO_BY_ENDPOINT:
         iso = ISOTOPES[iid]
@@ -60,6 +71,8 @@ def summary_rows(meta, emit):
 
 
 def print_table(meta, emit):
+    """Print the run header (protons, emitters, dose, physics list) and the
+    per-isotope summary table to stdout."""
     n = int(meta["n_protons"])
     print(f"\nprotons: {n}   emitters: {len(emit)} ({len(emit)/n:.3e}/p)   "
           f"dose: {meta['dose_total_Gy']:.3e} Gy   "
@@ -75,6 +88,8 @@ def print_table(meta, emit):
 # --- individual panels (each draws on a supplied Axes) ----------------------
 
 def panel_range(ax, emit):  # A
+    """Positron-range histogram per isotope — endpoint-ordered, so the curves
+    should nest: higher endpoint, longer range."""
     for iid in ISO_BY_ENDPOINT:
         sub = emit[emit.isotope_id == iid]
         if len(sub) < 2:
@@ -87,6 +102,8 @@ def panel_range(ax, emit):  # A
 
 
 def panel_depth(ax, emit):  # B
+    """Production depth profile (all emitters + per isotope) — the raw
+    depth-activity curve that tracks the beam range."""
     bins = np.linspace(emit.prod_z_mm.min(), emit.prod_z_mm.max(), 80)
     ax.hist(emit.prod_z_mm, bins=bins, histtype="stepfilled", alpha=0.2,
             color="k", label="all")
@@ -101,6 +118,7 @@ def panel_depth(ax, emit):  # B
 
 
 def panel_map(ax, fig, emit):  # C
+    """2-D production map, depth vs transverse radius."""
     # Log color scale: production is concentrated near the entrance/axis, so a
     # linear scale washes everything else to zero. cmin=1 masks empty bins.
     h = ax.hist2d(emit.prod_z_mm, emit.prod_r_mm, bins=[80, 40], cmap="viridis",
@@ -111,15 +129,20 @@ def panel_map(ax, fig, emit):  # C
 
 
 def panel_radial(ax, emit):  # D
+    """Transverse production profile — the beam-spot footprint in the emitters."""
     ax.hist(emit.prod_r_mm, bins=60, histtype="step", linewidth=1.5, color="C3")
     ax.set(xlabel="production radius [mm]", ylabel="emitters",
            title="D. Radial production profile")
 
 
 def panel_multiplicity(ax, emit, meta):  # E
+    """Emitters-per-proton distribution, including the zero bin."""
     n = int(meta["n_protons"])
     per_evt = emit.groupby("event_id").size()
     counts = per_evt.value_counts().sort_index()
+    # emitters.csv only has rows for protons that produced something; the
+    # zero-emitter count is the remainder: n_protons minus the distinct
+    # event_ids that appear.
     k = [0] + list(counts.index)
     v = [n - len(per_evt)] + list(counts.values)
     ax.bar(k, v, color="C4")
@@ -128,6 +151,7 @@ def panel_multiplicity(ax, emit, meta):  # E
 
 
 def panel_bragg(ax, depth):  # F
+    """Depth-dose split into primary-proton and secondary energy deposit."""
     ax.plot(depth.z_mm, depth.edep_total_MeV, label="total", color="k")
     ax.plot(depth.z_mm, depth.edep_primary_MeV, label="primary", color="C0",
             ls="--")
@@ -139,6 +163,8 @@ def panel_bragg(ax, depth):  # F
 
 
 def panel_overlay(ax, emit, depth):  # G
+    """Depth-dose and production depth on twin axes — the range-verification
+    picture: activity falls to zero before the Bragg peak."""
     ax.plot(depth.z_mm, depth.edep_total_MeV, color="k", label="dose (Bragg)")
     ax.set(xlabel="depth z [mm]", ylabel="energy deposit [MeV/bin]")
     peak_z = depth.z_mm[depth.edep_total_MeV.idxmax()]
@@ -155,6 +181,7 @@ def panel_overlay(ax, emit, depth):  # G
 
 
 def panel_table(ax, meta, emit):  # summary table
+    """Render summary_rows() as the dashboard's table panel."""
     ax.axis("off")
     cols = ["iso", "T1/2[s]", "endpt", "count", "yield/p", "mean[mm]", "med[mm]"]
     tbl = ax.table(cellText=summary_rows(meta, emit), colLabels=cols,

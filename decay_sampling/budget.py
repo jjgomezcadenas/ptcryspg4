@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Handoff budget (deterministic): measured decays N_j per isotope (Eq. 1).
+"""Handoff budget (deterministic): measured decays N_j per isotope.
 
 Reads the Stage-A output, scales production to a clinical dose
-(P_j(D)=count_j·D/target_dose), and applies the three-factor survival of Eq. 1 at
+(P_j(D)=count_j·D/target_dose), and applies the three-factor survival ---
+build-up during irradiation, decay over the beam-off delay, decay inside the
+measurement window; derived in ptcrysp_physics.pdf, "Decay kinetics" --- at
 the operating point to get the expected measured decays N_j. This is the
-detector-independent, RNG-free source budget — the thin quantity handed across the
-A|B seam to the downstream detector study. The stochastic Poisson realizations
+detector-independent, RNG-free source budget — the thin quantity handed to the
+downstream detector study. The stochastic Poisson realizations
 and the σ(range) figure of merit live downstream (budget_gen.py here for now;
 moves there later). Writes:
   data/sampling_budget_<scenario>.csv       (isotope_id, N_expected)
@@ -30,7 +32,11 @@ from isotopes import ISOTOPES  # noqa: E402
 
 
 def survival(lam, t_irr, t_del, t_meas):
-    """Eq. 1 factors (build-up, transport, window) for decay constant lam."""
+    """The three survival factors for decay constant lam [1/s], times in [s].
+
+    Returns the tuple (build, transport, window): build-up saturation over the
+    irradiation, decay during the beam-off delay, and the fraction decaying
+    inside the measurement window. Their product times P_j is N_j."""
     build = (1.0 - math.exp(-lam * t_irr)) / (lam * t_irr)
     transport = math.exp(-lam * t_del)
     window = 1.0 - math.exp(-lam * t_meas)

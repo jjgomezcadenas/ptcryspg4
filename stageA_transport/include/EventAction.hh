@@ -10,11 +10,11 @@
 #include <cstdint>
 #include <unordered_map>
 
-// Per-event bookkeeping shared with TrackingAction:
-//  - fIonMap links an emitter-ion trackID to its isotope_id (filled when the
-//    listed residual nucleus appears), so its positron can be labelled.
-//  - fBuffer collects this event's captured {event_id, isotope, prod, anh} rows.
-// At end of event the buffer is appended to the thread's StageARun.
+/// Per-event bookkeeping shared with TrackingAction:
+///  - fIonMap links an emitter-ion trackID to its isotope_id (filled when the
+///    listed residual nucleus appears), so its positron can be labelled.
+///  - fBuffer collects this event's captured {event_id, isotope, prod, anh} rows.
+/// At end of event the buffer is appended to the thread's StageARun.
 class EventAction : public G4UserEventAction {
  public:
   EventAction() = default;
@@ -28,7 +28,7 @@ class EventAction : public G4UserEventAction {
   void RegisterEmitterIon(G4int trackID, std::int8_t isotopeID) {
     fIonMap[trackID] = isotopeID;
   }
-  // If trackID is a registered emitter ion, return true and set isotopeID.
+  /// If trackID is a registered emitter ion, return true and set isotopeID.
   bool LookupEmitterIon(G4int trackID, std::int8_t& isotopeID) const {
     auto it = fIonMap.find(trackID);
     if (it == fIonMap.end()) return false;

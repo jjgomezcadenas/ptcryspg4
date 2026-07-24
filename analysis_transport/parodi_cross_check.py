@@ -4,7 +4,8 @@
 For the Parodi standard scenario (proton SOBP delivering 1 Gy to a target in a
 head), the absolute integral production is fixed by the dose normalization:
 
-    P_j(1 Gy) = count_j / target_dose_Gy          (see CLAUDE.md)
+    P_j(1 Gy) = count_j / target_dose_Gy
+    (the dose normalization of the user guide, "Setting the absolute scale")
 
 This prints our P_j against Parodi's published head-field yields per Gy.
 Agreement to ~2x for the dominant isotopes is the expected "gross" check —

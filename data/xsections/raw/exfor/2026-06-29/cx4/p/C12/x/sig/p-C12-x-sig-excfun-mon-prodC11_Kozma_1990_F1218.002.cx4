@@ -1,0 +1,22 @@
+# EXFOR #         : F1218.002  
+# EXFOR Ver.      : 20140721
+# TRANS #         : F055
+# Author          : P.Kozma et al.
+# Reference       : Nucl.Instrum.Meth.A 291 (1990) 662
+# DOI             : 10.1016/0168-9002(90)90017-Z
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Kozma_1990_f1218.002
+#
+# npts            : 1           
+# xmin            :   3.6500E+09
+# xmax            :   3.6500E+09
+# ymin            :   2.7300E-02
+# ymax            :   2.7300E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  3.6500E+09  0.0000E+00  2.7300E-02  5.0000E-04
+#---------------------------------------------------

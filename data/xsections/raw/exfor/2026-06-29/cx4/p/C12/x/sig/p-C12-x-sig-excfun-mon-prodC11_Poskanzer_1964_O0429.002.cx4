@@ -1,0 +1,22 @@
+# EXFOR #         : O0429.002  
+# EXFOR Ver.      : 20040701
+# TRANS #         : 0000
+# Author          : A.M.Poskanzer et al.
+# Reference       : Phys.Rev. 133 (1964) B1507
+# DOI             : 10.1103/PhysRev.133.B1507
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Poskanzer_1964_o0429.002
+#
+# npts            : 1           
+# xmin            :   1.0000E+09
+# xmax            :   1.0000E+09
+# ymin            :   2.9000E-02
+# ymax            :   2.9000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.0000E+09  5.0000E+07  2.9000E-02  1.3000E-03
+#---------------------------------------------------

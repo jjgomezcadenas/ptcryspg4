@@ -31,6 +31,8 @@ void BeamConfig::LoadLayers(const G4String& path) {
     return;
   }
   fLayerPath = path;  // remembered so the run can copy it into its own dir
+                      // (set before validation: every later failure is a
+                      // FatalException, so a half-loaded state never survives)
   fEnergyMeV.clear();
   fCumWeight.clear();
 

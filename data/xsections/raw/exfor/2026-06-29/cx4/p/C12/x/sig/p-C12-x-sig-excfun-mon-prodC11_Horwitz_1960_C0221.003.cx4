@@ -1,0 +1,22 @@
+# EXFOR #         : C0221.003  
+# EXFOR Ver.      : 20190109
+# TRANS #         : C183
+# Author          : N.Horwitz et al.
+# Reference       : Phys.Rev. 117 (1960) 1361
+# DOI             : 10.1103/PhysRev.117.1361
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Horwitz_1960_c0221.003
+#
+# npts            : 1           
+# xmin            :   4.1000E+09
+# xmax            :   4.1000E+09
+# ymin            :   3.0500E-02
+# ymax            :   3.0500E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  4.1000E+09  0.0000E+00  3.0500E-02  1.0000E-03
+#---------------------------------------------------

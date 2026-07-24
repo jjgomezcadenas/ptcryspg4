@@ -16,6 +16,10 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
 
   // --- depth-binned dose + target-box dose (steps that deposit energy) ------
+  // These tallies accept every depositing step, wherever it lands (air bins
+  // stay ~zero on their own). run_meta's dose_total_Gy comes from a separate
+  // tally: the multifunctional-detector scorer bound to the phantom volumes
+  // only (RunAction/StageARun), so it counts phantom edep exclusively.
   const G4double edep = step->GetTotalEnergyDeposit();
   if (edep > 0.) {
     const auto& pre = step->GetPreStepPoint()->GetPosition();
@@ -36,6 +40,9 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
 
     // Target-box dose: add edep if the step midpoint is inside the target
     // (cylinder: target z-range and radius from DetectorConstruction).
+    // Binary midpoint test, unlike the overlap-weighted depth binning above: a
+    // step crossing the boundary is counted whole or not at all. Steps are
+    // ~sub-mm against a 50 mm target, so the edge bias is negligible.
     const G4double zmid = 0.5 * (pre.z() + post.z());
     if (zmid >= fDet->TargetProxZ() && zmid <= fDet->TargetDistZ() &&
         rmid <= fDet->TargetRadius()) {

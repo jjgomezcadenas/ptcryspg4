@@ -41,7 +41,8 @@ def material_at(regions, x, y, z):
 
 def classify(regions, X, Y, Z):
     """Region name of each point in the arrays (X, Y, Z) [mm], 'air' if in none.
-    Priority-ordered: the lowest-priority region containing a point wins."""
+    Priority-ordered: the lowest-priority region containing a point wins.
+    Returns an object-dtype array of region-name strings, shaped like X."""
     X, Y, Z = np.asarray(X, float), np.asarray(Y, float), np.asarray(Z, float)
     out = np.full(X.shape, "air", dtype=object)
     assigned = np.zeros(X.shape, dtype=bool)

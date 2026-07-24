@@ -174,7 +174,7 @@ void DetectorConstruction::BuildHeadEnvelope(G4LogicalVolume* worldLV,
   *brainLVout = brainLV;
 }
 
-// Heterogeneous head (Phase 1): the scalp/skull/brain envelope placed laterally,
+// Heterogeneous head: the scalp/skull/brain envelope placed laterally,
 // so the L-R axis lies along the beam (+z) and the brain centre is at the world
 // origin. The base case, unchanged.
 void DetectorConstruction::BuildMirdHead(G4LogicalVolume* worldLV) {
@@ -288,7 +288,7 @@ void DetectorConstruction::BuildUniformHeadEP(G4LogicalVolume* worldLV) {
                                  kScalpByMM, kScalpCzMM)};
 }
 
-// Uniform head (Phase 2): the SAME outer envelope as the MIRD head (the scalp
+// Uniform head: the SAME outer envelope as the MIRD head (the scalp
 // ellipsoid) but a single homogeneous material (brain). Same shape as the
 // 3-region head, so the two cases isolate the effect of the skull/scalp on the
 // proton range and the isotope mix. One medium region.

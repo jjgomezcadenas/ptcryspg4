@@ -9,11 +9,11 @@ class G4UIdirectory;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
 
-// Exposes
-//     /stageA/beam/layers <file>
-// to load an SOBP energy-layer table (the field_design/sobp.py output) into the
-// shared BeamConfig. Without it the gun fires a single fixed energy. Owned by
-// the single BeamConfig, so the command is registered once on the master.
+/// Exposes
+///     /stageA/beam/layers <file>
+/// to load an SOBP energy-layer table (the field_design/sobp.py output) into the
+/// shared BeamConfig. Without it the gun fires a single fixed energy. Owned by
+/// the single BeamConfig, so the command is registered once on the master.
 class BeamMessenger : public G4UImessenger {
  public:
   explicit BeamMessenger(BeamConfig* beam);

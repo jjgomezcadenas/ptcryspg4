@@ -191,6 +191,11 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
            << G4endl;
     return;
   }
+  // beam_energy_MeV / beam_sigma_mm are the pencil constants from StageAConfig.
+  // On an SOBP run the per-primary energies come from the layer table instead;
+  // the table and its meta are copied into the run dir and are the beam record.
+  // random_seed is the master's engine seed; each worker derives its own stream
+  // from it, so it identifies the run without replaying any single thread.
   f << "n_protons,beam_energy_MeV,beam_sigma_mm,geometry,phantom_material,"
        "phantom_diameter_mm,phantom_length_mm,phantom_mass_g,edep_total_MeV,"
        "dose_total_Gy,target_dose_Gy,target_mass_g,target_radius_mm,"
@@ -207,7 +212,7 @@ void RunAction::WriteMetaCsv(const StageARun* run) const {
   G4cout << "[Stage A] wrote run metadata -> " << path << G4endl;
 }
 
-// The medium as a priority-ordered list of world-frame regions (Phase 2): one
+// The medium as a priority-ordered list of world-frame regions: one
 // row per region, the first containing a point owns it. Ellipsoids are
 // axis-aligned (Euler angles 0). Lets a downstream sim rebuild the phantom and
 // assign mu(511 keV) per region. Written for both geometries (cylinder = 1 row).

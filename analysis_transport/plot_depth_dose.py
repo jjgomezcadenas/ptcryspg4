@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Central-axis depth dose from depth_dose.csv (Step 1): the clean on-axis core
+"""Central-axis depth dose from depth_dose.csv: the clean on-axis core
 vs the contaminated full-plane tally.
 
 Left: dose_core_Gy along the beam (dose to the medium on the axis) with the
 target window shaded — the physical central-axis depth dose graded for the SOBP
-(R80, plateau flatness come in Step 3). Right: the shape comparison, edep_total
+(sobp_metrics.py computes R80 and plateau flatness from it). Right: the shape comparison, edep_total
 (whole transverse plane) vs edep_core (r <= 5 mm), each normalised to its own
 peak — through the head the full-plane curve carries the ellipsoid's varying
 cross-section and the bone shells, the core does not. Writes

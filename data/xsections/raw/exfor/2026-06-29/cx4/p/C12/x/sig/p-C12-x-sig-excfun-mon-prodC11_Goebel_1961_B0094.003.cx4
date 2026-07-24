@@ -1,0 +1,22 @@
+# EXFOR #         : B0094.003  
+# EXFOR Ver.      : 20011220
+# TRANS #         : 0000
+# Author          : K.Goebel et al.
+# Reference       : Nucl.Phys. 24 (1961) 28
+# DOI             : 10.1016/0029-5582(61)91013-6
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,IND,SIG,,,EXP
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Goebel_1961_b0094.003
+#
+# npts            : 1           
+# xmin            :   5.9100E+08
+# xmax            :   5.9100E+08
+# ymin            :   2.9900E-02
+# ymax            :   2.9900E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  5.9100E+08  0.0000E+00  2.9900E-02  1.5000E-03
+#---------------------------------------------------

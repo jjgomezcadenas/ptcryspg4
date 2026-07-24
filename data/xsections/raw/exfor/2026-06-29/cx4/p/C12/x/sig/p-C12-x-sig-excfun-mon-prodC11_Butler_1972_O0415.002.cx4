@@ -1,0 +1,22 @@
+# EXFOR #         : O0415.002  
+# EXFOR Ver.      : 20201020
+# TRANS #         : O081
+# Author          : G.W.Butler et al.
+# Reference       : Phys.Rev.C 6 (1972) 1153
+# DOI             : 10.1103/PhysRevC.6.1153
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Butler_1972_o0415.002
+#
+# npts            : 1           
+# xmin            :   7.6000E+09
+# xmax            :   7.6000E+09
+# ymin            :   2.8200E-02
+# ymax            :   2.8200E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  7.6000E+09  0.0000E+00  2.8200E-02  6.0000E-04
+#---------------------------------------------------

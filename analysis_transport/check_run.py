@@ -16,7 +16,7 @@ Each check is independent; several would have caught the head depth-reference bu
   - target depths within the phantom; box radius within the transverse extent
   - regions inside the phantom bounding box; head carve order brain<skull<scalp
   - depth_dose: edep_core <= edep_total (subset); dose_core == the independent
-    edep_core / (rho * pi r_core^2 dz) recompute  [Step 1 central-axis profile]
+    edep_core / (rho * pi r_core^2 dz) recompute  [central-axis profile]
 
 Usage:
     python analysis_transport/check_run.py <run_dir>
@@ -130,7 +130,7 @@ def main():
         add("head carve order tumour<brain<skull<scalp",
             order == ["tumour", "brain", "skull", "scalp"], " -> ".join(order))
 
-    # 7. Central-axis depth dose (Step 1): the core is a subset of the full plane,
+    # 7. Central-axis depth dose: the core is a subset of the full plane,
     #    and dose_core is the independent edep_core / (rho * pi r_core^2 dz) recompute.
     dd_path = os.path.join(args.run_dir, "depth_dose.csv")
     if os.path.exists(dd_path):
@@ -166,7 +166,7 @@ def main():
                 note += f" ({skipped} bins skipped: material not in registry)"
             add("dose_core matches edep_core recompute", worst <= DOSE_RTOL, note)
 
-    # 8. Field provenance (Step 2): if an SOBP field was used, it must have been
+    # 8. Field provenance: if an SOBP field was used, it must have been
     #    designed for THIS phantom (geometry + target window) — else the plateau
     #    is silently wrong. The field is phantom-specific, not universal.
     fmeta_path = os.path.join(args.run_dir, "sobp_layers_meta.csv")

@@ -149,6 +149,29 @@ property of the field and the medium alone. At the standard scale of \SI{1}{Gy} 
 the target, the integral yields are checkable against the published values of
 Parodi \emph{et al.}\ (2008), Table~2 ($\sim$\SI{1.8e8}{} decays per Gy in a head).
 
+\subsection{Statistics of the recovered range}
+\label{sec:pool}
+
+The figure of merit downstream is $\sigma_R$, the spread of the recovered
+distal edge over repeated realisations of a measurement. Each realisation
+draws its $N_j$ annihilation points from the simulated emitter list by
+sampling with replacement, so two pools of statistics enter with different
+roles. The measured counts $N_j$ are set by Eqs.~\eqref{eq:nmeas} and
+\eqref{eq:pj} --- by the dose and the timing --- and are independent of how
+many protons were simulated. The simulated run instead sets the
+\emph{granularity} of the source: the range fit uses only the distal fall-off
+of the activity, and with $n$ distinct emitters of the range-setting species
+($\Ox{15}$) populating a distal window of width $w$, the sampled edge position
+cannot be defined better than
+\begin{equation}
+\sigma_{\mathrm{pool}} \sim \frac{w}{\sqrt{n}},
+\label{eq:pool}
+\end{equation}
+a floor that resampling cannot lower. A $\sigma_R$ study therefore requires
+the simulation statistics to make $\sigma_{\mathrm{pool}}$ small against the
+resolution effects under study; the pool count in the distal window is
+reported, and gated, per run (user guide, \emph{Validating a run}).
+
 \section{\texorpdfstring{$\bplus$}{beta+} activity versus proton dose}
 \label{sec:source-picture}
 
@@ -240,8 +263,10 @@ inverting it for a constant left-hand side gives
 \boxed{\;\Phi(R)\ \propto\ (\Rd-R)^{-1/p}\;}\qquad R\in[\Rp,\Rd],
 \label{eq:phi}
 \end{equation}
-plus a finite reinforcement at the proximal edge $R=\Rp$ that fills the proximal
-corner of the plateau. Since $-1/p\approx-0.565<0$, the weight rises towards the
+The exact inversion also contains a point fluence at the proximal edge $R=\Rp$
+that squares off the proximal corner; the discrete design omits it, and the
+corner rounds over one layer spacing, within the plateau tolerance. Since
+$-1/p\approx-0.565<0$, the weight rises towards the
 \emph{distal} peak (which no deeper peak reinforces) and diverges integrably at
 $R=\Rd$. Integrating Eq.~\eqref{eq:phi} over each range bin
 $[R_i-\tfrac{\Delta}{2},\,R_i+\tfrac{\Delta}{2}]$ (with $\Delta=(\Rd-\Rp)/(N-1)$)
@@ -325,7 +350,9 @@ The SOBP is then built exactly as before, but in WEPL:
 \begin{enumerate}[nosep]
 \item Ray-trace Eq.~\eqref{eq:wepl} along the axis to map the \emph{geometric}
 target window $[\Rp,\Rd]$ to its \emph{water-equivalent} window
-$[\mathrm{WEPL}(\Rp),\mathrm{WEPL}(\Rd)]$.
+$[\mathrm{WEPL}(\Rp),\mathrm{WEPL}(\Rd)]$ (the implementation accumulates
+Eq.~\eqref{eq:wepl} in \SI{0.05}{mm} steps along the central axis, from the
+entrance face, with air contributing zero).
 \item Run the layer design of Secs.~\ref{sec:weights}--\ref{sec:atten} on that
 window with $\rho_{\mathrm{rel}}=1$ (the medium conversion now lives in the WEPL
 map, not in a scalar). The Abel weights, Eq.~\eqref{eq:wi}, are \textbf{unchanged}:
@@ -359,6 +386,31 @@ and WEPL corrects the mean range shift but not the extra straggling and
 multiple-scattering broadening at the bone interface. Plateau uniformity over the
 target volume, rather than along the axis alone, is therefore the physical test of
 the design.
+
+\section{From equations to code}
+\label{sec:eq-code}
+
+Each derivation of this note is implemented by one function in the repository;
+the table maps them.
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+equation & implements & function \\
+\midrule
+\eqref{eq:nmeas} & three-factor measured decays $N_j$ & \texttt{decay\_sampling/budget.py:survival} \\
+\eqref{eq:pj} & dose normalisation $P_j(D)$ & \texttt{decay\_sampling/budget.py} \\
+\eqref{eq:pool} & pool floor on the recovered range & \texttt{analysis\_transport/distal\_pool.py} \\
+\eqref{eq:range} & Bortfeld range--energy & \texttt{field\_design/sobp.py:energy\_for\_range} \\
+\eqref{eq:wi}, \eqref{eq:atten} & layer weights $+$ attenuation boost & \texttt{field\_design/sobp.py:design} \\
+\eqref{eq:rsp} & relative stopping power & \texttt{common/phantom\_material.py:relative\_stopping\_power} \\
+\eqref{eq:wepl} & WEPL ray-trace & \texttt{field\_design/sobp.py:wepl\_curve} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The activity curves of Fig.~\ref{fig:activity} are drawn by
+\texttt{decay\_sampling/activity\_plot.py} and the dose--activity overlay of
+Fig.~\ref{fig:source} by \texttt{analysis\_transport/plot\_dose\_activity.py},
+both from simulated runs.
 
 \bibliographystyle{unsrt}
 \bibliography{biblio}

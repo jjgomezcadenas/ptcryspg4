@@ -1,0 +1,22 @@
+# EXFOR #         : C2359.003  
+# EXFOR Ver.      : 20190114
+# TRANS #         : C183
+# Author          : S.D.Warshaw et al.
+# Reference       : Phys.Rev. 95 (1954) 649(SA2)
+# DOI             : N/A
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Warshaw_1954_c2359.003
+#
+# npts            : 1           
+# xmin            :   4.0000E+08
+# xmax            :   4.0000E+08
+# ymin            :   3.4000E-02
+# ymax            :   3.4000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  4.0000E+08  0.0000E+00  3.4000E-02  0.0000E+00
+#---------------------------------------------------

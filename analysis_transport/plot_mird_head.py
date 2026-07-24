@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Visualize the MIRD-head run: phantom, beam, and emitter paths.
 
-Reads the medium geometry from phantom_regions.csv (Phase 2) -- world-frame,
+Reads the medium geometry from phantom_regions.csv -- world-frame,
 axis-aligned ellipsoids, priority-ordered -- so nothing about the head is
 hardcoded here. Renders, from a head run's emitters.csv:
   (A) the labelled phantom + beam: scalp / skull / brain cross-sections, filled;
@@ -47,6 +47,9 @@ def _draw_regions(ax, regions, fill):
 
 
 def _beam_arrow(ax):
+    """Arrow along +z ending at the scalp entrance. The anchor coordinates, like
+    the leader-line anchors and axis limits in main(), are sized to the MIRD
+    head's ~±75-100 mm extent (StageAConfig.hh semi-axes)."""
     ax.annotate("", xy=(-74, 0), xytext=(-104, 0),
                 arrowprops=dict(arrowstyle="-|>", color="C2", lw=2.2), zorder=5)
     ax.annotate("beam +z", (-104, 0), textcoords="offset points", xytext=(-2, 6),

@@ -1,0 +1,25 @@
+# EXFOR #         : C0244.002  
+# EXFOR Ver.      : 20111128
+# TRANS #         : C113
+# Author          : S.S.Markowitz et al.
+# Reference       : Phys.Rev. 112 (1958) 1295
+# DOI             : 10.1103/PhysRev.112.1295
+# Quantity        : 14N(p,x)13N independent production cross section
+# REACTION        : 7-N-14(P,X)7-N-13,,SIG
+# File ID         : p-N14-x-sig-excfun-mon-prodN13_Markowitz_1958_c0244.002
+#
+# npts            : 4           
+# xmin            :   4.0000E+08
+# xmax            :   3.0000E+09
+# ymin            :   3.1000E-03
+# ymax            :   6.6000E-03
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  4.0000E+08  0.0000E+00  5.6000E-03  1.1200E-03
+  4.0000E+08  0.0000E+00  6.6000E-03  1.3200E-03
+  3.0000E+09  0.0000E+00  3.1000E-03  6.2000E-04
+  3.0000E+09  0.0000E+00  5.0000E-03  1.0000E-03
+#---------------------------------------------------

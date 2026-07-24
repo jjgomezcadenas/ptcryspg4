@@ -1,0 +1,34 @@
+# Doxygen configuration for the Stage-A Geant4 app (run from the repo root by
+# tools/build_docs.py). The documentation lives in the /// comments of the
+# headers and sources; the prose is the documentation, so no @tags are used.
+
+PROJECT_NAME           = "ptcryspg4 Stage A"
+PROJECT_BRIEF          = "Geant4 proton transport: protons -> phantom -> beta+ emitters"
+
+INPUT                  = stageA_transport/include \
+                         stageA_transport/src \
+                         stageA_transport/proton_transport.cc \
+                         common/Isotopes.hh
+FILE_PATTERNS          = *.hh *.cc
+RECURSIVE              = NO
+STRIP_FROM_PATH        = .
+
+OUTPUT_DIRECTORY       = docs_api/stageA
+GENERATE_HTML          = YES
+HTML_OUTPUT            = .
+GENERATE_LATEX         = NO
+
+# Undocumented entities are still listed; the class pages then show the full
+# member tables even where a declaration carries no comment.
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+
+# The comment style is prose sentences; the first sentence serves as the brief.
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+
+SOURCE_BROWSER         = YES
+REFERENCED_BY_RELATION = YES
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO

@@ -1,0 +1,22 @@
+# EXFOR #         : D0128.005  
+# EXFOR Ver.      : 20220228
+# TRANS #         : D136
+# Author          : C.Brun et al.
+# Reference       : J.Phys.(Paris) 23 (1962) 371
+# DOI             : 10.1051/jphysrad:01962002306037100
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Brun_1962_d0128.005
+#
+# npts            : 1           
+# xmin            :   1.5000E+08
+# xmax            :   1.5000E+08
+# ymin            :   4.5000E-02
+# ymax            :   4.5000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.5000E+08  0.0000E+00  4.5000E-02  2.0000E-03
+#---------------------------------------------------

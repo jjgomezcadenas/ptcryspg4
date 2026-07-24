@@ -1,0 +1,22 @@
+# EXFOR #         : C0061.019  
+# EXFOR Ver.      : 20040426
+# TRANS #         : 0000
+# Author          : L.Valentin et al.
+# Reference       : Phys.Lett. 7 (1963) 163
+# DOI             : 10.1016/0031-9163(63)90651-6
+# Quantity        : 16O(p,x)11C independent production cross section
+# REACTION        : 8-O-16(P,X)6-C-11,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodC11_Valentin_1963_c0061.019
+#
+# npts            : 1           
+# xmin            :   1.5500E+08
+# xmax            :   1.5500E+08
+# ymin            :   1.1000E-02
+# ymax            :   1.1000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.5500E+08  0.0000E+00  1.1000E-02  1.0000E-03
+#---------------------------------------------------

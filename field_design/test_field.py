@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit checks for the WEPL field design (Step 2): RSP + the WEPL ray-trace.
+"""Unit checks for the WEPL field design: RSP + the WEPL ray-trace.
 
 Pure-function tests, no Geant4: relative stopping-power values, and the WEPL
 ray-trace on synthetic homogeneous phantoms where the answer is exact (WEPL =

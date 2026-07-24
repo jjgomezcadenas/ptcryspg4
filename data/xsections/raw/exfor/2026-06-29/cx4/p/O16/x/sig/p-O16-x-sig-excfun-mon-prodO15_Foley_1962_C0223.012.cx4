@@ -1,0 +1,22 @@
+# EXFOR #         : C0223.012  
+# EXFOR Ver.      : 19960711
+# TRANS #         : 0000
+# Author          : K.J.Foley et al.
+# Reference       : Nucl.Phys. 31 (1962) 43
+# DOI             : 10.1016/0029-5582(62)90727-7
+# Quantity        : 16O(p,x)15O independent production cross section
+# REACTION        : 8-O-16(P,X)8-O-15,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodO15_Foley_1962_c0223.012
+#
+# npts            : 1           
+# xmin            :   1.4600E+08
+# xmax            :   1.4600E+08
+# ymin            :   5.2000E-02
+# ymax            :   5.2000E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.4600E+08  0.0000E+00  5.2000E-02  1.0000E-02
+#---------------------------------------------------

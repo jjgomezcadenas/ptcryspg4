@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 def load(run_dir):
+    """Read one run's central-axis dose curve for the overlay.
+
+    Returns a dict: geometry, depth [cm from the entrance], dose (dose_core_Gy
+    array), beam ("SOBP" when the run carries sobp_layers_meta.csv, else
+    "pencil"), and the target window prox/dist [cm]."""
     d = pd.read_csv(os.path.join(run_dir, "depth_dose.csv"))
     m = pd.read_csv(os.path.join(run_dir, "run_meta.csv")).iloc[0]
     half = 0.5 * float(m["phantom_length_mm"])

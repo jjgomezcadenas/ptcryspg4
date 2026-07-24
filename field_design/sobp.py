@@ -5,9 +5,9 @@ Implements latex/ptcrysp_physics.tex. Pristine-peak ranges span the target depth
 come from the Bortfeld power law R = alpha*E^p (water), scaled to the material by
 density; flattening weights are the bin-integrated
 
-    w_i ∝ (Rd - Ri + Δ/2)^(1/p) - (Rd - Ri - Δ/2)^(1/p)
+    w_i ∝ (Rd - Ri + Δ/2)^(1-1/p) - (Rd - Ri - Δ/2)^(1-1/p)
 
-of the continuous fluence Phi(R) ∝ (Rd - R)^(1/p - 1). Writes the layer table
+of the continuous fluence Phi(R) ∝ (Rd - R)^(-1/p). Writes the layer table
 (energy_MeV, weight) for the Geant4 gun and a sanity plot of the analytic SOBP
 (idealized peaks + range straggling; the G4 depth-dose is the real check).
 
@@ -56,7 +56,8 @@ def rsp_by_material(regions, energy_MeV=150.0):
 
 def wepl_curve(regions, z0_mm, d_max_mm, rsp_by, dz=0.05):
     """(depths, WEPL) [mm] along the central axis (x=y=0) from entrance z0:
-    geometric depth reweighted by the RSP of the medium there (Eq. WEPL)."""
+    geometric depth reweighted by the RSP of the medium there (the WEPL
+    integral of the physics note)."""
     depths = np.arange(0.0, d_max_mm + dz, dz)
     rsp = np.array([rsp_by.get(material_at(regions, 0.0, 0.0, z0_mm + d), 0.0)
                     for d in depths])

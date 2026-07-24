@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """SOBP plateau metrics on a run's central-axis depth dose: R80 + uniformity.
 
-Reads <run_dir>/depth_dose.csv (the dose_core_Gy column from Step 1) and
+Reads <run_dir>/depth_dose.csv (the dose_core_Gy central-axis column) and
 run_meta.csv, and reports the standard acceptance numbers for a spread-out Bragg
 peak through the phantom:
 
@@ -46,12 +46,23 @@ def crossing(depth, dose, level, lo, hi):
     if len(flips) == 0:
         return None
     i = flips[0] if y[0] >= level else flips[-1]  # proximal rise vs distal fall
+    # np.interp needs ascending xp, so on a falling edge (y[i] > y[i+1]) both
+    # pairs are reversed before interpolating.
     return float(np.interp(level, [y[i], y[i + 1]][:: 1 if y[i] < y[i + 1] else -1],
                            [d[i], d[i + 1]][:: 1 if y[i] < y[i + 1] else -1]))
 
 
 def metrics(run_dir):
-    """Raises ValueError when the run predates the central-axis tally, so a
+    """Compute the plateau metrics of a run's central-axis depth dose.
+
+    Returns a dict: geometry, plateau_Gy (mean core dose over the target window
+    minus the distal falloff), uniformity_pct ((max-min)/mean over that window,
+    in %), prox/dist (target window edges [cm from the entrance]), r80_distal /
+    r80_prox (the 80%-of-plateau crossings [cm], None when the curve does not
+    cross), and the depth [cm] / dose [Gy] arrays for plotting. check_run.py,
+    make_figures.py and plot() all consume this dict.
+
+    Raises ValueError when the run predates the central-axis tally, so a
     caller embedding this in a larger report (check_run) can record a FAIL
     instead of dying mid-table."""
     d = pd.read_csv(os.path.join(run_dir, "depth_dose.csv"))

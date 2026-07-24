@@ -1,0 +1,25 @@
+# EXFOR #         : E2449.005  
+# EXFOR Ver.      : 20140324
+# TRANS #         : E086
+# Author          : T.Akagi et al.
+# Reference       : Radiat.Meas. 59 (2013) 262
+# DOI             : 10.1016/j.radmeas.2013.07.005
+# Quantity        : 12C(p,x)11C independent production cross section
+# REACTION        : 6-C-12(P,X)6-C-11,,SIG
+# File ID         : p-C12-x-sig-excfun-mon-prodC11_Akagi_2013_e2449.005
+#
+# npts            : 4           
+# xmin            :   3.2500E+07
+# xmax            :   6.9600E+07
+# ymin            :   7.1200E-02
+# ymax            :   7.9800E-02
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  3.2500E+07  4.5000E+06  7.2500E-02  3.0000E-03
+  4.7500E+07  3.3000E+06  7.9800E-02  3.3000E-03
+  5.9400E+07  2.8000E+06  7.1200E-02  2.9000E-03
+  6.9600E+07  2.5000E+06  7.1900E-02  2.9000E-03
+#---------------------------------------------------

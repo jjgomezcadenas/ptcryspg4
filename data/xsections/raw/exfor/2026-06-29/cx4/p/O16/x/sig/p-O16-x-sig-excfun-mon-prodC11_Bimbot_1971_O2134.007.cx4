@@ -1,0 +1,23 @@
+# EXFOR #         : O2134.007  
+# EXFOR Ver.      : 20130615
+# TRANS #         : O051
+# Author          : R.Bimbot et al.
+# Reference       : Compt.Rend.B 273 (1971) 1054
+# DOI             : N/A
+# Quantity        : 16O(p,x)11C independent production cross section
+# REACTION        : 8-O-16(P,X)6-C-11,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodC11_Bimbot_1971_o2134.007
+#
+# npts            : 2           
+# xmin            :   1.0000E+08
+# xmax            :   1.5300E+08
+# ymin            :   5.8000E-03
+# ymax            :   7.0000E-03
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.0000E+08  5.0000E+06  5.8000E-03  1.2000E-03
+  1.5300E+08  3.0000E+06  7.0000E-03  1.0000E-03
+#---------------------------------------------------

@@ -8,39 +8,39 @@
 
 #include <vector>
 
-// Custom run object. Each worker thread fills its own instance (emitter rows via
-// EventAction, dose via RecordEvent, depth-dose via SteppingAction); Geant4
-// calls Merge() on the master to concatenate/sum all threads -- no manual
-// locking. The master's merged instance is what RunAction writes to CSV.
+/// Custom run object. Each worker thread fills its own instance (emitter rows via
+/// EventAction, dose via RecordEvent, depth-dose via SteppingAction); Geant4
+/// calls Merge() on the master to concatenate/sum all threads -- no manual
+/// locking. The master's merged instance is what RunAction writes to CSV.
 class StageARun : public G4Run {
  public:
-  static constexpr int kNZBins = 200;  // z-bins over the phantom's beam extent
+  static constexpr int kNZBins = 200;  ///< z-bins over the phantom's beam extent
 
-  // halfZ_mm: the phantom's beam-axis half-extent — the depth binning covers
-  // z in [-halfZ, +halfZ], whatever the geometry.
+  /// halfZ_mm: the phantom's beam-axis half-extent — the depth binning covers
+  /// z in [-halfZ, +halfZ], whatever the geometry.
   explicit StageARun(G4double halfZ_mm);
   ~StageARun() override = default;
 
-  void RecordEvent(const G4Event* event) override;  // accumulate total dose
-  void Merge(const G4Run* aRun) override;            // concatenate/sum threads
+  void RecordEvent(const G4Event* event) override;  ///< accumulate total dose
+  void Merge(const G4Run* aRun) override;            ///< concatenate/sum threads
 
-  // Append one event's captured emitters (called by EventAction, same thread).
+  /// Append one event's captured emitters (called by EventAction, same thread).
   void FillEmitters(const ptcrysp::EmitterData& buf) { fEmitters.append(buf); }
 
-  // Bin a step's energy deposit by depth, distributing it across the z-bins the
-  // step spans (weighted by path-length overlap) so long plateau steps give a
-  // smooth profile rather than midpoint spikes. z in mm, edep in MeV. inCore
-  // (step within kCoreRadiusMM of the beam axis) also bins it into the thin
-  // central-axis core profile.
+  /// Bin a step's energy deposit by depth, distributing it across the z-bins the
+  /// step spans (weighted by path-length overlap) so long plateau steps give a
+  /// smooth profile rather than midpoint spikes. z in mm, edep in MeV. inCore
+  /// (step within kCoreRadiusMM of the beam axis) also bins it into the thin
+  /// central-axis core profile.
   void AddEdepAlongStep(G4double z1_mm, G4double z2_mm, G4double edep_MeV,
                         bool primary, bool inCore);
 
-  // Accumulate a step's energy deposit that falls inside the target box
-  // (SteppingAction decides; G4 internal energy units) -> the dose normalization.
+  /// Accumulate a step's energy deposit that falls inside the target box
+  /// (SteppingAction decides; G4 internal energy units) -> the dose normalization.
   void AddTargetEdep(G4double edep) { fTargetEdep += edep; }
 
   const ptcrysp::EmitterData& Emitters() const { return fEmitters; }
-  G4double EdepTotal() const { return fEdep; }  // G4 internal energy units
+  G4double EdepTotal() const { return fEdep; }  ///< G4 internal energy units
   G4double TargetEdep() const { return fTargetEdep; }
   const std::vector<G4double>& EdepZTotal() const { return fEdepZTotal; }
   const std::vector<G4double>& EdepZPrimary() const { return fEdepZPrimary; }
@@ -48,14 +48,14 @@ class StageARun : public G4Run {
 
  private:
   ptcrysp::EmitterData fEmitters;
-  G4double fZMinMM = 0.;  // depth-binning window start (= -halfZ), mm
-  G4double fBinWMM = 0.;  // depth-bin width, mm
+  G4double fZMinMM = 0.;  ///< depth-binning window start (= -halfZ), mm
+  G4double fBinWMM = 0.;  ///< depth-bin width, mm
   G4double fEdep = 0.;
-  G4double fTargetEdep = 0.;  // energy deposited inside the target box
-  G4int fCollID = -1;  // cached scorer collection ID
+  G4double fTargetEdep = 0.;  ///< energy deposited inside the target box
+  G4int fCollID = -1;  ///< cached scorer collection ID
   std::vector<G4double> fEdepZTotal{std::vector<G4double>(kNZBins, 0.)};
   std::vector<G4double> fEdepZPrimary{std::vector<G4double>(kNZBins, 0.)};
-  // Thin on-axis core (r <= kCoreRadiusMM): the clean central-axis depth dose.
+  /// Thin on-axis core (r <= kCoreRadiusMM): the clean central-axis depth dose.
   std::vector<G4double> fEdepZCore{std::vector<G4double>(kNZBins, 0.)};
 };
 
