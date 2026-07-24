@@ -47,6 +47,30 @@ is stored beside the pilot curves under the versioned Geant4 directory. These
 curves diagnose the residual final-state model and are not inputs to the
 production estimator.
 
+After folding a physical exposure table, generate the production-profile,
+yield, distal-edge and energy-grid figures with:
+
+```text
+python -m analysis_transport.xsections.make_folding_plots FOLDING_DIR \
+  --convergence-csv CONVERGENCE_DIR/exposure_convergence.csv
+```
+
+The PDFs are written to `docs/figures/xsection_folding`, and their quantitative
+summary and provenance are written to `docs/generated/xsection_folding`. The
+figures and the complete propagation procedure are included in
+`docs/xsection_fit.tex`.
+
+The report also contains a persistent analytic reference generated with the
+real nominal fit and all 1000 replicas:
+
+```text
+python -m analysis_transport.xsections.make_folding_reference
+```
+
+This writes separately labelled figures and numerical products under the
+`reference` subdirectories. The standard `tools/build_xsection_fit.py` build
+regenerates this reference automatically.
+
 ## Current EXFOR curation
 
 The current policy accepts 79 of the 85 series. Six remain pending:

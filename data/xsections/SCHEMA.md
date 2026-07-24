@@ -233,6 +233,48 @@ corresponding fine-grid replica half-width, and its R50 effect is also below
 0.1 mm. The convergence output records the fine and candidate grids,
 metrics, tolerances and pass state.
 
+## Folding diagnostic figures
+
+`analysis_transport/xsections/make_folding_plots.py` consumes one complete
+folding output directory and, when supplied, `exposure_convergence.csv`. It
+writes four publication-ready PDF figures:
+
+| File | Quantity |
+|---|---|
+| `production_profiles.pdf` | Nominal depth profiles, pointwise replica bands and nominal R50 |
+| `r50_shifts.pdf` | Paired replica production-edge displacements |
+| `yield_ratios.pdf` | Replica-to-nominal integral yields |
+| `energy_convergence.pdf` | Yield and R50 binning effects relative to the acceptance limits |
+
+The companion `folding_plot_summary.csv` records nominal yields and edges,
+relative yield half-widths, and R50 displacement percentiles.
+`folding_plot_meta.json` records every input digest and the generated figure
+names. The figures are written under `docs/figures/xsection_folding` for direct
+inclusion in `docs/xsection_fit.tex`.
+
+### Analytic folding reference
+
+`analysis_transport/xsections/make_folding_reference.py` constructs a
+deterministic analytic target-resolved exposure, folds the current nominal
+curve and all 1000 replicas, evaluates the four configured candidate energy
+grids, and calls the common plotting program. Its persistent products are:
+
+- `docs/figures/xsection_folding/reference/*.pdf`;
+- `docs/generated/xsection_folding/reference/nominal_profiles.csv`;
+- `docs/generated/xsection_folding/reference/profile_bands.csv`;
+- `docs/generated/xsection_folding/reference/production_summary.csv`;
+- `docs/generated/xsection_folding/reference/uncertainty_summary.csv`;
+- `docs/generated/xsection_folding/reference/exposure_convergence.csv`;
+- `docs/generated/xsection_folding/reference/folding_plot_summary.csv` and
+  `.tex`; and
+- `reference_definition.json` and `folding_plot_meta.json`.
+
+`reference_definition.json` records the analytic energy, depth, exposure and
+target-mixture parameters plus the fit and timing digests. These products
+validate and illustrate the propagation procedure. Their exposure scale,
+profiles and R50 values are an analytic reference rather than a treatment
+prediction.
+
 ## Native-route diagnostic counters
 
 The future transport scorer writes `native_route_counts.csv` for diagnostic

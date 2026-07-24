@@ -1,0 +1,19 @@
+{
+  "context_label": "Analytic exposure reference (not a transport result)",
+  "convergence_sha256": "ccce2dac4d6a1f65c5957cc1fb988a07e63c56c5ee584253f6d800dc5edc3445",
+  "convergence_source": "analytic_folding_reference_v1",
+  "figures": [
+    "production_profiles.pdf",
+    "r50_shifts.pdf",
+    "yield_ratios.pdf",
+    "energy_convergence.pdf"
+  ],
+  "folding_source": "analytic_folding_reference_v1",
+  "inputs_sha256": {
+    "bands": "6a61211b58ee4607026e607af9d314576cb3f901978da16c886d80bffbeeb029",
+    "nominal": "bc5399ec1a896e9c3573d59f05c76a75354b734a076a9628c8f4b51aff47f4cc",
+    "summary": "bbc1bc500e1e4f5bb04dfe36ce4ce37ab39bbe73ca3cf7f5b96da6f056ac77ad",
+    "uncertainty": "b0065360f2ac06794287ed4cb529ef79a24ce1a076c1d810eac0ae967a1d2966"
+  },
+  "schema_version": 1
+}

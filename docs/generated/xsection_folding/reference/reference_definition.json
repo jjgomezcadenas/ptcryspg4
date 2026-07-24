@@ -1,0 +1,38 @@
+{
+  "all_candidates_pass": false,
+  "exposure_rows": 11883,
+  "fit_meta_sha256": "f5f8bd1792f580fb031049c1724980dba7d6d30ce6f52bdfaeabe31a2eb20861",
+  "handoff_scenario_sha256": "2fa7700553e5027ac4053ca8505d1eb876d1a3e50529b54797ae8b73fe86c149",
+  "parameters": {
+    "candidate_energy_widths_MeV": [
+      0.5,
+      1.0,
+      2.0,
+      5.0
+    ],
+    "depth_max_mm": 122.0,
+    "depth_min_mm": 0.0,
+    "depth_width_mm": 2.0,
+    "description": "Analytic longitudinal proton-exposure field used to demonstrate cross-section folding; it is not a Geant4 treatment result.",
+    "energy_max_MeV": 120.0,
+    "energy_min_MeV": 5.0,
+    "energy_spread_MeV": 3.0,
+    "entrance_mean_energy_MeV": 112.0,
+    "exposure_scale_cm2_inv": 1e+27,
+    "fine_energy_width_MeV": 0.5,
+    "n_protons": 1000000.0,
+    "r50_absolute_tolerance_mm": 0.1,
+    "range_energy_exponent": 0.56,
+    "reference_range_mm": 112.0,
+    "relative_tolerance_fraction": 0.1,
+    "scenario": "inroom",
+    "target_dose_Gy": 0.01,
+    "target_exposure_scales": {
+      "C12": 0.12,
+      "N14": 0.03,
+      "O16": 0.55
+    }
+  },
+  "replicas": 1000,
+  "schema_version": 1
+}

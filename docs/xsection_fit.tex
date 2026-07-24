@@ -12,9 +12,15 @@
 \IfFileExists{docs/generated/xsection_fit/fit_summary.tex}{
   \newcommand{\generateddir}{docs/generated/xsection_fit}
   \newcommand{\figuredir}{docs/figures/xsection_fit}
+  \newcommand{\foldgenerateddir}{docs/generated/xsection_folding}
+  \newcommand{\foldfiguredir}{docs/figures/xsection_folding}
+  \newcommand{\foldreferencefiguredir}{docs/figures/xsection_folding/reference}
 }{
   \newcommand{\generateddir}{generated/xsection_fit}
   \newcommand{\figuredir}{figures/xsection_fit}
+  \newcommand{\foldgenerateddir}{generated/xsection_folding}
+  \newcommand{\foldfiguredir}{figures/xsection_folding}
+  \newcommand{\foldreferencefiguredir}{figures/xsection_folding/reference}
 }
 
 \title{Selection, curation, and uncertainty modelling of PET-production
@@ -338,66 +344,288 @@ penalty are recorded in
 \path{\generateddir/distance_by_smoothing.csv}; the distance percentile is
 used only to choose the nine displayed examples.
 
-\section{Propagation to the distal activity edge}
+\section{Propagation to production profiles and the distal activity edge}
 
-Let $s$ denote a proton step of length $\ell_s$, representative kinetic energy
-$E_s$, and statistical weight $a_s$.  If the step traverses a material with
-number density $n_{t,s}$ of target isotope $t$, its expected contribution to
-production channel $c$ in cross-section replica $r$ is
+\subsection{Frozen proton exposure}
+
+The propagation begins with one Geant4 transport of primary and secondary
+protons through the phantom.  For target isotope $t$, proton-energy bin $k$
+and depth bin $m$, the scorer accumulates
+\begin{equation}
+  K_{t,k,m}=\sum_{s\in(t,k,m)}a_s n_{t,s}\ell_s,
+  \label{eq:exposure}
+\end{equation}
+where $a_s$, $n_{t,s}$ and $\ell_s$ are the statistical weight, target number
+density and length of proton step $s$.  The units of $K$ are cm$^{-2}$.  The
+same weighted sums define the mean energy and depth stored for each occupied
+bin.  The resulting CSV contains the target isotope, the energy and depth
+limits, the two exposure-weighted means, and $K_{t,k,m}$.
+
+The companion \path{exposure_meta.json} records the exposure-file digest,
+transport-run identifier, number of primary protons, target-box dose, Geant4
+version, physics list, random seed, software revision, coordinate definition,
+and authoritative energy and depth edges.  The loader checks every bin against
+these grids and verifies
+\begin{equation}
+  N_{p/\mathrm{Gy}}=\frac{N_p}{D_{\mathrm{sim,target}}}.
+  \label{eq:normalization-check}
+\end{equation}
+Overlapping energy bins, overlapping depth bins, duplicate cells, inconsistent
+normalization, and a file-digest mismatch stop the calculation.
+
+Geant4 determines charged-particle transport, continuous energy loss, nuclear
+attenuation and dose.  The same exposure table is used for the nominal curve
+and all 1000 replicas.  Alternative BIC, INCL++ and Bertini calculations vary
+the exposure table and constitute a separate transport envelope.
+
+\subsection{Direct folding of the cross-section ensemble}
+
+For channel $c$ with target $t(c)$, the expected production in one occupied
+exposure cell is
+\begin{equation}
+  \Delta P_{c,k,m}^{(r)}=
+  K_{t(c),k,m}\,
+  \sigma_c^{(r)}(\bar E_{t(c),k,m})\,10^{-27},
+  \label{eq:binned-fold}
+\end{equation}
+where the cross section is in millibarns and $10^{-27}$ converts millibarns to
+cm$^2$.  Linear interpolation is used inside the fitted grid.  Production is
+zero at and below the reaction threshold, and queries above the fitted range
+are rejected.  The fitted grid is required to bracket the physical threshold.
+
+Equation~\eqref{eq:binned-fold} is the binned implementation of the per-step
+track-length estimator
 \begin{equation}
   \Delta N_{s,c}^{(r)}=
   a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
   \label{eq:fold-step}
 \end{equation}
-Summing Eq.~\eqref{eq:fold-step} over the steps in spatial bin $m$ and over the
-channels producing isotope $j$ gives
+The nominal calculation uses the stored pointwise replica median
+$\sigma_c^{(50)}(E)$.  A replica calculation uses all five curves carrying the
+same replica identifier.  Consequently, the variation is correlated across
+energy, depth, and all uses of a channel curve.
+
+Channel contributions producing the same residual are summed to obtain
 \begin{equation}
   P_{j,m}^{(r)}=
-  \sum_{s\in m}\sum_{c\rightarrow j}
-  a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
-  \label{eq:fold-profile}
+  \sum_{c\rightarrow j}\sum_k\Delta P_{c,k,m}^{(r)}.
+  \label{eq:isotope-profile}
 \end{equation}
-The nominal prediction uses the replica median $\sigma_{50}(E)$; each
-uncertainty realization substitutes one complete replica curve.  All
-realizations use the same stored proton steps, so differences among them arise
-from the experimental cross-section ensemble.
+The three isotope profiles are $^{11}$C, $^{15}$O and $^{13}$N.
+The selected-channel source is constructed from Eq.~\eqref{eq:binned-fold}.
+Native Geant4 residuals provide a separate counter for neutron-induced
+production, $^{10}$C, $^{14}$O and other routes outside the selected set.  The
+counter is reported for raw production and after the named beam-off timing; it
+serves as a diagnostic of the five-channel approximation.
 
-Geant4 continues to determine proton and secondary-proton transport, energy
-loss, total inelastic attenuation and dose.  Residual nuclei generated by the
-Geant4 final-state model through the five selected channels are excluded from
-the folded source tally, preventing double counting.  Their production is
-replaced by Eqs.~\eqref{eq:fold-step} and \eqref{eq:fold-profile}.  This method
-also remains defined where a Geant4 residual-production model has zero support,
-because it contains no channel-cross-section denominator.
+The exposure is held fixed across cross-section replicas.  This retains the
+nominal Geant4 total-inelastic attenuation while varying the selected partial
+production cross sections.  The summed selected cross section divided by the
+Geant4 total inelastic cross section is recorded as the scale of the associated
+first-order attenuation correction.
 
-The fixed-transport approximation holds the proton fluence constant while the
-selected partial production cross sections vary.  These channels contribute
-only a fraction of the total proton inelastic cross section, so the associated
-change in fluence attenuation is a higher-order correction.  The implementation
-will record the ratio of their summed cross section to the Geant4 total
-inelastic cross section as a quantitative check of this approximation.
+\path{all_production} is their unweighted sum.  The named in-room profile is
+\begin{equation}
+  P_{\mathrm{inroom},m}^{(r)}=
+  \sum_j F_j P_{j,m}^{(r)},
+  \label{eq:inroom-profile}
+\end{equation}
+with
+\begin{equation}
+  F_j=
+  \frac{1-\exp(-\lambda_j t_{\mathrm{irr}})}
+       {\lambda_j t_{\mathrm{irr}}}
+  \exp(-\lambda_j t_{\mathrm{del}})
+  [1-\exp(-\lambda_j t_{\mathrm{meas}})].
+  \label{eq:handoff-factor}
+\end{equation}
+The times are resolved from the named \path{inroom} entry in
+\path{config/handoff_scenarios.toml}; the folding calculation and the handoff
+budget use the same resolver and configuration digest.
 
-Equation~\eqref{eq:fold-profile} directly provides isotope budgets,
-production-depth profiles and the production-edge displacement.  A common
-proposal sample drawn from the scored proton steps supplies production sites
-for positron transport.  Nominal and replica sources use the same proposal
-sites and random numbers, with probabilities proportional to
-$\Delta N_{s,c}^{(r)}$, thereby preserving correlations and reducing sampling
-noise.  The resulting annihilation coordinates pass through the common
-beam-off acquisition, detector simulation, reconstruction and edge estimator.
+Every profile and integral is reported for the simulated run, per primary
+proton and per Gy.  The output consists of nominal channel contributions,
+nominal isotope and aggregate profiles, pointwise replica bands, optional
+compressed per-replica profiles, the complete production summary, an
+uncertainty summary, and \path{folding_meta.json}.  The metadata retain the
+cross-section, exposure, timing and software digests.
 
-The final cross-section uncertainty is obtained from the distribution of
-distal-edge displacements
+\subsection{Production-edge estimator and replica uncertainty}
+
+For each profile, $R_{50,\mathrm{prod}}$ is the distal crossing of half the
+profile maximum.  The algorithm selects the last depth bin at or above the
+half maximum and linearly interpolates to the following bin.  Replica $r$ is
+paired with the nominal result through
+\begin{equation}
+  b_{\mathrm{prod}}^{(r)}=
+  R_{50,\mathrm{prod}}^{(r)}-
+  R_{50,\mathrm{prod}}^{(50)}.
+  \label{eq:production-shift}
+\end{equation}
+The yield diagnostic is the integral ratio
+\begin{equation}
+  \rho_Y^{(r)}=
+  \frac{\sum_m P_m^{(r)}}{\sum_m P_m^{(50)}}.
+  \label{eq:yield-ratio}
+\end{equation}
+The 16th, 50th and 84th percentiles of $b_{\mathrm{prod}}$ define its central
+shift and interval.  The reported symmetric summary is
+$(q_{84}-q_{16})/2$.  The same percentile construction is applied to the
+integral yield.  All replicas enter these distributions with equal weight;
+the curve-distance diagnostic $D_r$ is used only to select representative
+curves for the cross-section figures.
+
+The reconstructed displacement is evaluated downstream with the same
+definition,
 \begin{equation}
   b_{\mathrm{reco}}^{(r)}=
-  R_{50,\mathrm{reco}}^{(r)}-R_{50,\mathrm{reco}}^{(\mathrm{nominal})},
+  R_{50,\mathrm{reco}}^{(r)}-
+  R_{50,\mathrm{reco}}^{(50)}.
 \end{equation}
-after applying the common acquisition, detector simulation, reconstruction,
-and edge estimator.  The production-profile displacement is recorded
-separately.  The median and 16th--84th percentiles of the paired displacement
-distribution define the propagated bias and uncertainty interval.  Thus all
-replicas enter the physical propagation; the value of $D_r$ has no role in
-their weighting.
+A common proposal sample drawn from the scored proton segments supplies
+three-dimensional production sites for positron transport.  Nominal and
+replica sources share proposal sites and random-number streams, preserving the
+pairing through positron transport, beam-off acquisition, detector simulation,
+reconstruction and the final edge estimator.
+
+\subsection{Energy-grid convergence}
+
+The initial transport uses a deliberately fine proton-energy grid.  Candidate
+coarser tables are derived offline from the same exposure realization.  If
+$G$ is a set of fine cells forming one coarse cell, the exact recombination is
+\begin{equation}
+  K_G=\sum_{g\in G}K_g,
+  \qquad
+  \bar E_G=\frac{\sum_{g\in G}K_g\bar E_g}{K_G}.
+  \label{eq:coarsening}
+\end{equation}
+The approximation under test is therefore the use of
+$\sigma(\bar E_G)$ for a cross section that can be nonlinear inside $G$.
+
+The nominal curve and every replica are folded on the fine and candidate
+grids.  For every isotope and aggregate profile, the program records the
+largest paired change in yield and $R_{50}$ across the nominal result and all
+replicas.  A candidate passes when the yield and $R_{50}$ changes are each
+below 10\% of the corresponding fine-grid replica half-width, the absolute
+$R_{50}$ change is below SI{0.1}{mm}, and the reported half-widths satisfy the
+same stability requirement.  The accepted grid is fixed before the
+high-statistics transport.
+
+\subsection{Quantitative diagnostic figures}
+
+The tracked program
+\path{analysis_transport/xsections/make_folding_plots.py} reads the folding
+products and \path{exposure_convergence.csv}.  It validates the required
+columns, profile labels, depth ordering, quantile ordering, positive nominal
+yields and replica support before producing the figures.  It also writes
+\path{folding_plot_summary.csv}, containing the nominal yields and edges,
+relative yield half-widths and $R_{50}$ percentiles, and
+\path{folding_plot_meta.json}, containing all input digests and output names.
+
+\subsubsection{Analytic reference calculation}
+
+The figures below are produced before the Geant4 exposure run as an executable
+reference for the complete propagation.  The reference uses the fitted
+cross-section median and all 1000 fitted replicas with a deterministic analytic
+proton-exposure field.  It tests the same interpolation, channel aggregation,
+timing, normalization, edge extraction, uncertainty summaries, offline
+coarsening and plotting code used for the physical result.
+
+The reference depth grid covers \SIrange{0}{122}{mm} in \SI{2}{mm} bins and
+the fine energy grid covers \SIrange{5}{120}{MeV} in \SI{0.5}{MeV} bins.  For
+depth $z$ below the reference range $R=\SI{112}{mm}$, the mean energy is
+\begin{equation}
+ \bar E(z)=5+(112-5)
+ \left[\frac{R-z}{R}\right]^{0.56}\ \mathrm{MeV}.
+ \label{eq:reference-energy}
+\end{equation}
+The exposure is distributed around this mean with a Gaussian width of
+\SI{3}{MeV}.  Its longitudinal amplitude is proportional to
+$1-0.12z/R$.  The relative target-exposure coefficients are 0.12, 0.03 and
+0.55 for $^{12}$C, $^{14}$N and $^{16}$O.  Beyond $R$, the reference exposure
+is placed in the lowest energy bin, below all configured production
+thresholds, to supply explicit zero-production bins for distal-edge
+interpolation.
+
+The absolute exposure scale and the assigned proton count and dose are fixed
+reference constants; they do not represent a treatment normalization.  The
+profile shapes, replica-to-nominal ratios, paired edge shifts and convergence
+ratios are the reference quantities.  Candidate energy widths of 0.5, 1, 2
+and \SI{5}{MeV} are obtained by exact recombination of the fine table.  The
+complete definition, fit and timing digests, numerical profiles, replica
+summaries and convergence table are stored under
+\path{docs/generated/xsection_folding/reference}.  They are regenerated by
+\path{analysis_transport/xsections/make_folding_reference.py}.
+
+\begin{table}[H]
+\centering\small
+\caption{Analytic-reference folding summary.  The yield half-width and $u_R$
+are half the 16th--84th percentile intervals.  The absolute yields are omitted
+because the analytic exposure normalization is arbitrary.}
+\label{tab:folding-reference-summary}
+\input{\foldgenerateddir/reference/folding_plot_summary.tex}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{\foldreferencefiguredir/production_profiles.pdf}
+\caption{Analytic-reference production-depth profiles and pointwise
+16th--84th percentile bands from the cross-section replicas.  Each profile is
+divided by its nominal maximum so that its distal shape and nominal $R_{50}$
+can be compared directly.  These are method-validation profiles, not a Geant4
+treatment prediction.}
+\label{fig:folding-profiles}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{\foldreferencefiguredir/r50_shifts.pdf}
+\caption{Analytic-reference distributions of the paired production-edge
+displacement for the three isotopes, their unweighted production sum and the
+named in-room acquisition profile.}
+\label{fig:folding-r50}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{\foldreferencefiguredir/yield_ratios.pdf}
+\caption{Analytic-reference replica yield divided by nominal yield.  This
+distribution separates the integral normalization variation from the
+distal-profile displacement in Fig.~\ref{fig:folding-r50}.}
+\label{fig:folding-yields}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{\foldreferencefiguredir/energy_convergence.pdf}
+\caption{Analytic-reference energy-grid convergence.  The maximum paired
+changes across the nominal result and all replicas are shown relative to the
+replica half-widths and, for $R_{50}$, in millimetres.  Dashed lines mark the
+acceptance limits.}
+\label{fig:folding-convergence}
+\end{figure}
+
+The reference gives relative yield half-widths of approximately 8.1\% for
+$^{11}$C and $^{15}$O, 13.2\% for $^{13}$N, and 5.5\% for the two aggregate
+profiles.  The corresponding production-edge half-widths are
+\SI{0.202}{mm}, \SI{0.043}{mm}, zero, \SI{0.164}{mm}, and
+\SI{0.190}{mm}.  The zero $^{13}$N edge width is specific to this analytic
+profile: its terminal feature always crosses half maximum in the same
+\SI{2}{mm} depth interval, although its integral yield varies substantially.
+It therefore illustrates why yield and edge uncertainty are reported
+separately.
+
+The \SI{1}{MeV} candidate energy grid satisfies every reference criterion.
+The \SI{2}{MeV} grid fails the replica-relative $R_{50}$ condition for
+$^{15}$O and the in-room aggregate, while the \SI{5}{MeV} grid fails it for
+four of the five profiles.  These decisions demonstrate the convergence
+procedure; the accepted physical grid will be determined from the Geant4
+exposure rather than copied from the analytic reference.
+
+The physical exposure run is processed by the same plotting program and writes
+the corresponding figures one directory above the analytic reference.  Their
+metadata distinguish the transport run, physics list, dose normalization and
+named acquisition scenario from the reference calculation.
 
 \section{Conclusions}
 
@@ -461,5 +689,16 @@ python3 tools/build_xsection_fit.py
 \end{verbatim}
 The build regenerates the normalized input, both curation audits, fitted
 ensembles, tables, figures, validation checks, and this document.
+
+After the physical exposure and convergence products exist, the same build
+adds the propagated figures with
+\begin{verbatim}
+python3 tools/build_xsection_fit.py --skip-normalize --skip-fit \
+  --folding-dir <folding-output> \
+  --convergence-csv <convergence-output>/exposure_convergence.csv
+\end{verbatim}
+The plotting step writes the PDFs under
+\path{docs/figures/xsection_folding} and its numerical summary and provenance
+under \path{docs/generated/xsection_folding} before compiling this document.
 
 \end{document}

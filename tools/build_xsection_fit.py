@@ -21,6 +21,12 @@ def main():
     parser.add_argument("--skip-normalize", action="store_true")
     parser.add_argument("--skip-fit", action="store_true")
     parser.add_argument("--skip-latex", action="store_true")
+    parser.add_argument(
+        "--folding-dir", type=Path,
+        help="complete folding output directory used for propagated figures")
+    parser.add_argument(
+        "--convergence-csv", type=Path,
+        help="energy-grid convergence table used for the fourth propagated figure")
     args = parser.parse_args()
     repo = args.repo.resolve()
     python = Path(sys.executable)
@@ -41,6 +47,21 @@ def main():
         repo, environment)
     run([python, "-m", "analysis_transport.xsections.validate_fit"],
         repo, environment)
+    run([python, "-m", "analysis_transport.xsections.make_folding_reference"],
+        repo, environment)
+    if args.convergence_csv is not None and args.folding_dir is None:
+        parser.error("--convergence-csv requires --folding-dir")
+    if args.folding_dir is not None:
+        plot_command = [
+            python, "-m", "analysis_transport.xsections.make_folding_plots",
+            args.folding_dir.resolve(),
+            "--output-dir", repo / "docs/figures/xsection_folding",
+            "--generated-dir", repo / "docs/generated/xsection_folding",
+        ]
+        if args.convergence_csv is not None:
+            plot_command.extend([
+                "--convergence-csv", args.convergence_csv.resolve()])
+        run(plot_command, repo, environment)
     if not args.skip_latex:
         run([python, "docs/build_latex.py", "xsection_fit"], repo)
 

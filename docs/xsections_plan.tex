@@ -73,8 +73,8 @@ Two quantities are reported for replica $r$:
   R_{50,\mathrm{reco}}^{(r)}-R_{50,\mathrm{reco}}^{(\mathrm{nom})}.
   \label{eq:breco}
 \end{align}
-Here ``nom'' denotes the central fitted cross section stored as the nominal
-curve.  The replicas sample the uncertainty around that central fit.
+Here ``nom'' denotes the pointwise median of the replica ensemble, stored as
+the nominal curve.
 The first displacement is available from the production profile in this
 repository.  The second follows the common acquisition, detector simulation,
 reconstruction and edge estimator.
@@ -215,7 +215,7 @@ expression.  The production of isotope $j$ in spatial bin $m$ is
   a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
   \label{eq:profile}
 \end{equation}
-The nominal calculation substitutes the central fit
+The nominal calculation substitutes the pointwise replica median
 $\sigma_c^{(\mathrm{nom})}(E)$.  Every replica substitutes one complete, correlated
 curve.  This construction preserves correlations across energy and between
 all spatial regions sampled by the same proton field.
@@ -440,7 +440,7 @@ The implementation is accepted when the following checks pass:
   \item Add target-resolved proton step scoring to Stage A and generate a
         dedicated moderate-statistics nominal SOBP transport.  This run
         constructs the physical target--energy--position exposure table.
-  \item Fold the median curves and all 1000 replicas, then write isotope
+  \item Fold the nominal curves and all 1000 replicas, then write isotope
         budgets, production profiles, $R_{50,\mathrm{prod}}$ values and the
         paired uncertainty distribution.
   \item Implement the common spatial proposal and Geant4 positron-source pass,
