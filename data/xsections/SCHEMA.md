@@ -113,7 +113,7 @@ Evaluated covariance data use a long-form table:
 
 ## `models/models.csv`
 
-One row defines an interpolation-ready curve used by the reweighting code:
+One row defines an interpolation-ready production curve:
 
 | Column | Meaning |
 |---|---|
@@ -129,7 +129,49 @@ One row defines an interpolation-ready curve used by the reweighting code:
 | `version` | Local model version |
 
 The model catalog records every scientific choice used to turn measurements or
-evaluations into a reweighting curve.
+evaluations into an interpolation-ready production curve.
+
+## Target-resolved proton exposure table
+
+The dedicated Geant4 transport run accumulates one row for every target
+isotope, proton-energy bin and beam-depth bin. The table is the transport input
+to the direct cross-section folding calculation.
+
+| Column | Unit | Meaning |
+|---|---:|---|
+| `target` | -- | `C12`, `N14`, or `O16` |
+| `energy_low_MeV` | MeV | Lower edge of the proton-energy bin |
+| `energy_high_MeV` | MeV | Upper edge of the proton-energy bin |
+| `energy_mean_MeV` | MeV | Exposure-weighted mean proton energy in the bin |
+| `depth_low_mm` | mm | Lower edge of the beam-depth bin |
+| `depth_high_mm` | mm | Upper edge of the beam-depth bin |
+| `depth_mean_mm` | mm | Exposure-weighted mean depth in the bin |
+| `target_exposure_cm2_inv` | cm^-2 | Sum of `proton_weight * target_number_density_cm3 * step_length_cm` |
+
+Multiplication of `target_exposure_cm2_inv` by a channel cross section in
+square centimetres gives the expected number of residual nuclei produced in
+that bin. The table contains the summed exposure of the simulated run; the run
+metadata provide the primary-proton count, dose, physics list, Geant4 version,
+random seed, energy binning, depth binning and coordinate definition.
+
+The first implementation is longitudinal because its immediate observable is
+the production-depth edge. A separate proposal sample of proton step segments
+will provide three-dimensional production sites for positron transport.
+
+## Direct-folding products
+
+`analysis_transport/xsections/exposure_folding.py` combines the exposure table
+with the EXFOR nominal curves and all cross-section replicas. It writes:
+
+| File | Meaning |
+|---|---|
+| `nominal_channel_contributions.csv` | Nominal cross section and expected production for every exposure row and channel |
+| `nominal_isotope_profiles.csv` | Nominal depth profiles for C-11, N-13, O-15 and their sum |
+| `replica_isotope_profiles.csv` | Corresponding profile for every replica |
+| `production_summary.csv` | Isotope budgets, production R50 and replica displacement from nominal |
+| `folding_meta.json` | Schema version, unit conversion, input digests and fit provenance |
+
+The conversion used by the folding calculation is `1 mb = 1e-27 cm2`.
 
 ## Geant4 thin-target tables
 

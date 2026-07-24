@@ -99,9 +99,11 @@ $\longrightarrow$ beam-off handoff and reconstructed $R_{50}$.
 \end{minipage}
 \end{center}
 
-The Geant4 transport is run once for all nominal and replica calculations.  It
-records steps from primary and secondary protons in the phantom.  The required
-step information is
+The physical calculation requires a dedicated Geant4 proton-transport run.
+That run is performed once for the nominal cross section and all replicas.  It
+records steps from primary and secondary protons in the phantom and accumulates
+the target-resolved proton exposure needed by Eq.~\eqref{eq:step-yield}.  The
+required step information is
 \begin{itemize}[nosep]
   \item event and proton-track identifiers;
   \item pre- and post-step position and step length;
@@ -114,13 +116,65 @@ The adopted midpoint or path-averaged rule will be tested by subdividing the
 steps.
 
 Two tracked transport products serve different stages of the calculation.
-First, a binned track-length kernel stores the total proton path length for
-each target isotope, proton-energy bin and spatial bin.  This compact object is
-sufficient for isotope budgets, production profiles and
-$R_{50,\mathrm{prod}}$.  Second, a fixed proposal sample of step segments
+First, a binned target-resolved proton exposure table stores
+\begin{equation}
+ K_{t,k,m}=\sum_{s\in(t,k,m)}a_s n_{t,s}\ell_s,
+ \label{eq:exposure-table}
+\end{equation}
+for target isotope $t$, proton-energy bin $k$ and spatial bin $m$.  It is a
+multidimensional histogram rather than a fitted function.  Its units are
+inverse area, and multiplication by a cross section gives the expected number
+of reactions.  This compact table is sufficient for isotope budgets,
+production profiles and $R_{50,\mathrm{prod}}$.  Second, a fixed proposal
+sample of step segments
 retains their positions and sampling probabilities.  It supplies production
 sites to the positron-transport stage without storing the complete raw step
 history for every replica.
+
+Development and validation of the folding calculation precede the dedicated
+Geant4 run.  Synthetic exposure tables with analytic yields establish the data
+schema, units, interpolation, channel aggregation and edge calculation.  The
+subsequent Geant4 scorer writes the physical exposure table in this validated
+format.  The synthetic tables are test fixtures; the treatment result uses the
+table produced by the dedicated transport run.
+
+\subsection{Exposure-table data contract}
+
+Table~\ref{tab:exposure-schema} defines the versioned CSV interface between the
+transport and folding stages.  The mean energy and depth are weighted by the
+exposure accumulated in the bin.  The companion run metadata will record the
+primary-proton count, dose, physics list, Geant4 version, random seed, bin edges
+and beam-depth coordinate.
+
+\begin{table}[H]
+\centering\small
+\caption{Target-resolved proton exposure table.}
+\label{tab:exposure-schema}
+\begin{tabular}{lll}
+\toprule
+Column & Unit & Meaning \\
+\midrule
+\file{target} & --- & \file{C12}, \file{N14}, or \file{O16} \\
+\file{energy\_low\_MeV} & MeV & lower energy-bin edge \\
+\file{energy\_high\_MeV} & MeV & upper energy-bin edge \\
+\file{energy\_mean\_MeV} & MeV & exposure-weighted proton energy \\
+\file{depth\_low\_mm} & mm & lower beam-depth-bin edge \\
+\file{depth\_high\_mm} & mm & upper beam-depth-bin edge \\
+\file{depth\_mean\_mm} & mm & exposure-weighted beam depth \\
+\file{target\_exposure\_cm2\_inv} & cm$^{-2}$ & value of $K_{t,k,m}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The pre-transport implementation is
+\file{analysis\_transport/xsections/exposure\_folding.py}.  It validates this
+table, loads the five fitted nominal curves and their 1000 replicas, applies
+linear interpolation with the configured reaction thresholds, performs the
+folding, aggregates channels by isotope, and calculates production budgets and
+distal $R_{50}$.  Its Python step accumulator is a reference definition for
+synthetic tests; the production scorer will perform the same accumulation
+during the dedicated Geant4 run.  The detailed input and output schemas are
+recorded in \file{data/xsections/SCHEMA.md}.
 
 \section{Direct folding of external cross sections}
 
@@ -214,7 +268,7 @@ curves are retained as a diagnostic of the final-state model.}
 \end{figure}
 
 The BIC calculation produced no $^{12}$C(p,x)$^{11}$C residuals between
-\SIrange{20}{40}{MeV}, with its first positive pilot point at SI{45}{MeV},
+\SIrange{20}{40}{MeV}, with its first positive pilot point at \SI{45}{MeV},
 whereas accepted measurements establish production in this interval.  A
 cross-section ratio would therefore be undefined in part of the proton-energy
 history sampled near the distal region.  Direct folding remains defined
@@ -232,8 +286,8 @@ time.  The first set is
   \item \file{QGSP\_BERT\_HP}.
 \end{itemize}
 Each physics-list name is recorded in the run metadata and run tag.  Each run
-produces an independent target-resolved track-length kernel.  The same nominal
-EXFOR curves are folded with the three kernels.  The signed changes in
+produces an independent target-resolved proton exposure table.  The same
+nominal EXFOR curves are folded with the three tables.  The signed changes in
 $b_{\mathrm{prod}}$ and $b_{\mathrm{reco}}$ are reported individually, and
 the largest absolute change relative to BIC defines the initial envelope.
 This envelope probes changes in primary and secondary proton transport.  The
@@ -241,8 +295,8 @@ external production cross sections remain common to all three calculations.
 
 \section{Uncertainty estimator}
 
-All 1000 cross-section replicas can be evaluated on one stored track-length
-kernel without repeating proton transport.  The folding consists of array
+All 1000 cross-section replicas can be evaluated on one stored proton exposure
+table without repeating proton transport.  The folding consists of array
 operations over channel, energy and spatial bins.  The computationally
 expensive positron and detector stages use a fixed proposal sample.  If the
 downstream sample size makes propagation of all replicas impractical, a
@@ -271,8 +325,8 @@ The implementation is accepted when the following checks pass:
         zero at and below the configured thresholds, and follow the documented
         interpolation rule between points.
   \item Subdivision of proton steps and refinement of the energy and spatial
-        kernel bins leave the production budgets and edge positions stable at
-        the adopted tolerance.
+        exposure-table bins leave the production budgets and edge positions
+        stable at the adopted tolerance.
   \item A direct per-step sum agrees with the binned track-length calculation.
   \item Substituting the nominal and a selected replica reproduces their known
         production-ratio change in a mono-energetic slab.
@@ -291,12 +345,14 @@ The implementation is accepted when the following checks pass:
 \section{Implementation sequence}
 
 \begin{enumerate}
-  \item Add target-resolved proton step scoring and define the tracked schema
-        for raw step segments, binned kernels and run metadata.
-  \item Implement cross-section interpolation and Eq.~\eqref{eq:step-yield},
-        followed by the analytic slab, interpolation and bin-refinement tests.
-  \item Generate a moderate-statistics nominal SOBP transport and construct its
-        target--energy--position track-length kernel.
+  \item Define the tracked schema for the binned proton exposure table and
+        implement cross-section interpolation, Eq.~\eqref{eq:step-yield},
+        channel aggregation and $R_{50,\mathrm{prod}}$ using synthetic tables.
+  \item Validate the folding code with analytic slab, units, threshold,
+        interpolation, per-step--versus--binned and bin-refinement tests.
+  \item Add target-resolved proton step scoring to Stage A and generate a
+        dedicated moderate-statistics nominal SOBP transport.  This run
+        constructs the physical target--energy--position exposure table.
   \item Fold the median curves and all 1000 replicas, then write isotope
         budgets, production profiles, $R_{50,\mathrm{prod}}$ values and the
         paired uncertainty distribution.
