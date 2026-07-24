@@ -1,0 +1,18 @@
+{
+  "accession": "B0094.003",
+  "author": "K.Goebel et al.",
+  "dataset_id": "exfor_B0094_003_p_C12_x_C11",
+  "doi": "10.1016/0029-5582(61)91013-6",
+  "label": "K.Goebel et al. (B0094.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "12C(p,x)11C independent production cross section",
+  "reaction": "6-C-12(P,X)6-C-11,IND,SIG,,,EXP",
+  "reference": "Nucl.Phys. 24 (1961) 28",
+  "residual": "C11",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/C12/x/sig/p-C12-x-sig-excfun-mon-prodC11_Goebel_1961_B0094.003.cx4",
+  "target": "C12"
+}

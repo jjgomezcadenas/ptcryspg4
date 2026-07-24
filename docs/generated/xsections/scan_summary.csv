@@ -1,0 +1,4 @@
+target,points,maximum_mean_energy_loss_MeV,maximum_inelastic_probability,incident_protons,C11_residuals,N13_residuals,O15_residuals
+C12,36,0.485974575126,0.00097,3600000,174,0,0
+N14,36,0.497146669448,0.00092,3600000,108,116,0
+O16,36,0.498277889601,0.00092,3600000,86,18,248

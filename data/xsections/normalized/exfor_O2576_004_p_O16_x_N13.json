@@ -1,0 +1,18 @@
+{
+  "accession": "O2576.004",
+  "author": "T.Rodriguez-Gonzalez et al.",
+  "dataset_id": "exfor_O2576_004_p_O16_x_N13",
+  "doi": "10.1016/j.radphyschem.2021.109759",
+  "label": "T.Rodriguez-Gonzalez et al. (O2576.004)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 13,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Radiat.Phys.Chem. 190 (2022) 109759",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Rodriguez+Gonzalez_2022_O2576.004.cx4",
+  "target": "O16"
+}

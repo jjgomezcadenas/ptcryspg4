@@ -1,0 +1,18 @@
+{
+  "accession": "B0157.002",
+  "author": "W.Gruhle et al.",
+  "dataset_id": "exfor_B0157_002_p_O16_x_N13",
+  "doi": "10.1016/0375-9474(77)90601-7",
+  "label": "W.Gruhle et al. (B0157.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 29,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG,,,EXP",
+  "reference": "Nucl.Phys.A 286 (1977) 523",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Gruhle_1977_B0157.002.cx4",
+  "target": "O16"
+}

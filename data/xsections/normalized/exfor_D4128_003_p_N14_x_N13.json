@@ -1,0 +1,18 @@
+{
+  "accession": "D4128.003",
+  "author": "Z.Kovacs et al.",
+  "dataset_id": "exfor_D4128_003_p_N14_x_N13",
+  "doi": "10.1524/ract.91.4.185.19970",
+  "label": "Z.Kovacs et al. (D4128.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 10,
+  "quantity": "14N(p,x)13N independent production cross section",
+  "reaction": "7-N-14(P,X)7-N-13,,SIG",
+  "reference": "Radiochim.Acta 91 (2003) 185",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/N14/x/sig/p-N14-x-sig-excfun-mon-prodN13_Kovacs_2003_D4128.003.cx4",
+  "target": "N14"
+}

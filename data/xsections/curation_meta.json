@@ -1,0 +1,15 @@
+{
+  "curation_config": "config/xsection_curation.toml",
+  "curation_config_sha256": "6b01a3c60a020e31d834719a2e5579fbc8913e575c7f81c96b7ddae978f268c1",
+  "dataset_count": 85,
+  "fit_config_sha256": "0e80a0581c7372f2adb72d714a206c58967ec9f9d6be21dfb3cc01bf608c7f6d",
+  "fit_point_count": 834,
+  "modifier_reference": "IAEA EXFOR Formats/LEXFOR, reaction SF8 general quantity modifier A",
+  "normalized_catalog_sha256": "24cf1c96548f816dafa52e3185985a53f8276306c313db0a78716f21cc411cad",
+  "point_count": 1729,
+  "schema_version": 1,
+  "state_counts": {
+    "accepted": 79,
+    "pending": 6
+  }
+}

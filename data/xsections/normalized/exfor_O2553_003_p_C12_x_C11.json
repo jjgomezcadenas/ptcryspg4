@@ -1,0 +1,18 @@
+{
+  "accession": "O2553.003",
+  "author": "F.Horst et al.",
+  "dataset_id": "exfor_O2553_003_p_C12_x_C11",
+  "doi": "10.1088/1361-6560/ab4511",
+  "label": "F.Horst et al. (O2553.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 8,
+  "quantity": "12C(p,x)11C independent production cross section",
+  "reaction": "6-C-12(P,X)6-C-11,,SIG",
+  "reference": "Phys.Med.Biol. 64 (2019) 205012",
+  "residual": "C11",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/C12/x/sig/p-C12-x-sig-excfun-mon-prodC11_Horst_2019_O2553.003.cx4",
+  "target": "C12"
+}

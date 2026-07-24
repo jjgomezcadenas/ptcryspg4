@@ -1,0 +1,19 @@
+{
+  "accession": "E2568.002",
+  "author": "T.Masuda et al.",
+  "dataset_id": "exfor_E2568_002_p_O16_x_O15",
+  "doi": "10.1038/s41598-018-20906-z",
+  "label": "T.Masuda et al. (E2568.002)",
+  "library": "EXFOR",
+  "normalization_note": "Masuda oxygen curves share an external normalization through O-16(p,x)O-15 = 76.8 mb at 35 MeV",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 161,
+  "quantity": "16O(p,x)15O independent production cross section",
+  "reaction": "8-O-16(P,X)8-O-15,,SIG",
+  "reference": "Sci.Rep. 8 (2018) 2570",
+  "residual": "O15",
+  "role": "shape_validation",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodO15_Masuda_2018_E2568.002.cx4",
+  "target": "O16"
+}

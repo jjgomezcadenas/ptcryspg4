@@ -1,0 +1,97 @@
+dataset_id,library,target,residual,label,point_count,point_file,metadata_file
+exfor_B0077_002_p_C12_x_C11,EXFOR,C12,C11,R.L.Aamodt et al. (B0077.002),42,data/xsections/normalized/exfor_B0077_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0077_002_p_C12_x_C11.json
+exfor_B0077_003_p_C12_x_C11,EXFOR,C12,C11,R.L.Aamodt et al. (B0077.003),8,data/xsections/normalized/exfor_B0077_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0077_003_p_C12_x_C11.json
+exfor_E2449_005_p_C12_x_C11,EXFOR,C12,C11,T.Akagi et al. (E2449.005),4,data/xsections/normalized/exfor_E2449_005_p_C12_x_C11.csv,data/xsections/normalized/exfor_E2449_005_p_C12_x_C11.json
+exfor_C0220_003_p_C12_x_C11,EXFOR,C12,C11,P.A.Benioff (C0220.003),1,data/xsections/normalized/exfor_C0220_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0220_003_p_C12_x_C11.json
+exfor_D0128_005_p_C12_x_C11,EXFOR,C12,C11,C.Brun et al. (D0128.005),1,data/xsections/normalized/exfor_D0128_005_p_C12_x_C11.csv,data/xsections/normalized/exfor_D0128_005_p_C12_x_C11.json
+exfor_O0415_002_p_C12_x_C11,EXFOR,C12,C11,G.W.Butler et al. (O0415.002),1,data/xsections/normalized/exfor_O0415_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_O0415_002_p_C12_x_C11.json
+exfor_B0101_002_p_C12_x_C11,EXFOR,C12,C11,W.E.Crandall et al. (B0101.002),10,data/xsections/normalized/exfor_B0101_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0101_002_p_C12_x_C11.json
+exfor_C0216_002_p_C12_x_C11,EXFOR,C12,C11,J.B.Cumming et al. (C0216.002),6,data/xsections/normalized/exfor_C0216_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0216_002_p_C12_x_C11.json
+exfor_C0231_002_p_C12_x_C11,EXFOR,C12,C11,J.B.Cumming et al. (C0231.002),1,data/xsections/normalized/exfor_C0231_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0231_002_p_C12_x_C11.json
+exfor_B0095_002_p_C12_x_C11,EXFOR,C12,C11,J.B.Cumming (B0095.002),9,data/xsections/normalized/exfor_B0095_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0095_002_p_C12_x_C11.json
+exfor_B0094_003_p_C12_x_C11,EXFOR,C12,C11,K.Goebel et al. (B0094.003),1,data/xsections/normalized/exfor_B0094_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0094_003_p_C12_x_C11.json
+exfor_B0076_005_p_C12_x_C11,EXFOR,C12,C11,N.M.Hintz et al. (B0076.005),42,data/xsections/normalized/exfor_B0076_005_p_C12_x_C11.csv,data/xsections/normalized/exfor_B0076_005_p_C12_x_C11.json
+exfor_C1911_002_p_C12_x_C11,EXFOR,C12,C11,K.R.Hogstrom (C1911.002),1,data/xsections/normalized/exfor_C1911_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C1911_002_p_C12_x_C11.json
+exfor_C1911_003_p_C12_x_C11,EXFOR,C12,C11,K.R.Hogstrom (C1911.003),2,data/xsections/normalized/exfor_C1911_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_C1911_003_p_C12_x_C11.json
+exfor_O2553_003_p_C12_x_C11,EXFOR,C12,C11,F.Horst et al. (O2553.003),8,data/xsections/normalized/exfor_O2553_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_O2553_003_p_C12_x_C11.json
+exfor_C0221_002_p_C12_x_C11,EXFOR,C12,C11,N.Horwitz et al. (C0221.002),5,data/xsections/normalized/exfor_C0221_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0221_002_p_C12_x_C11.json
+exfor_C0221_003_p_C12_x_C11,EXFOR,C12,C11,N.Horwitz et al. (C0221.003),1,data/xsections/normalized/exfor_C0221_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0221_003_p_C12_x_C11.json
+exfor_C2341_002_p_C12_x_C11,EXFOR,C12,C11,S.B.Kaufman et al. (C2341.002),1,data/xsections/normalized/exfor_C2341_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C2341_002_p_C12_x_C11.json
+exfor_A0660_018_p_C12_x_C11,EXFOR,C12,C11,A.Korejwo et al. (A0660.018),2,data/xsections/normalized/exfor_A0660_018_p_C12_x_C11.csv,data/xsections/normalized/exfor_A0660_018_p_C12_x_C11.json
+exfor_F1218_002_p_C12_x_C11,EXFOR,C12,C11,P.Kozma et al. (F1218.002),1,data/xsections/normalized/exfor_F1218_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_F1218_002_p_C12_x_C11.json
+exfor_E2501_002_p_C12_x_C11,EXFOR,C12,C11,K.Matsushita et al. (E2501.002),35,data/xsections/normalized/exfor_E2501_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_E2501_002_p_C12_x_C11.json
+exfor_C0058_002_p_C12_x_C11,EXFOR,C12,C11,D.F.Measday (C0058.002),17,data/xsections/normalized/exfor_C0058_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0058_002_p_C12_x_C11.json
+exfor_O0429_002_p_C12_x_C11,EXFOR,C12,C11,A.M.Poskanzer et al. (O0429.002),1,data/xsections/normalized/exfor_O0429_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_O0429_002_p_C12_x_C11.json
+exfor_O2582_002_p_C12_x_C11,EXFOR,C12,C11,T.Rodriguez-Gonzalez et al. (O2582.002),43,data/xsections/normalized/exfor_O2582_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_O2582_002_p_C12_x_C11.json
+exfor_C0062_011_p_C12_x_C11,EXFOR,C12,C11,L.Valentin (C0062.011),1,data/xsections/normalized/exfor_C0062_011_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0062_011_p_C12_x_C11.json
+exfor_C0206_002_p_C12_x_C11,EXFOR,C12,C11,Vastupal Parikh (C0206.002),5,data/xsections/normalized/exfor_C0206_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C0206_002_p_C12_x_C11.json
+exfor_C2359_002_p_C12_x_C11,EXFOR,C12,C11,S.D.Warshaw et al. (C2359.002),2,data/xsections/normalized/exfor_C2359_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_C2359_002_p_C12_x_C11.json
+exfor_C2359_003_p_C12_x_C11,EXFOR,C12,C11,S.D.Warshaw et al. (C2359.003),1,data/xsections/normalized/exfor_C2359_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_C2359_003_p_C12_x_C11.json
+exfor_P0051_002_p_C12_x_C11,EXFOR,C12,C11,A.B.Whitehead et al. (P0051.002),31,data/xsections/normalized/exfor_P0051_002_p_C12_x_C11.csv,data/xsections/normalized/exfor_P0051_002_p_C12_x_C11.json
+exfor_P0051_003_p_C12_x_C11,EXFOR,C12,C11,A.B.Whitehead et al. (P0051.003),36,data/xsections/normalized/exfor_P0051_003_p_C12_x_C11.csv,data/xsections/normalized/exfor_P0051_003_p_C12_x_C11.json
+exfor_C0220_005_p_N14_x_N13,EXFOR,N14,N13,P.A.Benioff (C0220.005),1,data/xsections/normalized/exfor_C0220_005_p_N14_x_N13.csv,data/xsections/normalized/exfor_C0220_005_p_N14_x_N13.json
+exfor_O2134_003_p_N14_x_N13,EXFOR,N14,N13,R.Bimbot et al. (O2134.003),1,data/xsections/normalized/exfor_O2134_003_p_N14_x_N13.csv,data/xsections/normalized/exfor_O2134_003_p_N14_x_N13.json
+exfor_O2067_027_p_N14_x_N13,EXFOR,N14,N13,A.B.Clegg et al. (O2067.027),1,data/xsections/normalized/exfor_O2067_027_p_N14_x_N13.csv,data/xsections/normalized/exfor_O2067_027_p_N14_x_N13.json
+exfor_D4128_003_p_N14_x_N13,EXFOR,N14,N13,Z.Kovacs et al. (D4128.003),10,data/xsections/normalized/exfor_D4128_003_p_N14_x_N13.csv,data/xsections/normalized/exfor_D4128_003_p_N14_x_N13.json
+exfor_D4145_002_p_N14_x_N13,EXFOR,N14,N13,Z.Kovacs et al. (D4145.002),4,data/xsections/normalized/exfor_D4145_002_p_N14_x_N13.csv,data/xsections/normalized/exfor_D4145_002_p_N14_x_N13.json
+exfor_C0244_002_p_N14_x_N13,EXFOR,N14,N13,S.S.Markowitz et al. (C0244.002),4,data/xsections/normalized/exfor_C0244_002_p_N14_x_N13.csv,data/xsections/normalized/exfor_C0244_002_p_N14_x_N13.json
+exfor_O2582_007_p_N14_x_N13,EXFOR,N14,N13,T.Rodriguez-Gonzalez et al. (O2582.007),43,data/xsections/normalized/exfor_O2582_007_p_N14_x_N13.csv,data/xsections/normalized/exfor_O2582_007_p_N14_x_N13.json
+exfor_C1979_002_1_p_N14_x_N13,EXFOR,N14,N13,L.C.Sah (C1979.002.1),6,data/xsections/normalized/exfor_C1979_002_1_p_N14_x_N13.csv,data/xsections/normalized/exfor_C1979_002_1_p_N14_x_N13.json
+exfor_C1979_002_2_p_N14_x_N13,EXFOR,N14,N13,L.C.Sah (C1979.002.2),5,data/xsections/normalized/exfor_C1979_002_2_p_N14_x_N13.csv,data/xsections/normalized/exfor_C1979_002_2_p_N14_x_N13.json
+exfor_C1979_002_3_p_N14_x_N13,EXFOR,N14,N13,L.C.Sah (C1979.002.3),1,data/xsections/normalized/exfor_C1979_002_3_p_N14_x_N13.csv,data/xsections/normalized/exfor_C1979_002_3_p_N14_x_N13.json
+exfor_C0202_004_p_N14_x_N13,EXFOR,N14,N13,M.Sajjad et al. (C0202.004),35,data/xsections/normalized/exfor_C0202_004_p_N14_x_N13.csv,data/xsections/normalized/exfor_C0202_004_p_N14_x_N13.json
+exfor_C0062_012_p_N14_x_N13,EXFOR,N14,N13,L.Valentin (C0062.012),2,data/xsections/normalized/exfor_C0062_012_p_N14_x_N13.csv,data/xsections/normalized/exfor_C0062_012_p_N14_x_N13.json
+exfor_C0062_017_p_N14_x_N13,EXFOR,N14,N13,L.Valentin (C0062.017),16,data/xsections/normalized/exfor_C0062_017_p_N14_x_N13.csv,data/xsections/normalized/exfor_C0062_017_p_N14_x_N13.json
+exfor_D0138_003_p_O16_x_N13,EXFOR,O16,N13,R.Chapman et al. (D0138.003),1,data/xsections/normalized/exfor_D0138_003_p_O16_x_N13.csv,data/xsections/normalized/exfor_D0138_003_p_O16_x_N13.json
+exfor_P0045_003_p_O16_x_N13,EXFOR,O16,N13,M.Furukawa et al. (P0045.003),32,data/xsections/normalized/exfor_P0045_003_p_O16_x_N13.csv,data/xsections/normalized/exfor_P0045_003_p_O16_x_N13.json
+exfor_B0157_002_p_O16_x_N13,EXFOR,O16,N13,W.Gruhle et al. (B0157.002),29,data/xsections/normalized/exfor_B0157_002_p_O16_x_N13.csv,data/xsections/normalized/exfor_B0157_002_p_O16_x_N13.json
+exfor_C0998_002_p_O16_x_N13,EXFOR,O16,N13,H.A.Hill et al. (C0998.002),355,data/xsections/normalized/exfor_C0998_002_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0998_002_p_O16_x_N13.json
+exfor_O0065_005_p_O16_x_N13,EXFOR,O16,N13,S.W.Kitwanga et al. (O0065.005),5,data/xsections/normalized/exfor_O0065_005_p_O16_x_N13.csv,data/xsections/normalized/exfor_O0065_005_p_O16_x_N13.json
+exfor_R0043_002_p_O16_x_N13,EXFOR,O16,N13,R.H.McCamis et al. (R0043.002),11,data/xsections/normalized/exfor_R0043_002_p_O16_x_N13.csv,data/xsections/normalized/exfor_R0043_002_p_O16_x_N13.json
+exfor_O2576_004_p_O16_x_N13,EXFOR,O16,N13,T.Rodriguez-Gonzalez et al. (O2576.004),13,data/xsections/normalized/exfor_O2576_004_p_O16_x_N13.csv,data/xsections/normalized/exfor_O2576_004_p_O16_x_N13.json
+exfor_C0202_002_p_O16_x_N13,EXFOR,O16,N13,M.Sajjad et al. (C0202.002),37,data/xsections/normalized/exfor_C0202_002_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0202_002_p_O16_x_N13.json
+exfor_P0051_004_p_O16_x_N13,EXFOR,O16,N13,A.B.Whitehead et al. (P0051.004),60,data/xsections/normalized/exfor_P0051_004_p_O16_x_N13.csv,data/xsections/normalized/exfor_P0051_004_p_O16_x_N13.json
+exfor_E2449_003_p_O16_x_C11,EXFOR,O16,C11,T.Akagi et al. (E2449.003),7,data/xsections/normalized/exfor_E2449_003_p_O16_x_C11.csv,data/xsections/normalized/exfor_E2449_003_p_O16_x_C11.json
+exfor_C0220_011_p_O16_x_C11,EXFOR,O16,C11,P.A.Benioff (C0220.011),1,data/xsections/normalized/exfor_C0220_011_p_O16_x_C11.csv,data/xsections/normalized/exfor_C0220_011_p_O16_x_C11.json
+exfor_O2134_006_p_O16_x_C11,EXFOR,O16,C11,R.Bimbot et al. (O2134.006),1,data/xsections/normalized/exfor_O2134_006_p_O16_x_C11.csv,data/xsections/normalized/exfor_O2134_006_p_O16_x_C11.json
+exfor_O2134_007_p_O16_x_C11,EXFOR,O16,C11,R.Bimbot et al. (O2134.007),2,data/xsections/normalized/exfor_O2134_007_p_O16_x_C11.csv,data/xsections/normalized/exfor_O2134_007_p_O16_x_C11.json
+exfor_C0223_014_p_O16_x_C11,EXFOR,O16,C11,K.J.Foley et al. (C0223.014),1,data/xsections/normalized/exfor_C0223_014_p_O16_x_C11.csv,data/xsections/normalized/exfor_C0223_014_p_O16_x_C11.json
+exfor_O0065_004_p_O16_x_C11,EXFOR,O16,C11,S.W.Kitwanga et al. (O0065.004),4,data/xsections/normalized/exfor_O0065_004_p_O16_x_C11.csv,data/xsections/normalized/exfor_O0065_004_p_O16_x_C11.json
+exfor_E2568_004_p_O16_x_C11,EXFOR,O16,C11,T.Masuda et al. (E2568.004),133,data/xsections/normalized/exfor_E2568_004_p_O16_x_C11.csv,data/xsections/normalized/exfor_E2568_004_p_O16_x_C11.json
+exfor_D1061_002_p_O16_x_C11,EXFOR,O16,C11,J.Matulewicz et al. (D1061.002),16,data/xsections/normalized/exfor_D1061_002_p_O16_x_C11.csv,data/xsections/normalized/exfor_D1061_002_p_O16_x_C11.json
+exfor_C0208_003_p_O16_x_C11,EXFOR,O16,C11,V.Parikh (C0208.003),1,data/xsections/normalized/exfor_C0208_003_p_O16_x_C11.csv,data/xsections/normalized/exfor_C0208_003_p_O16_x_C11.json
+exfor_O2576_003_p_O16_x_C11,EXFOR,O16,C11,T.Rodriguez-Gonzalez et al. (O2576.003),13,data/xsections/normalized/exfor_O2576_003_p_O16_x_C11.csv,data/xsections/normalized/exfor_O2576_003_p_O16_x_C11.json
+exfor_O2582_003_p_O16_x_C11,EXFOR,O16,C11,T.Rodriguez-Gonzalez et al. (O2582.003),42,data/xsections/normalized/exfor_O2582_003_p_O16_x_C11.csv,data/xsections/normalized/exfor_O2582_003_p_O16_x_C11.json
+exfor_C0061_019_p_O16_x_C11,EXFOR,O16,C11,L.Valentin et al. (C0061.019),1,data/xsections/normalized/exfor_C0061_019_p_O16_x_C11.csv,data/xsections/normalized/exfor_C0061_019_p_O16_x_C11.json
+exfor_E2449_004_p_O16_x_N13,EXFOR,O16,N13,T.Akagi et al. (E2449.004),9,data/xsections/normalized/exfor_E2449_004_p_O16_x_N13.csv,data/xsections/normalized/exfor_E2449_004_p_O16_x_N13.json
+exfor_C0220_010_p_O16_x_N13,EXFOR,O16,N13,P.A.Benioff (C0220.010),1,data/xsections/normalized/exfor_C0220_010_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0220_010_p_O16_x_N13.json
+exfor_O2134_008_p_O16_x_N13,EXFOR,O16,N13,R.Bimbot et al. (O2134.008),1,data/xsections/normalized/exfor_O2134_008_p_O16_x_N13.csv,data/xsections/normalized/exfor_O2134_008_p_O16_x_N13.json
+exfor_C0223_013_p_O16_x_N13,EXFOR,O16,N13,K.J.Foley et al. (C0223.013),1,data/xsections/normalized/exfor_C0223_013_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0223_013_p_O16_x_N13.json
+exfor_E2568_003_p_O16_x_N13,EXFOR,O16,N13,T.Masuda et al. (E2568.003),167,data/xsections/normalized/exfor_E2568_003_p_O16_x_N13.csv,data/xsections/normalized/exfor_E2568_003_p_O16_x_N13.json
+exfor_D1061_003_p_O16_x_N13,EXFOR,O16,N13,J.Matulewicz et al. (D1061.003),17,data/xsections/normalized/exfor_D1061_003_p_O16_x_N13.csv,data/xsections/normalized/exfor_D1061_003_p_O16_x_N13.json
+exfor_C0208_005_2_p_O16_x_N13,EXFOR,O16,N13,V.Parikh (C0208.005.2),1,data/xsections/normalized/exfor_C0208_005_2_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0208_005_2_p_O16_x_N13.json
+exfor_O2582_004_p_O16_x_N13,EXFOR,O16,N13,T.Rodriguez-Gonzalez et al. (O2582.004),42,data/xsections/normalized/exfor_O2582_004_p_O16_x_N13.csv,data/xsections/normalized/exfor_O2582_004_p_O16_x_N13.json
+exfor_C0061_018_p_O16_x_N13,EXFOR,O16,N13,L.Valentin et al. (C0061.018),1,data/xsections/normalized/exfor_C0061_018_p_O16_x_N13.csv,data/xsections/normalized/exfor_C0061_018_p_O16_x_N13.json
+exfor_E2449_002_p_O16_x_O15,EXFOR,O16,O15,T.Akagi et al. (E2449.002),9,data/xsections/normalized/exfor_E2449_002_p_O16_x_O15.csv,data/xsections/normalized/exfor_E2449_002_p_O16_x_O15.json
+exfor_C0220_008_p_O16_x_O15,EXFOR,O16,O15,P.A.Benioff (C0220.008),1,data/xsections/normalized/exfor_C0220_008_p_O16_x_O15.csv,data/xsections/normalized/exfor_C0220_008_p_O16_x_O15.json
+exfor_C0223_012_p_O16_x_O15,EXFOR,O16,O15,K.J.Foley et al. (C0223.012),1,data/xsections/normalized/exfor_C0223_012_p_O16_x_O15.csv,data/xsections/normalized/exfor_C0223_012_p_O16_x_O15.json
+exfor_O2553_006_p_O16_x_O15,EXFOR,O16,O15,F.Horst et al. (O2553.006),5,data/xsections/normalized/exfor_O2553_006_p_O16_x_O15.csv,data/xsections/normalized/exfor_O2553_006_p_O16_x_O15.json
+exfor_O0065_006_p_O16_x_O15,EXFOR,O16,O15,S.W.Kitwanga et al. (O0065.006),4,data/xsections/normalized/exfor_O0065_006_p_O16_x_O15.csv,data/xsections/normalized/exfor_O0065_006_p_O16_x_O15.json
+exfor_E2568_002_p_O16_x_O15,EXFOR,O16,O15,T.Masuda et al. (E2568.002),161,data/xsections/normalized/exfor_E2568_002_p_O16_x_O15.csv,data/xsections/normalized/exfor_E2568_002_p_O16_x_O15.json
+exfor_D1061_004_p_O16_x_O15,EXFOR,O16,O15,J.Matulewicz et al. (D1061.004),17,data/xsections/normalized/exfor_D1061_004_p_O16_x_O15.csv,data/xsections/normalized/exfor_D1061_004_p_O16_x_O15.json
+exfor_C0208_004_2_p_O16_x_O15,EXFOR,O16,O15,V.Parikh (C0208.004.2),1,data/xsections/normalized/exfor_C0208_004_2_p_O16_x_O15.csv,data/xsections/normalized/exfor_C0208_004_2_p_O16_x_O15.json
+exfor_O2582_005_p_O16_x_O15,EXFOR,O16,O15,T.Rodriguez-Gonzalez et al. (O2582.005),42,data/xsections/normalized/exfor_O2582_005_p_O16_x_O15.csv,data/xsections/normalized/exfor_O2582_005_p_O16_x_O15.json
+exfor_A0316_008_p_O16_x_O15,EXFOR,O16,O15,M.Sajjad et al. (A0316.008),15,data/xsections/normalized/exfor_A0316_008_p_O16_x_O15.csv,data/xsections/normalized/exfor_A0316_008_p_O16_x_O15.json
+exfor_C0062_013_p_O16_x_O15,EXFOR,O16,O15,L.Valentin (C0062.013),2,data/xsections/normalized/exfor_C0062_013_p_O16_x_O15.csv,data/xsections/normalized/exfor_C0062_013_p_O16_x_O15.json
+exfor_C0062_016_p_O16_x_O15,EXFOR,O16,O15,L.Valentin (C0062.016),18,data/xsections/normalized/exfor_C0062_016_p_O16_x_O15.csv,data/xsections/normalized/exfor_C0062_016_p_O16_x_O15.json
+jendl40he_p_C12_x_C11,JENDL-4.0/HE,C12,C11,JENDL-4.0/HE,24,data/xsections/normalized/jendl40he_p_C12_x_C11.csv,data/xsections/normalized/jendl40he_p_C12_x_C11.json
+lanl_endfb71_p_C12_x_C11,LANL ENDF/B-VII.1,C12,C11,LANL ENDF/B-VII.1,21,data/xsections/normalized/lanl_endfb71_p_C12_x_C11.csv,data/xsections/normalized/lanl_endfb71_p_C12_x_C11.json
+jendl40he_p_O16_x_O15,JENDL-4.0/HE,O16,O15,JENDL-4.0/HE,33,data/xsections/normalized/jendl40he_p_O16_x_O15.csv,data/xsections/normalized/jendl40he_p_O16_x_O15.json
+lanl_endfb71_p_O16_x_O15,LANL ENDF/B-VII.1,O16,O15,LANL ENDF/B-VII.1,24,data/xsections/normalized/lanl_endfb71_p_O16_x_O15.csv,data/xsections/normalized/lanl_endfb71_p_O16_x_O15.json
+jendl40he_p_O16_x_C11,JENDL-4.0/HE,O16,C11,JENDL-4.0/HE,27,data/xsections/normalized/jendl40he_p_O16_x_C11.csv,data/xsections/normalized/jendl40he_p_O16_x_C11.json
+lanl_endfb71_p_O16_x_C11,LANL ENDF/B-VII.1,O16,C11,LANL ENDF/B-VII.1,17,data/xsections/normalized/lanl_endfb71_p_O16_x_C11.csv,data/xsections/normalized/lanl_endfb71_p_O16_x_C11.json
+jendl40he_p_N14_x_N13,JENDL-4.0/HE,N14,N13,JENDL-4.0/HE,39,data/xsections/normalized/jendl40he_p_N14_x_N13.csv,data/xsections/normalized/jendl40he_p_N14_x_N13.json
+lanl_endfb71_p_N14_x_N13,LANL ENDF/B-VII.1,N14,N13,LANL ENDF/B-VII.1,38,data/xsections/normalized/lanl_endfb71_p_N14_x_N13.csv,data/xsections/normalized/lanl_endfb71_p_N14_x_N13.json
+jendl40he_p_O16_x_N13,JENDL-4.0/HE,O16,N13,JENDL-4.0/HE,42,data/xsections/normalized/jendl40he_p_O16_x_N13.csv,data/xsections/normalized/jendl40he_p_O16_x_N13.json
+lanl_endfb71_p_O16_x_N13,LANL ENDF/B-VII.1,O16,N13,LANL ENDF/B-VII.1,32,data/xsections/normalized/lanl_endfb71_p_O16_x_N13.csv,data/xsections/normalized/lanl_endfb71_p_O16_x_N13.json
+iaea2021_p_O16_a_N13,IAEA recommended,O16,N13,"IAEA recommended O-16(p,alpha)N-13",121,data/xsections/normalized/iaea2021_p_O16_a_N13.csv,data/xsections/normalized/iaea2021_p_O16_a_N13.json

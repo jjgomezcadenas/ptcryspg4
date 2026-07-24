@@ -1,0 +1,33 @@
+schema_version = 1
+physics_list = "QGSP_BIC_HP"
+geant4_version = "11.4.1"
+energies_MeV = [
+  5.0, 5.5, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,
+  12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0,
+  35.0, 40.0, 45.0, 50.0, 55.0, 60.0,
+  65.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0,
+  105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0,
+  145.0, 150.0,
+]
+targets = ["C12", "N14", "O16"]
+denominator_pilot_interactions = 10000
+denominator_batch_interactions = 100000
+denominator_minimum_residual_count = 2500
+denominator_maximum_interactions = 1000000
+
+[target.C12]
+active_residuals = ["C11"]
+[target.C12.threshold_MeV]
+C11 = 17.9
+
+[target.N14]
+active_residuals = ["N13"]
+[target.N14.threshold_MeV]
+N13 = 8.9
+
+[target.O16]
+active_residuals = ["C11", "N13", "O15"]
+[target.O16.threshold_MeV]
+C11 = 25.17
+N13 = 5.5
+O15 = 14.29

@@ -12,6 +12,11 @@ cx4/p/C12/x/sig/*prodC11*.cx4
 cx4/p/O16/x/sig/*prodO15*.cx4
 cx4/p/O16/x/sig/*prodC11*.cx4
 cx4/p/N14/x/sig/*prodN13*.cx4
+cx4/p/O16/x/sig/*prodN13*.cx4
+cx4/p/O16/a/sig/*prodN13*.cx4
 ```
 
-CX4 files are retained exactly as checked out from the pinned commit.
+Only total excitation-function files matching `excfun-mon` are selected for
+O-16 to N-13.  The `x` path contains inclusive residual-production data and
+the `a` path contains exclusive O-16(p,alpha)N-13 data.  CX4 files are retained
+exactly as checked out from the pinned commit.

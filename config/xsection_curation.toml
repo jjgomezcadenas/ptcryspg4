@@ -1,0 +1,50 @@
+schema_version = 1
+
+# Exact EXFOR quantity/data-type suffixes admitted by the first-pass curation.
+# The target and residual are checked independently against the channel catalog.
+accepted_reaction_suffixes = [
+  ",,SIG",
+  ",,SIG,,,EXP",
+  ",IND,SIG,,,EXP",
+]
+accepted_energy_unit = "eV"
+accepted_cross_section_unit = "b"
+
+# EXFOR Formats/LEXFOR: SF8 modifier A means cross section multiplied by
+# isotopic abundance. The CX4 values are therefore not direct absolute cross
+# sections until that factor is recovered and verified from the source entry.
+[dataset_override.exfor_B0077_002_p_C12_x_C11]
+state = "pending"
+reason_code = "abundance_weighted_quantity"
+verification_basis = "EXFOR reaction SF8 contains A"
+notes = "Resolve the abundance factor against Phys. Rev. 88 (1952) 739 before use."
+
+[dataset_override.exfor_B0077_003_p_C12_x_C11]
+state = "pending"
+reason_code = "abundance_weighted_quantity"
+verification_basis = "EXFOR reaction SF8 contains A"
+notes = "Resolve the abundance factor against Phys. Rev. 88 (1952) 739 before use."
+
+[dataset_override.exfor_B0095_002_p_C12_x_C11]
+state = "pending"
+reason_code = "incident_energy_field_unclassified"
+verification_basis = "The two near-threshold points carry a 1 MeV EXFOR incident-energy field whose meaning has not been verified from the 1963 source."
+notes = "Retain as a named sensitivity dataset; exclude from the nominal fit until the energy field and resolution are classified."
+
+[dataset_override.exfor_E2568_002_p_O16_x_O15]
+state = "pending"
+reason_code = "shared_external_normalization_not_modelled"
+verification_basis = "Masuda et al. report relative excitation functions normalized together to O-16(p,x)O-15 = 76.8 mb at 35 MeV."
+notes = "Retain at the published scale for shape comparison; exclude from the nominal absolute fit."
+
+[dataset_override.exfor_E2568_003_p_O16_x_N13]
+state = "pending"
+reason_code = "shared_external_normalization_not_modelled"
+verification_basis = "Masuda et al. report relative excitation functions normalized together to O-16(p,x)O-15 = 76.8 mb at 35 MeV."
+notes = "Retain at the published scale for shape comparison; exclude from the nominal absolute fit."
+
+[dataset_override.exfor_E2568_004_p_O16_x_C11]
+state = "pending"
+reason_code = "shared_external_normalization_not_modelled"
+verification_basis = "Masuda et al. report relative excitation functions normalized together to O-16(p,x)O-15 = 76.8 mb at 35 MeV."
+notes = "Retain at the published scale for shape comparison; exclude from the nominal absolute fit."

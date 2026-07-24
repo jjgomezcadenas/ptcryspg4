@@ -1,0 +1,18 @@
+{
+  "accession": "C0061.018",
+  "author": "L.Valentin et al.",
+  "dataset_id": "exfor_C0061_018_p_O16_x_N13",
+  "doi": "10.1016/0031-9163(63)90651-6",
+  "label": "L.Valentin et al. (C0061.018)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "16O(p,x)13N independent production cross section",
+  "reaction": "8-O-16(P,X)7-N-13,,SIG",
+  "reference": "Phys.Lett. 7 (1963) 163",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodN13_Valentin_1963_C0061.018.cx4",
+  "target": "O16"
+}

@@ -1,0 +1,18 @@
+{
+  "accession": "D0138.003",
+  "author": "R.Chapman et al.",
+  "dataset_id": "exfor_D0138_003_p_O16_x_N13",
+  "doi": "10.1016/0375-9474(67)90006-1",
+  "label": "R.Chapman et al. (D0138.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Nucl.Phys.A 94 (1967) 313",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Chapman_1967_D0138.003.cx4",
+  "target": "O16"
+}

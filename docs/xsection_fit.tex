@@ -1,0 +1,465 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.25cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage[hidelinks]{hyperref}
+\usepackage{siunitx}
+
+\IfFileExists{docs/generated/xsection_fit/fit_summary.tex}{
+  \newcommand{\generateddir}{docs/generated/xsection_fit}
+  \newcommand{\figuredir}{docs/figures/xsection_fit}
+}{
+  \newcommand{\generateddir}{generated/xsection_fit}
+  \newcommand{\figuredir}{figures/xsection_fit}
+}
+
+\title{Selection, curation, and uncertainty modelling of PET-production
+cross sections}
+\author{J.J. G\'omez-Cadenas}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Experimental excitation functions are used to construct cross-section
+ensembles for five positron-emitter production channels relevant to
+proton-therapy PET.  The input is a pinned EXFOR snapshot subjected to explicit
+dataset- and point-level selection.  Positive, threshold-constrained spline
+fits retain the separation between experimental campaigns and account for
+reported point uncertainties and observed between-campaign dispersion.
+JENDL-4.0/HE and LANL ENDF/B-VII.1 provide external comparisons and do not
+enter the fit.  The nominal curve and its replicas are folded with
+target-resolved proton track length from a frozen Geant4 transport and
+propagated to the production and reconstructed distal activity edges.
+\end{abstract}
+
+\section{Reaction scope and role in the uncertainty calculation}
+
+The selected residual-production channels are
+\begin{equation}
+\begin{split}
+  &^{12}\mathrm{C}(p,x)^{11}\mathrm{C},\qquad
+   ^{16}\mathrm{O}(p,x)^{15}\mathrm{O},\qquad
+   ^{16}\mathrm{O}(p,x)^{11}\mathrm{C},\\
+  &^{14}\mathrm{N}(p,x)^{13}\mathrm{N},\qquad
+   ^{16}\mathrm{O}(p,x)^{13}\mathrm{N}.
+\end{split}
+\end{equation}
+The fitted interval is \SIrange{5}{150}{MeV}.  This interval contains the
+low-energy production that controls the distal activity fall-off and the
+incident-energy range of the treatment field.  The extension beyond the
+highest treatment layer constrains the upper fit boundary with measured data.
+The fit uses experimental cross sections.  Geant4 subsequently supplies the
+proton trajectories, energy loss, fluence and total inelastic attenuation.
+Production through the five selected channels is calculated from the fitted
+curves; the corresponding Geant4 residual-production cross sections and final-
+state branching do not enter either the nominal result or its replicas.
+
+\section{Experimental data and evaluated comparisons}
+
+\subsection{EXFOR snapshot and normalized representation}
+
+The experimental input is the EXFOR Plot File snapshot at commit
+\texttt{57052199247e}, dated 29 June 2026; the complete commit identifier is
+stored in the source manifest.  The selected snapshot contains 85
+excitation-function series for the five channels.  Each CX4 series is converted
+one-to-one into the common schema under \path{data/xsections/normalized}; the
+conversion changes eV to MeV and b to mb and preserves the EXFOR accession,
+reaction field, source reference, central values, and reported uncertainties.
+
+Experimental campaigns remain separate.  The EXFOR accession prefix defines
+the campaign identifier, so subentries obtained from the same irradiation
+share a campaign-level contribution in the covariance model.
+
+\subsection{Evaluated libraries}
+
+JENDL-4.0/HE and the LANL proton evaluations distributed with ENDF/B-VII.1 are
+converted to the same energy and cross-section units.  They are compared with
+the resulting experimental fit.  Their values are not treated as
+measurements and do not contribute to the nominal curve or its uncertainty
+band.
+
+\section{Data curation}
+
+\subsection{Dataset-level selection}
+
+Dataset-level curation is based on the normalized EXFOR metadata.  A series is
+accepted when
+\begin{enumerate}
+  \item its projectile, target isotope, and residual isotope identify one of
+        the five selected channels;
+  \item the EXFOR reaction field identifies an absolute production cross
+        section, with no relative-yield, abundance, thick-target-yield,
+        monitor-ratio, or cumulative modifier;
+  \item the original units are eV and b and therefore have a direct conversion
+        to MeV and mb; and
+  \item the normalized quantity is identified as a cross section.
+\end{enumerate}
+The accepted EXFOR reaction suffixes are \texttt{,,SIG},
+\texttt{,,SIG,,,EXP}, and \texttt{,IND,SIG,,,EXP}.  A dataset that fails one
+of these tests is assigned either \emph{excluded} or \emph{pending
+verification}.  Numerical disagreement between experiments is not, by itself,
+an exclusion criterion.
+
+Six series are pending verification.  The EXFOR reaction fields for B0077.002
+and B0077.003 contain the SF8 modifier \texttt{A}, which denotes a cross
+section multiplied by isotopic abundance.\footnote{IAEA,
+\href{https://nds.iaea.org/nrdc/nrdc_doc/iaea-nds-0208-200601.pdf}{LEXFOR,
+General Quantity Modifiers and Products}.}  The stored values are consequently
+not direct absolute cross sections.  These two series remain outside the fit
+until the abundance factor and normalization are recovered from the original
+entry and publication.
+
+B0095.002 contains two measurements at 20.7 and \SI{21.1}{MeV}.  Its EXFOR
+incident-energy field is \SI{1}{MeV}, but the present curation has not
+established whether this field denotes calibration uncertainty, resolution,
+or an energy interval.  The series is therefore pending and is omitted from
+the nominal fit.  A named sensitivity fit includes B0095.002 together with all
+nominally accepted carbon data.
+
+Masuda E2568.002, E2568.003, and E2568.004 are relative excitation functions
+normalized simultaneously to
+$^{16}$O(p,x)$^{15}$O = \SI{76.8}{mb} at \SI{35}{MeV}.  Their shared external
+normalization is not represented by the present covariance model.  These
+series are retained in the figures at their published scale as shape
+comparisons and are pending for the absolute fit.
+
+The metadata criteria provide a reproducible initial selection.  Verification
+against an original publication is recorded as a separate curation action when
+the EXFOR quantity or normalization is ambiguous; the procedure does not infer
+an undocumented uncertainty or normalization component.
+
+\subsection{Point-level selection}
+
+Within an accepted series, a point contributes to the weighted fit when
+\begin{equation}
+  5\leq E\leq150~\mathrm{MeV},\qquad
+  E>E_{\mathrm{th}},\qquad
+  \sigma>0,
+\end{equation}
+and EXFOR reports a positive cross-section uncertainty.  The adopted thresholds
+are 17.9, 14.29, 25.17, 8.9, and \SI{5.55}{MeV}, respectively, in the channel
+order given above.  For the two corrected oxygen channels, Table~\ref{tab:thresholds}
+gives the lowest production route and the exact laboratory-frame threshold
+calculated from AME2020 atomic masses.  The calculation uses
+\begin{equation}
+ E_{\mathrm{th,lab}}=
+ \frac{M_f^2-(M_p+M_T)^2}{2M_T}c^2,
+\end{equation}
+where $M_f$ is the sum of the final-state rest masses.  The rounded values in
+the fit configuration are checked against the generated calculation.
+
+\begin{table}[H]
+\centering\small
+\caption{Lowest production routes and laboratory thresholds.  Atomic masses
+are from the \href{https://amdc.impcas.ac.cn/web/masseval.html}{AME2020 atomic-mass evaluation}.}
+\label{tab:thresholds}
+\input{\generateddir/reaction_thresholds.tex}
+\end{table}
+
+Dataset and point decisions are stored in
+\path{data/xsections/curation.csv} and
+\path{data/xsections/point_curation.csv}.
+
+\subsection{Curation outcome}
+
+Table~\ref{tab:curation} summarizes the selected data.  Of the 85 EXFOR
+series, 79 are accepted and six remain pending.  A total of 834 experimental
+points satisfy the dataset- and point-level rules.
+
+\begin{table}[H]
+\centering\small
+\caption{EXFOR curation by production channel.}
+\label{tab:curation}
+\input{\generateddir/curation_summary.tex}
+\end{table}
+
+\section{Cross-section model}
+
+\subsection{Threshold-constrained smooth curve}
+
+For $E>E_{\mathrm{th}}$, the cross section is represented as
+\begin{equation}
+  \sigma(E)=(E-E_{\mathrm{th}})^{1/2}\exp[g(E)],
+  \label{eq:curve}
+\end{equation}
+where $g(E)$ is a cubic B-spline.  Equation~\eqref{eq:curve} imposes a zero
+cross section at and below threshold and a positive cross section above it.  A
+squared second-difference penalty controls the spline curvature.
+
+The fit is performed in the transformed variable
+\begin{equation}
+  g_i=\log\sigma_i-\frac{1}{2}\log(E_i-E_{\mathrm{th}}).
+\end{equation}
+A reported fractional one-standard-deviation cross-section error $r_i$ is
+mapped to the logarithmic error
+\begin{equation}
+  u_i=\sqrt{\log(1+r_i^2)}.
+\end{equation}
+
+\subsection{Campaign covariance and smoothing selection}
+
+For experimental points $i$ and $j$, the covariance model is
+\begin{equation}
+  C_{ij}=u_i^2\delta_{ij}+s_c^2 I[c(i)=c(j)],
+  \label{eq:covariance}
+\end{equation}
+where $c(i)$ denotes the campaign and $s_c$ is a common logarithmic
+between-campaign spread.  The second term represents a coherent displacement
+of a campaign rather than independent fluctuations of all its points.
+
+The curvature penalty and $s_c$ are selected from fixed grids by
+leave-one-campaign-out prediction.  Each complete campaign is predicted by a
+fit to the remaining campaigns, and the selection score is the Gaussian
+predictive loss including its variance term.  The fractional campaign spread
+reported in the results is $\exp(s_c)-1$.
+
+Spline knots are dense below \SI{100}{MeV}, where the threshold structure and
+excitation-function maxima occur, and coarser above \SI{100}{MeV}.  The latter
+region is constrained by accepted measurements through \SI{150}{MeV}; this
+placement suppresses free-boundary oscillation while retaining the measured
+high-energy trend.
+
+\section{Replica construction and cross-section uncertainty}
+
+One thousand replicas are generated with a recorded random seed.  For each
+replica, every fitted point receives a draw from its reported logarithmic
+cross-section error and every campaign receives one common draw with standard
+deviation $s_c$.  The curvature penalty is reselected from the fixed grid, and
+the varied data are refitted.
+
+The implementation also defines within-campaign correlated draws for
+separately quantified normalization errors and verified incident-energy
+uncertainties.  No such numerical component is active in the current
+configuration: the curated metadata contain no separate campaign
+normalization value, and no CX4 energy field has yet been verified as an
+uncertainty rather than an energy interval.
+
+At each energy, the replica median defines the nominal cross section.  The
+16th and 84th percentiles define the primary uncertainty interval.  Its
+relative half-width is
+\begin{equation}
+  u_{\mathrm{rel}}(E)=
+  \frac{\sigma_{84}(E)-\sigma_{16}(E)}{2\sigma_{50}(E)}.
+\end{equation}
+
+\section{Fit results}
+
+Table~\ref{tab:summary} gives the number of campaigns and fitted points, the
+fractional between-campaign spread $\exp(s_c)-1$, the median relative band
+half-width in the production-bearing interval, and the cross section at the
+maximum of the nominal curve.
+
+\begin{table}[H]
+\centering\small
+\caption{EXFOR fit and uncertainty summary.  The peak interval is the 16th--84th
+percentile interval evaluated at the maximum of the nominal curve.}
+\label{tab:summary}
+\setlength{\tabcolsep}{4pt}
+\input{\generateddir/fit_summary.tex}
+\end{table}
+
+The reported $\chi^2/\nu$ is a lack-of-fit diagnostic evaluated with the point
+errors and fitted campaign-spread covariance.  Values above unity indicate
+shape-level scatter remaining after coherent campaign offsets are included.
+The replica band follows the stated covariance model and is not rescaled to
+force $\chi^2/\nu=1$.
+
+For $^{12}$C(p,x)$^{11}$C, omission of B0095.002 removes the isolated
+near-threshold peak from the nominal curve.  The dashed sensitivity curve in
+the carbon figure adds B0095.002 to the accepted datasets.  Across the
+production-bearing region its median absolute fractional difference from the
+nominal fit is 0.9\%; the largest difference occurs on the steep threshold
+rise.  The complete numerical comparison is stored in
+\path{\generateddir/curation_sensitivity.csv}.
+
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{\figuredir/p_C12_x_C11.pdf}
+\caption{Fit and uncertainty ensemble for
+$^{12}$C(p,x)$^{11}$C.}
+\end{figure}
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{\figuredir/p_O16_x_O15.pdf}
+\caption{Fit and uncertainty ensemble for
+$^{16}$O(p,x)$^{15}$O.}
+\end{figure}
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{\figuredir/p_O16_x_C11.pdf}
+\caption{Fit and uncertainty ensemble for
+$^{16}$O(p,x)$^{11}$C.}
+\end{figure}
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{\figuredir/p_N14_x_N13.pdf}
+\caption{Fit and uncertainty ensemble for
+$^{14}$N(p,x)$^{13}$N.}
+\end{figure}
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{\figuredir/p_O16_x_N13.pdf}
+\caption{Fit and uncertainty ensemble for
+$^{16}$O(p,x)$^{13}$N.}
+\end{figure}
+
+\clearpage
+\section{Comparison with evaluated libraries}
+
+The lower-right panel of each channel figure compares the experimental fit
+with JENDL-4.0/HE and LANL ENDF/B-VII.1.  The numerical comparison is evaluated
+over the common interval in which the nominal fit exceeds 5\% of its maximum.
+For each evaluated curve,
+\path{docs/generated/xsection_fit/evaluation_comparison.csv} records the median
+ratio to the experimental fit and the median and maximum absolute fractional
+differences.  These comparisons diagnose evaluation dependence; they are not
+samples of the experimental uncertainty distribution.
+
+\section{Replica-distance diagnostic}
+
+For plotting purposes, replica $r$ is assigned the distance
+\begin{equation}
+  D_r=\frac{1}{N}[g_r-g_{50}]^{\mathsf T}C^{-1}[g_r-g_{50}],
+  \label{eq:distance}
+\end{equation}
+evaluated at the $N$ fitted experimental energies.  The histogram in each
+figure contains all replicas, and the nine displayed curves are selected at
+fixed quantiles of $D$.
+
+Equation~\eqref{eq:distance} is a diagnostic of the replica ensemble.  Its
+magnitude depends on the channel covariance, the number and placement of the
+data, and the selected curvature penalty.  It is not used to rank channel
+uncertainties and does not enter the propagated distal-edge uncertainty.
+The curvature penalty is reselected from a discrete grid for every replica.
+Consequently, replicas assigned to different penalty values can form separate
+modes in the $D$ histogram.  The counts and distance range for each selected
+penalty are recorded in
+\path{\generateddir/distance_by_smoothing.csv}; the distance percentile is
+used only to choose the nine displayed examples.
+
+\section{Propagation to the distal activity edge}
+
+Let $s$ denote a proton step of length $\ell_s$, representative kinetic energy
+$E_s$, and statistical weight $a_s$.  If the step traverses a material with
+number density $n_{t,s}$ of target isotope $t$, its expected contribution to
+production channel $c$ in cross-section replica $r$ is
+\begin{equation}
+  \Delta N_{s,c}^{(r)}=
+  a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
+  \label{eq:fold-step}
+\end{equation}
+Summing Eq.~\eqref{eq:fold-step} over the steps in spatial bin $m$ and over the
+channels producing isotope $j$ gives
+\begin{equation}
+  P_{j,m}^{(r)}=
+  \sum_{s\in m}\sum_{c\rightarrow j}
+  a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
+  \label{eq:fold-profile}
+\end{equation}
+The nominal prediction uses the replica median $\sigma_{50}(E)$; each
+uncertainty realization substitutes one complete replica curve.  All
+realizations use the same stored proton steps, so differences among them arise
+from the experimental cross-section ensemble.
+
+Geant4 continues to determine proton and secondary-proton transport, energy
+loss, total inelastic attenuation and dose.  Residual nuclei generated by the
+Geant4 final-state model through the five selected channels are excluded from
+the folded source tally, preventing double counting.  Their production is
+replaced by Eqs.~\eqref{eq:fold-step} and \eqref{eq:fold-profile}.  This method
+also remains defined where a Geant4 residual-production model has zero support,
+because it contains no channel-cross-section denominator.
+
+The fixed-transport approximation holds the proton fluence constant while the
+selected partial production cross sections vary.  These channels contribute
+only a fraction of the total proton inelastic cross section, so the associated
+change in fluence attenuation is a higher-order correction.  The implementation
+will record the ratio of their summed cross section to the Geant4 total
+inelastic cross section as a quantitative check of this approximation.
+
+Equation~\eqref{eq:fold-profile} directly provides isotope budgets,
+production-depth profiles and the production-edge displacement.  A common
+proposal sample drawn from the scored proton steps supplies production sites
+for positron transport.  Nominal and replica sources use the same proposal
+sites and random numbers, with probabilities proportional to
+$\Delta N_{s,c}^{(r)}$, thereby preserving correlations and reducing sampling
+noise.  The resulting annihilation coordinates pass through the common
+beam-off acquisition, detector simulation, reconstruction and edge estimator.
+
+The final cross-section uncertainty is obtained from the distribution of
+distal-edge displacements
+\begin{equation}
+  b_{\mathrm{reco}}^{(r)}=
+  R_{50,\mathrm{reco}}^{(r)}-R_{50,\mathrm{reco}}^{(\mathrm{nominal})},
+\end{equation}
+after applying the common acquisition, detector simulation, reconstruction,
+and edge estimator.  The production-profile displacement is recorded
+separately.  The median and 16th--84th percentiles of the paired displacement
+distribution define the propagated bias and uncertainty interval.  Thus all
+replicas enter the physical propagation; the value of $D_r$ has no role in
+their weighting.
+
+\section{Conclusions}
+
+The curation retains 79 absolute EXFOR series for the five selected production
+channels and assigns six series to pending verification.  The fitted ensembles
+preserve reported point errors, coherent campaign variation, and uncertainty
+in the smooth representation.  Folding each complete curve with a common
+Geant4 proton track-length field transfers this uncertainty to isotope budgets
+and spatial production profiles without using Geant4 residual-production
+cross sections.  The
+between-campaign dispersion is channel dependent and is largest for
+$^{16}$O(p,x)$^{13}$N in the present selection.  The physical importance of
+each variation will be determined by propagation to the reconstructed distal
+edge rather than by its distance from the nominal cross-section curve.
+
+\appendix
+
+\section{Dataset-level curation audit}
+
+Table~\ref{tab:curation-detail} lists every selected EXFOR series, its energy
+coverage, dataset decision, total number of points, and number satisfying the
+numerical point rules.  The latter count does not supersede the dataset
+decision: points from a pending series remain outside the fit.  The full audit
+table additionally records the reaction field, quantity, reference, DOI,
+decision basis, and notes.
+
+\begingroup
+\small
+\setlength{\LTcapwidth}{\textwidth}
+\input{\generateddir/curation_detail.tex}
+\endgroup
+
+\section{Point-level curation audit}
+
+Table~\ref{tab:point-curation} partitions all selected EXFOR points by their
+first applicable selection decision.  ``No error'' denotes the absence of a
+positive reported cross-section uncertainty; ``Range'' denotes energies
+outside \SIrange{5}{150}{MeV}; and ``Pending'' denotes points belonging to a
+dataset pending verification.
+
+\begin{table}[ht]
+\centering\small
+\caption{Point-level curation outcome by channel.}
+\label{tab:point-curation}
+\resizebox{\textwidth}{!}{\input{\generateddir/point_curation_summary.tex}}
+\end{table}
+
+\section{Numerical configuration and reproducibility}
+
+The authoritative curation and fit settings are
+\path{config/xsection_curation.toml} and
+\path{config/xsection_fit.toml}.  The fit metadata record their SHA-256
+digests, the random seed, the spline knots, the candidate curvature penalties,
+the candidate campaign spreads, the replica count, and the output grids.
+Dense curves, common-grid tables, all replicas, representative curves, and
+distance histograms are stored under \path{data/xsections/fits}.
+
+The analysis and document are regenerated with
+\begin{verbatim}
+python3 tools/build_xsection_fit.py
+\end{verbatim}
+The build regenerates the normalized input, both curation audits, fitted
+ensembles, tables, figures, validation checks, and this document.
+
+\end{document}

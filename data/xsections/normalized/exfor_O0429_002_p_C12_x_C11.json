@@ -1,0 +1,18 @@
+{
+  "accession": "O0429.002",
+  "author": "A.M.Poskanzer et al.",
+  "dataset_id": "exfor_O0429_002_p_C12_x_C11",
+  "doi": "10.1103/PhysRev.133.B1507",
+  "label": "A.M.Poskanzer et al. (O0429.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "12C(p,x)11C independent production cross section",
+  "reaction": "6-C-12(P,X)6-C-11,,SIG",
+  "reference": "Phys.Rev. 133 (1964) B1507",
+  "residual": "C11",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/C12/x/sig/p-C12-x-sig-excfun-mon-prodC11_Poskanzer_1964_O0429.002.cx4",
+  "target": "C12"
+}

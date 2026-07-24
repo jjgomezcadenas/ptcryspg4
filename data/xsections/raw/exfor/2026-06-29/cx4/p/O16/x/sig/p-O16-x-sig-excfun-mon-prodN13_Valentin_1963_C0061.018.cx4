@@ -1,0 +1,22 @@
+# EXFOR #         : C0061.018  
+# EXFOR Ver.      : 20040426
+# TRANS #         : 0000
+# Author          : L.Valentin et al.
+# Reference       : Phys.Lett. 7 (1963) 163
+# DOI             : 10.1016/0031-9163(63)90651-6
+# Quantity        : 16O(p,x)13N independent production cross section
+# REACTION        : 8-O-16(P,X)7-N-13,,SIG
+# File ID         : p-O16-x-sig-excfun-mon-prodN13_Valentin_1963_c0061.018
+#
+# npts            : 1           
+# xmin            :   1.5500E+08
+# xmax            :   1.5500E+08
+# ymin            :   4.5000E-03
+# ymax            :   4.5000E-03
+#
+#---------------------------------------------------
+# Einc        dEinc       sig         dsig        
+#  eV          eV          b           b          
+#---------------------------------------------------
+  1.5500E+08  0.0000E+00  4.5000E-03  1.0000E-03
+#---------------------------------------------------

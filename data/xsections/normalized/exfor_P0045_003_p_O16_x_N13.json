@@ -1,0 +1,18 @@
+{
+  "accession": "P0045.003",
+  "author": "M.Furukawa et al.",
+  "dataset_id": "exfor_P0045_003_p_O16_x_N13",
+  "doi": "10.1143/JPSJ.15.2167",
+  "label": "M.Furukawa et al. (P0045.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 32,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "J.Phys.Soc.Jpn. 15 (1960) 2167",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Furukawa_1960_P0045.003.cx4",
+  "target": "O16"
+}

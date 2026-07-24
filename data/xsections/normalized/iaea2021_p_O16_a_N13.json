@@ -1,0 +1,12 @@
+{
+  "dataset_id": "iaea2021_p_O16_a_N13",
+  "label": "IAEA recommended O-16(p,alpha)N-13",
+  "library": "IAEA recommended",
+  "original_cross_section_unit": "mb",
+  "original_energy_unit": "MeV",
+  "point_count": 121,
+  "residual": "N13",
+  "role": "recommended_evaluation",
+  "source_file": "data/xsections/raw/iaea/medical/o6p13nt.txt",
+  "target": "O16"
+}

@@ -1,0 +1,18 @@
+{
+  "accession": "D1061.003",
+  "author": "J.Matulewicz et al.",
+  "dataset_id": "exfor_D1061_003_p_O16_x_N13",
+  "doi": "10.1140/epja/s10050-024-01420-5",
+  "label": "J.Matulewicz et al. (D1061.003)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 17,
+  "quantity": "16O(p,x)13N independent production cross section",
+  "reaction": "8-O-16(P,X)7-N-13,,SIG",
+  "reference": "Eur.Phys.J.A 60 (2024) 203",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodN13_Matulewicz_2024_D1061.003.cx4",
+  "target": "O16"
+}

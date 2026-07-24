@@ -4,6 +4,7 @@ data/*
 # Versioned public inputs for the cross-section uncertainty study
 !data/xsections/
 !data/xsections/**
+data/xsections/g4/**/logs/
 *.h5
 
 # Build directories

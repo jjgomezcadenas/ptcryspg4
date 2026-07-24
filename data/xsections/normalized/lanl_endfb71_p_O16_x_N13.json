@@ -1,0 +1,12 @@
+{
+  "dataset_id": "lanl_endfb71_p_O16_x_N13",
+  "label": "LANL ENDF/B-VII.1",
+  "library": "LANL ENDF/B-VII.1",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 32,
+  "residual": "N13",
+  "source_file": "data/xsections/raw/tendl/2023/p-O016.tendl",
+  "target": "O16",
+  "transformation": "MF=3 MT=5 cross section times MF=6 MT=5 residual yield"
+}

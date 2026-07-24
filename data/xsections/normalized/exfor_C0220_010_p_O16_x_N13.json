@@ -1,0 +1,18 @@
+{
+  "accession": "C0220.010",
+  "author": "P.A.Benioff",
+  "dataset_id": "exfor_C0220_010_p_O16_x_N13",
+  "doi": "10.1103/PhysRev.119.316",
+  "label": "P.A.Benioff (C0220.010)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "16O(p,x)13N independent production cross section",
+  "reaction": "8-O-16(P,X)7-N-13,,SIG",
+  "reference": "Phys.Rev. 119 (1960) 316",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodN13_Benioff_1960_C0220.010.cx4",
+  "target": "O16"
+}

@@ -1,0 +1,18 @@
+{
+  "accession": "C0223.012",
+  "author": "K.J.Foley et al.",
+  "dataset_id": "exfor_C0223_012_p_O16_x_O15",
+  "doi": "10.1016/0029-5582(62)90727-7",
+  "label": "K.J.Foley et al. (C0223.012)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "16O(p,x)15O independent production cross section",
+  "reaction": "8-O-16(P,X)8-O-15,,SIG",
+  "reference": "Nucl.Phys. 31 (1962) 43",
+  "residual": "O15",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodO15_Foley_1962_C0223.012.cx4",
+  "target": "O16"
+}

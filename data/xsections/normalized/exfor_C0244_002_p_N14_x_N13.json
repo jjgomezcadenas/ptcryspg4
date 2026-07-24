@@ -1,0 +1,18 @@
+{
+  "accession": "C0244.002",
+  "author": "S.S.Markowitz et al.",
+  "dataset_id": "exfor_C0244_002_p_N14_x_N13",
+  "doi": "10.1103/PhysRev.112.1295",
+  "label": "S.S.Markowitz et al. (C0244.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 4,
+  "quantity": "14N(p,x)13N independent production cross section",
+  "reaction": "7-N-14(P,X)7-N-13,,SIG",
+  "reference": "Phys.Rev. 112 (1958) 1295",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/N14/x/sig/p-N14-x-sig-excfun-mon-prodN13_Markowitz_1958_C0244.002.cx4",
+  "target": "N14"
+}

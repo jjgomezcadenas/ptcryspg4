@@ -1,0 +1,18 @@
+{
+  "accession": "C0998.002",
+  "author": "H.A.Hill et al.",
+  "dataset_id": "exfor_C0998_002_p_O16_x_N13",
+  "doi": "10.1103/PhysRev.123.1301",
+  "label": "H.A.Hill et al. (C0998.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 355,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Phys.Rev. 123 (1961) 1301",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Hill_1961_C0998.002.cx4",
+  "target": "O16"
+}

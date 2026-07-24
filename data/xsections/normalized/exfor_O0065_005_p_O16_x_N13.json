@@ -1,0 +1,18 @@
+{
+  "accession": "O0065.005",
+  "author": "S.W.Kitwanga et al.",
+  "dataset_id": "exfor_O0065_005_p_O16_x_N13",
+  "doi": "10.1103/PhysRevC.40.35",
+  "label": "S.W.Kitwanga et al. (O0065.005)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 5,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Phys.Rev.C 40 (1989) 35",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Kitwanga_1989_O0065.005.cx4",
+  "target": "O16"
+}

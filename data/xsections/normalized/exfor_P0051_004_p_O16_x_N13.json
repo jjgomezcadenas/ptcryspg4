@@ -1,0 +1,18 @@
+{
+  "accession": "P0051.004",
+  "author": "A.B.Whitehead et al.",
+  "dataset_id": "exfor_P0051_004_p_O16_x_N13",
+  "doi": "10.1139/p58-132",
+  "label": "A.B.Whitehead et al. (P0051.004)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 60,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Can.J.Phys. 36 (1958) 1276",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_Whitehead_1958_P0051.004.cx4",
+  "target": "O16"
+}

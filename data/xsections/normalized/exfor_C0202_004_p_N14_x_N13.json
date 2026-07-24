@@ -1,0 +1,18 @@
+{
+  "accession": "C0202.004",
+  "author": "M.Sajjad et al.",
+  "dataset_id": "exfor_C0202_004_p_N14_x_N13",
+  "doi": "10.1524/ract.1986.39.3.165",
+  "label": "M.Sajjad et al. (C0202.004)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 35,
+  "quantity": "14N(p,x)13N independent production cross section",
+  "reaction": "7-N-14(P,X)7-N-13,,SIG",
+  "reference": "Radiochim.Acta 39 (1986) 165",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/N14/x/sig/p-N14-x-sig-excfun-mon-prodN13_Sajjad_1986_C0202.004.cx4",
+  "target": "N14"
+}

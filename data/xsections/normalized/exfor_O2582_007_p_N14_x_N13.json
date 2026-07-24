@@ -1,0 +1,18 @@
+{
+  "accession": "O2582.007",
+  "author": "T.Rodriguez-Gonzalez et al.",
+  "dataset_id": "exfor_O2582_007_p_N14_x_N13",
+  "doi": "10.1016/j.nds.2023.01.004",
+  "label": "T.Rodriguez-Gonzalez et al. (O2582.007)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 43,
+  "quantity": "14N(p,x)13N independent production cross section",
+  "reaction": "7-N-14(P,X)7-N-13,,SIG",
+  "reference": "Nucl.Data Sheets 187 (2023) 579",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/N14/x/sig/p-N14-x-sig-excfun-mon-prodN13_Rodriguez+Gonzalez_2023_O2582.007.cx4",
+  "target": "N14"
+}

@@ -1,0 +1,6 @@
+channel_id,grid_points,experimental_production_grid_points,zero_g4_support_in_production_region,zero_support_energies_MeV,first_positive_g4_energy_MeV,total_pilot_residual_count,median_relative_statistical_uncertainty_positive,maximum_relative_statistical_uncertainty_positive
+p_C12_x_C11,42,30,8,20;22;24;26;28;30;35;40,45.0,34258,0.023438642010269,0.0250454132981016
+p_O16_x_O15,42,32,0,,16.0,51613,0.0207046171425944,0.4471017781221632
+p_O16_x_C11,42,27,2,26;28,30.0,13916,0.0405986668285024,0.2179886410321593
+p_N14_x_N13,42,34,1,12,11.0,30002,0.0269843927394872,0.0755906971020382
+p_O16_x_N13,42,36,1,8,9.0,6268,0.0830241350030639,0.3534119409414458

@@ -1,0 +1,18 @@
+{
+  "accession": "R0043.002",
+  "author": "R.H.McCamis et al.",
+  "dataset_id": "exfor_R0043_002_p_O16_x_N13",
+  "doi": "10.1139/p73-223",
+  "label": "R.H.McCamis et al. (R0043.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 11,
+  "quantity": "16O(p,a)13N cross section",
+  "reaction": "8-O-16(P,A)7-N-13,,SIG",
+  "reference": "Can.J.Phys. 51 No.16 (1973) 1689",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/a/sig/p-O16-a-sig-excfun-mon-prodN13_McCamis_1973_R0043.002.cx4",
+  "target": "O16"
+}

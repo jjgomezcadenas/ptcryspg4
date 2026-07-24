@@ -1,0 +1,6 @@
+channel_id,accepted_series,pending_series,excluded_series,fit_points
+p_C12_x_C11,27,3,0,94
+p_O16_x_O15,11,1,0,94
+p_O16_x_C11,11,1,0,58
+p_N14_x_N13,13,0,0,76
+p_O16_x_N13,17,1,0,512

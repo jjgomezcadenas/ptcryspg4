@@ -1,0 +1,18 @@
+{
+  "accession": "E2449.002",
+  "author": "T.Akagi et al.",
+  "dataset_id": "exfor_E2449_002_p_O16_x_O15",
+  "doi": "10.1016/j.radmeas.2013.07.005",
+  "label": "T.Akagi et al. (E2449.002)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 9,
+  "quantity": "16O(p,x)15O independent production cross section",
+  "reaction": "8-O-16(P,X)8-O-15,,SIG",
+  "reference": "Radiat.Meas. 59 (2013) 262",
+  "residual": "O15",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodO15_Akagi_2013_E2449.002.cx4",
+  "target": "O16"
+}

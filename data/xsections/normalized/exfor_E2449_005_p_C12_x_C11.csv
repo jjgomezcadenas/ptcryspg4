@@ -1,0 +1,5 @@
+point_id,energy_MeV,energy_unc_minus_MeV,energy_unc_plus_MeV,sigma_mb,sigma_unc_stat_mb,sigma_unc_sys_mb,sigma_unc_minus_mb,sigma_unc_plus_mb
+0,32.5,4.5,4.5,72.5,,,3.0,3.0
+1,47.5,3.3,3.3,79.8,,,3.3,3.3
+2,59.4,2.8,2.8,71.2,,,2.9,2.9
+3,69.6,2.5,2.5,71.9,,,2.9,2.9

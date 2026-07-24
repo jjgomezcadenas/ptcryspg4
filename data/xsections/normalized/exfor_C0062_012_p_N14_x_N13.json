@@ -1,0 +1,18 @@
+{
+  "accession": "C0062.012",
+  "author": "L.Valentin",
+  "dataset_id": "exfor_C0062_012_p_N14_x_N13",
+  "doi": "10.1016/0029-5582(65)90072-6",
+  "label": "L.Valentin (C0062.012)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 2,
+  "quantity": "14N(p,x)13N independent production cross section",
+  "reaction": "7-N-14(P,X)7-N-13,,SIG",
+  "reference": "Nucl.Phys. 62 (1965) 81",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/N14/x/sig/p-N14-x-sig-excfun-mon-prodN13_Valentin_1965_C0062.012.cx4",
+  "target": "N14"
+}

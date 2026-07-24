@@ -1,0 +1,18 @@
+{
+  "accession": "O2134.008",
+  "author": "R.Bimbot et al.",
+  "dataset_id": "exfor_O2134_008_p_O16_x_N13",
+  "doi": "N/A",
+  "label": "R.Bimbot et al. (O2134.008)",
+  "library": "EXFOR",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 1,
+  "quantity": "16O(p,x)13N independent production cross section",
+  "reaction": "8-O-16(P,X)7-N-13,,SIG",
+  "reference": "Compt.Rend.B 273 (1971) 1054",
+  "residual": "N13",
+  "role": "experimental",
+  "source_file": "data/xsections/raw/exfor/2026-06-29/cx4/p/O16/x/sig/p-O16-x-sig-excfun-mon-prodN13_Bimbot_1971_O2134.008.cx4",
+  "target": "O16"
+}

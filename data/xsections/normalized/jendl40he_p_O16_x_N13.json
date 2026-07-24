@@ -1,0 +1,12 @@
+{
+  "dataset_id": "jendl40he_p_O16_x_N13",
+  "label": "JENDL-4.0/HE",
+  "library": "JENDL-4.0/HE",
+  "original_cross_section_unit": "b",
+  "original_energy_unit": "eV",
+  "point_count": 42,
+  "residual": "N13",
+  "source_file": "data/xsections/raw/jendl/4.0he/O016.txt",
+  "target": "O16",
+  "transformation": "JAEA precomputed MF=3 MT=5 times MF=6 MT=5 residual production"
+}
