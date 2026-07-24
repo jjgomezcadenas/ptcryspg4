@@ -1,0 +1,19 @@
+schema_version = 1
+
+[scenario.inroom]
+description = "Standard cyclotron beam-off acquisition"
+t_irr_s = 60.0
+t_del_s = 120.0
+t_meas_s = 1200.0
+
+[scenario.fast]
+description = "Fast in-room transfer sensitivity"
+t_irr_s = 60.0
+t_del_s = 60.0
+t_meas_s = 1200.0
+
+[scenario.offline]
+description = "Conservative offline acquisition"
+t_irr_s = 60.0
+t_del_s = 300.0
+t_meas_s = 1800.0

@@ -58,16 +58,23 @@ The nominal cross sections and their replica ensembles are documented in
 comparisons with the fitted experimental curves.  The distal-edge calculation
 uses the EXFOR fit and replicas.
 
+The direct fold is the selected-channel production estimator.  The nominal
+calculation and its replicas use the external curves.  The forced-final-state
+Geant4 curves are residual-model diagnostics.  The BIC, INCL++ and Bertini
+envelope varies the proton exposure and spatial proposal sample while retaining
+the external production curves.
+
 Two quantities are reported for replica $r$:
 \begin{align}
   b_{\mathrm{prod}}^{(r)} & =
-  R_{50,\mathrm{prod}}^{(r)}-R_{50,\mathrm{prod}}^{(50)},
+  R_{50,\mathrm{prod}}^{(r)}-R_{50,\mathrm{prod}}^{(\mathrm{nom})},
   \label{eq:bprod}\\
   b_{\mathrm{reco}}^{(r)} & =
-  R_{50,\mathrm{reco}}^{(r)}-R_{50,\mathrm{reco}}^{(50)}.
+  R_{50,\mathrm{reco}}^{(r)}-R_{50,\mathrm{reco}}^{(\mathrm{nom})}.
   \label{eq:breco}
 \end{align}
-Here the superscript 50 denotes the pointwise replica-median cross section.
+Here ``nom'' denotes the central fitted cross section stored as the nominal
+curve.  The replicas sample the uncertainty around that central fit.
 The first displacement is available from the production profile in this
 repository.  The second follows the common acquisition, detector simulation,
 reconstruction and edge estimator.
@@ -176,6 +183,19 @@ synthetic tests; the production scorer will perform the same accumulation
 during the dedicated Geant4 run.  The detailed input and output schemas are
 recorded in \file{data/xsections/SCHEMA.md}.
 
+The required companion \file{exposure\_meta.json} carries the exposure-file
+digest, run identifier, primary count, target-box dose, \file{Np\_per\_Gy},
+Geant4 version, physics list, random seed, software revision, coordinate
+definition and authoritative bin edges.  The normalization satisfies
+\begin{equation}
+ \file{Np\_per\_Gy}=\frac{N_{\mathrm{protons}}}
+ {D_{\mathrm{sim,target}}},
+ \label{eq:np-per-gy}
+\end{equation}
+where $D_{\mathrm{sim,target}}$ is the same \file{target\_dose\_Gy} written by
+Stage A and consumed by \file{decay\_sampling/budget.py}.  Folded yields are
+reported for the simulated run, per primary proton and per Gy.
+
 \section{Direct folding of external cross sections}
 
 Let $s$ be a proton step with length $\ell_s$, representative energy $E_s$,
@@ -195,8 +215,8 @@ expression.  The production of isotope $j$ in spatial bin $m$ is
   a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s).
   \label{eq:profile}
 \end{equation}
-The nominal calculation substitutes the replica median
-$\sigma_c^{(50)}(E)$.  Every replica substitutes one complete, correlated
+The nominal calculation substitutes the central fit
+$\sigma_c^{(\mathrm{nom})}(E)$.  Every replica substitutes one complete, correlated
 curve.  This construction preserves correlations across energy and between
 all spatial regions sampled by the same proton field.
 
@@ -243,12 +263,22 @@ beam-off handoff then applies isotope half-lives and acquisition timing to the
 production budgets.  Production-profile and reconstructed-edge displacements
 remain distinct outputs throughout the analysis.
 
+The longitudinal outputs distinguish the raw sum
+\file{all\_production} from a timing-weighted activity profile.  A profile such
+as \file{all\_inroom} is constructed from the named scenario in
+\file{config/handoff\_scenarios.toml}.  The folding code and
+\file{budget.py} use the same scenario resolver.  Output metadata record the
+scenario-file digest, resolved irradiation, delay and measurement times, and
+the isotope-specific handoff factors.
+
 \section{Geant4 residual-production pilot}
 
 A direct Geant4 pilot sampled residual nuclei after forced proton inelastic
-interactions at fixed target and energy.  It was designed to measure a channel
-cross-section denominator for a ratio-weight method.  Table~\ref{tab:support}
-and Fig.~\ref{fig:support} summarize the observed support.
+interactions at fixed target and energy.  It was originally designed to
+measure a channel-cross-section denominator for a ratio-weight method.
+Table~\ref{tab:support} and Fig.~\ref{fig:support} summarize the observed
+support.  The direct fold supersedes that estimator, so the pilot now serves
+only as a residual-model diagnostic.
 
 \begin{table}[H]
 \centering\small
@@ -315,6 +345,55 @@ single-number cross-section uncertainty is
 The full displacement distribution and isotope-resolved production changes are
 retained with the scalar summary.
 
+\section{Energy-grid convergence}
+
+The scorer first writes a deliberately fine energy grid.  Candidate coarser
+tables are constructed offline from the same transport realization.  For a
+set $G$ of fine cells forming one coarse cell,
+\begin{equation}
+ K_G=\sum_{g\in G}K_g,
+ \qquad
+ \bar E_G=\frac{\sum_{g\in G}K_g\bar E_g}{K_G}.
+ \label{eq:coarsen}
+\end{equation}
+Coarsening therefore preserves the exposure and its first energy moment.  The
+tested approximation is the replacement of the exposure-weighted mean cross
+section by $\sigma(\bar E_G)$ when the excitation function is nonlinear within
+the coarse cell.
+
+Every candidate table is folded with the nominal curve and all replicas.  The
+nominal result and each replica are paired between the fine and coarse tables.
+For each isotope, let $u_Y$ and $u_R$ be the fine-grid 16th--84th percentile
+half-widths of the yield and production-edge displacement.  A candidate passes
+when the largest absolute paired yield and edge changes are below $0.1u_Y$ and
+$0.1u_R$, respectively, and its absolute edge change is below
+\SI{0.1}{mm}.  The changes in the reported yield and edge half-widths must
+satisfy the same limits.  A vanishing replica half-width admits only numerical
+round-off from coarsening.
+
+The moderate-statistics fine-grid transport determines the accepted binning.
+The high-statistics run then uses that frozen grid.  The convergence table,
+tolerances and pass decision are generated by tracked code and recorded in the
+folding provenance.
+
+\section{Production outside the folded channel set}
+
+The folded source contains the five proton-induced channels in
+Eq.~\eqref{eq:channels}.  Native Geant4 residuals provide a separate diagnostic
+of routes outside this set, including neutron-induced production and the
+$^{10}$C and $^{14}$O residuals.  The transport scorer records native counts by
+projectile, target, residual isotope and depth.  These counts are classified
+as represented or unrepresented by the folded set and passed through the same
+named handoff scenarios.
+
+The diagnostic reports both the raw-production fraction and the expected
+beam-off measured fraction outside the folded set.  It is evaluated for BIC,
+INCL++ and Bertini, and the largest fraction is retained as the conservative
+first-pass estimate.  The folded source obtains its production sites, isotope
+budgets and normalization from the direct estimator.  The native-counter input
+digest and unmodeled fractions are copied into the folding provenance with a
+diagnostic-only flag.
+
 \section{Validation requirements}
 
 The implementation is accepted when the following checks pass:
@@ -326,7 +405,7 @@ The implementation is accepted when the following checks pass:
         interpolation rule between points.
   \item Subdivision of proton steps and refinement of the energy and spatial
         exposure-table bins leave the production budgets and edge positions
-        stable at the adopted tolerance.
+        within the replica-relative and \SI{0.1}{mm} tolerances.
   \item A direct per-step sum agrees with the binned track-length calculation.
   \item Substituting the nominal and a selected replica reproduces their known
         production-ratio change in a mono-energetic slab.
@@ -336,6 +415,11 @@ The implementation is accepted when the following checks pass:
         replica evaluated on a frozen transport.
   \item Fixed seeds reproduce the proposal sites, isotope budgets and paired
         edge shifts.
+  \item Exposure metadata reproduce \file{Np\_per\_Gy} from the primary count
+        and target-box dose, and folding and handoff resolve identical named-
+        scenario factors.
+  \item Native-route counters reproduce their raw and beam-off classified
+        fractions without contributing to the folded source.
   \item Positron-range distributions from the externally sampled sources agree
         with the corresponding isotope and material reference calculations.
   \item Alternative physics lists write distinct run directories and record
@@ -350,6 +434,9 @@ The implementation is accepted when the following checks pass:
         channel aggregation and $R_{50,\mathrm{prod}}$ using synthetic tables.
   \item Validate the folding code with analytic slab, units, threshold,
         interpolation, per-step--versus--binned and bin-refinement tests.
+  \item Implement run-metadata validation, per-Gy normalization, named-scenario
+        activity profiles, vectorized outputs, convergence analysis and the
+        native-route diagnostic.
   \item Add target-resolved proton step scoring to Stage A and generate a
         dedicated moderate-statistics nominal SOBP transport.  This run
         constructs the physical target--energy--position exposure table.

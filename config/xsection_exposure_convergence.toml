@@ -1,0 +1,4 @@
+schema_version = 1
+relative_tolerance_fraction = 0.10
+r50_absolute_tolerance_mm = 0.10
+candidate_energy_widths_MeV = [0.5, 1.0, 2.0, 5.0]

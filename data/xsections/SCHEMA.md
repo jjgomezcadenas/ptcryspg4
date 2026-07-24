@@ -131,6 +131,20 @@ One row defines an interpolation-ready production curve:
 The model catalog records every scientific choice used to turn measurements or
 evaluations into an interpolation-ready production curve.
 
+## Authoritative production estimator
+
+Selected-channel production is defined exclusively by the direct fold
+
+```text
+expected production = target-resolved proton exposure * external cross section
+```
+
+The nominal EXFOR fit and its replicas supply the cross sections. Geant4
+supplies proton transport and the exposure table. Geant4 residual-production
+curves and cross-section ratios serve as diagnostic products. Alternative
+physics lists vary the exposure table and proposal sample while retaining the
+same external production curves.
+
 ## Target-resolved proton exposure table
 
 The dedicated Geant4 transport run accumulates one row for every target
@@ -150,9 +164,29 @@ to the direct cross-section folding calculation.
 
 Multiplication of `target_exposure_cm2_inv` by a channel cross section in
 square centimetres gives the expected number of residual nuclei produced in
-that bin. The table contains the summed exposure of the simulated run; the run
-metadata provide the primary-proton count, dose, physics list, Geant4 version,
-random seed, energy binning, depth binning and coordinate definition.
+that bin. The table contains the summed exposure of the simulated run.
+
+### `exposure_meta.json`
+
+The companion metadata file is required by the physical folding calculation:
+
+| Field | Meaning |
+|---|---|
+| `schema_version` | Exposure schema version |
+| `run_id` | Stable transport-run identifier |
+| `exposure_file`, `exposure_sha256` | Exposure filename and content digest |
+| `n_protons` | Number of simulated primary protons |
+| `target_dose_Gy` | Dose deposited in the Stage-A target box |
+| `Np_per_Gy` | `n_protons / target_dose_Gy` |
+| `physics_list`, `geant4_version`, `random_seed` | Transport provenance |
+| `software_revision` | Repository revision used by the scorer |
+| `beam_axis`, `depth_origin`, `depth_unit` | Beam-depth coordinate definition |
+| `energy_edges_MeV`, `depth_edges_mm` | Authoritative scorer bin edges |
+
+The energy and depth edges in every exposure row must belong to the grids in
+this metadata. The folding output retains the metadata digest and reports
+production for the simulated run, per primary proton and per Gy using the same
+`target_dose_Gy` convention as `decay_sampling/budget.py`.
 
 The first implementation is longitudinal because its immediate observable is
 the production-depth edge. A separate proposal sample of proton step segments
@@ -166,12 +200,60 @@ with the EXFOR nominal curves and all cross-section replicas. It writes:
 | File | Meaning |
 |---|---|
 | `nominal_channel_contributions.csv` | Nominal cross section and expected production for every exposure row and channel |
-| `nominal_isotope_profiles.csv` | Nominal depth profiles for C-11, N-13, O-15 and their sum |
-| `replica_isotope_profiles.csv` | Corresponding profile for every replica |
-| `production_summary.csv` | Isotope budgets, production R50 and replica displacement from nominal |
-| `folding_meta.json` | Schema version, unit conversion, input digests and fit provenance |
+| `nominal_isotope_profiles.csv` | Nominal C-11, N-13, O-15, `all_production`, and named-scenario activity profiles |
+| `profile_bands.csv` | Pointwise replica 16th, 50th and 84th percentiles |
+| `replica_isotope_profiles.csv.gz` | Optional complete replica profiles in compressed long-form CSV |
+| `production_summary.csv` | Per-replica budgets, production R50 and paired shifts |
+| `uncertainty_summary.csv` | Yield and R50 16th, 50th and 84th percentiles and half-widths |
+| `folding_meta.json` | Input digests, run normalization, scenario and fit provenance |
 
 The conversion used by the folding calculation is `1 mb = 1e-27 cm2`.
+
+`all_production` is the unweighted sum of the three fitted-isotope profiles.
+A measured profile such as `all_inroom` multiplies each isotope profile by the
+decay-and-acquisition factor resolved from a named scenario in
+`config/handoff_scenarios.toml`. `folding_meta.json` records the scenario name,
+configuration digest, resolved times and isotope factors.
+
+Profile tables use `expected_count_*` because the individual isotope and
+`all_production` rows count produced nuclei, whereas a named beam-off aggregate
+counts expected measured decays. The `quantity` column distinguishes
+`production_nuclei` from `measured_decays`. Each count is written per simulated
+run, per primary proton and per Gy. Channel-contribution rows always count
+produced nuclei and therefore use `expected_nuclei_*`.
+
+## Energy-grid convergence products
+
+`analysis_transport/xsections/exposure_convergence.py` coarsens one fine
+exposure table by summing exposure and its energy and depth moments. It folds
+the fine and candidate tables with all replicas and writes paired yield and R50
+differences. A candidate grid passes for every profile when the largest paired
+binning effect and the change in the reported half-width are below 10% of the
+corresponding fine-grid replica half-width, and its R50 effect is also below
+0.1 mm. The convergence output records the fine and candidate grids,
+metrics, tolerances and pass state.
+
+## Native-route diagnostic counters
+
+The future transport scorer writes `native_route_counts.csv` for diagnostic
+classification of production outside the five folded channels:
+
+| Column | Meaning |
+|---|---|
+| `projectile` | Producing projectile, for example `proton` or `neutron` |
+| `target` | Sampled target isotope, or `unknown` when unavailable |
+| `residual` | Produced positron emitter: C-10, C-11, N-13, O-14 or O-15 |
+| `depth_low_mm`, `depth_high_mm` | Production-depth bin |
+| `production_count` | Native Geant4 residual count |
+
+The diagnostic marks rows represented by the five folded proton-induced
+channels and reports the remaining fraction in raw production and in each
+named beam-off scenario. The direct fold supplies the source events and
+normalization. `native_route_meta.json` records the input
+digest and named-scenario provenance. When the summary is available,
+`folding_meta.json` records its raw and beam-off unmodeled fractions while
+marking them explicitly as diagnostic. Their model dependence is reported
+across BIC, INCL++ and Bertini.
 
 ## Geant4 thin-target tables
 
@@ -184,7 +266,7 @@ outputs. run_meta.json records the scan-configuration digest and runtime
 limits. The conversion into mb is performed by
 analysis_transport/xsections/g4_cross_sections.py.
 
-## Geant4 direct denominator tables
+## Geant4 residual-production diagnostic tables
 
 `denominator_pilot_counts.csv` contains one row per pure target and incident
 energy. Each row records a fixed number of forced proton-inelastic final-state
@@ -197,4 +279,5 @@ The `denominator_pilot/` subdirectory contains the factorized channel curves,
 where `sigma_mb` is the queried inelastic cross section multiplied by the
 sampled residual probability. Zero counts carry a 95% binomial upper limit.
 `support_summary.csv` audits nonzero Geant4 support over the production-bearing
-interval of each experimental fit.
+interval of each experimental fit. The historical filenames retain the word
+`denominator`; the curves serve as residual-production diagnostics.

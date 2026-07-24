@@ -16,31 +16,22 @@ See latex/ptcrysp_physics.tex.
 
 Usage:
     python decay_sampling/budget.py <run_dir> [--scenario NAME] [--dose GY]
-        [--t-irr S] [--t-del S] [--t-meas S]
+        [--scenario-config FILE]
 """
 
 import argparse
-import math
 import os
 import sys
 
 import pandas as pd
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, "..", "common"))
-from isotopes import ISOTOPES  # noqa: E402
-
-
-def survival(lam, t_irr, t_del, t_meas):
-    """The three survival factors for decay constant lam [1/s], times in [s].
-
-    Returns the tuple (build, transport, window): build-up saturation over the
-    irradiation, decay during the beam-off delay, and the fraction decaying
-    inside the measurement window. Their product times P_j is N_j."""
-    build = (1.0 - math.exp(-lam * t_irr)) / (lam * t_irr)
-    transport = math.exp(-lam * t_del)
-    window = 1.0 - math.exp(-lam * t_meas)
-    return build, transport, window
+_REPO = os.path.abspath(os.path.join(_HERE, ".."))
+sys.path.insert(0, _REPO)
+from common.isotopes import ISOTOPES  # noqa: E402
+from decay_sampling.scenarios import (  # noqa: E402
+    DEFAULT_SCENARIO_CONFIG, resolve_scenario, survival,
+)
 
 
 def main():
@@ -48,11 +39,10 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
     ap.add_argument("--scenario", default="inroom")
+    ap.add_argument("--scenario-config", default=str(DEFAULT_SCENARIO_CONFIG))
     ap.add_argument("--dose", type=float, default=1.0, help="delivered dose D [Gy]")
-    ap.add_argument("--t-irr", type=float, default=60.0)
-    ap.add_argument("--t-del", type=float, default=120.0)
-    ap.add_argument("--t-meas", type=float, default=1200.0)
     args = ap.parse_args()
+    scenario = resolve_scenario(args.scenario, args.scenario_config)
 
     emit = pd.read_csv(os.path.join(args.data_dir, "emitters.csv"),
                        usecols=["isotope_id"])  # counts only — skip the positions
@@ -63,15 +53,15 @@ def main():
     # Expected measured decays per isotope: N_j = P_j(D) · survival.
     rows = []
     print(f"\nscenario '{args.scenario}'  ({meta['phantom_material']}, "
-          f"{args.dose:g} Gy; t_irr={args.t_irr:g}, t_del={args.t_del:g}, "
-          f"t_meas={args.t_meas:g} s)")
+          f"{args.dose:g} Gy; t_irr={scenario.t_irr_s:g}, "
+          f"t_del={scenario.t_del_s:g}, t_meas={scenario.t_meas_s:g} s)")
     print(f"{'iso':>5} {'build':>6} {'transp':>7} {'window':>7} "
           f"{'P_j(D)':>10} {'N_j':>10}")
     print("-" * 50)
     for iid in sorted(ISOTOPES):
         lam = ISOTOPES[iid].lam
         pj = counts.get(iid, 0) * args.dose / t_dose
-        b, tr, w = survival(lam, args.t_irr, args.t_del, args.t_meas)
+        b, tr, w = scenario.factors(lam)
         n_exp = pj * b * tr * w
         rows.append((iid, n_exp))
         print(f"{ISOTOPES[iid].name:>5} {b:>6.3f} {tr:>7.3f} {w:>7.3f} "
@@ -90,9 +80,13 @@ def main():
 
     meta_out = {
         "scenario": args.scenario,
+        "scenario_config": str(scenario.config_path),
+        "scenario_config_sha256": scenario.config_sha256,
         "source_file": "emitters.csv",
         "dose_Gy": args.dose,
-        "t_irr_s": args.t_irr, "t_del_s": args.t_del, "t_meas_s": args.t_meas,
+        "t_irr_s": scenario.t_irr_s,
+        "t_del_s": scenario.t_del_s,
+        "t_meas_s": scenario.t_meas_s,
         "target_dose_Gy": t_dose,
     }
     mpath = os.path.join(args.data_dir, f"sampling_budget_{args.scenario}_meta.csv")

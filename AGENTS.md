@@ -335,7 +335,7 @@ warns at run time if the target-box centre is in air.
 ```bash
 RUN=data/runs/cylinder_sobp_1e7
 python3 decay_sampling/budget.py     $RUN              # -> $RUN/sampling_budget_inroom.csv (measured N_j)
-python3 decay_sampling/budget.py     $RUN --scenario fast --t-del 60
+python3 decay_sampling/budget.py     $RUN --scenario fast
 python3 decay_sampling/budget_gen.py $RUN              # -> $RUN/sampling_realizations_inroom.csv (Poisson draws)
 python3 analysis_transport/make_figures.py $RUN        # -> $RUN/figures/ (geometry-aware control plots)
 python3 tools/snapshot_scenario.py cylinder_sobp_1e7   # freeze into ~/Projects/ptcrysp-scenarios

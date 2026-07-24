@@ -10,13 +10,18 @@ from analysis_transport.xsections.channels import CHANNELS
 from analysis_transport.xsections.exposure_folding import (
     ChannelCurves,
     CrossSectionEnsemble,
+    ExposureMetadata,
     accumulate_step_exposure,
     distal_r50,
     fold_exposure,
     interpolate_curves,
+    load_exposure_metadata,
     validate_exposure_table,
+    validate_threshold_coverage,
     write_result,
 )
+from common.isotopes import ISOTOPES as ISOTOPE_DATA, NAME_TO_ID
+from decay_sampling.scenarios import resolve_scenario
 
 
 def constant_ensemble(nominal_mb=10.0, replica_scales=(0.5, 1.5)):
@@ -89,6 +94,18 @@ class ExposureSchemaTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "depth bins overlap"):
             validate_exposure_table(frame)
 
+    def test_overlapping_energy_bins_are_rejected_within_depth_bin(self):
+        frame = pd.DataFrame([
+            exposure_row(
+                "C12", 1.0, energy_low=10.0,
+                energy_high=20.0, energy_mean=15.0),
+            exposure_row(
+                "C12", 1.0, energy_low=19.0,
+                energy_high=25.0, energy_mean=22.0),
+        ])
+        with self.assertRaisesRegex(ValueError, "energy bins overlap"):
+            validate_exposure_table(frame)
+
     def test_step_accumulator_uses_weight_density_and_length(self):
         steps = pd.DataFrame({
             "target": ["O16", "O16"],
@@ -146,6 +163,47 @@ class CrossSectionInterpolationTests(unittest.TestCase):
             [0.0, 0.0],
         )
 
+    def test_grid_starting_above_threshold_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "above the 5 MeV reaction threshold"):
+            validate_threshold_coverage([6.0, 10.0], 5.0, "test")
+
+
+class ExposureMetadataTests(unittest.TestCase):
+    def test_companion_metadata_checks_hash_and_normalization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            exposure_path = root / "exposure.csv"
+            pd.DataFrame([exposure_row("C12", 1.0)]).to_csv(
+                exposure_path, index=False)
+            import hashlib
+            digest = hashlib.sha256(exposure_path.read_bytes()).hexdigest()
+            document = {
+                "schema_version": 1,
+                "run_id": "test",
+                "exposure_file": "exposure.csv",
+                "exposure_sha256": digest,
+                "n_protons": 100.0,
+                "target_dose_Gy": 2.0,
+                "Np_per_Gy": 50.0,
+                "physics_list": "QGSP_BIC_HP",
+                "geant4_version": "test",
+                "random_seed": 7,
+                "software_revision": "abc",
+                "beam_axis": "z",
+                "depth_origin": "phantom entrance",
+                "depth_unit": "mm",
+                "energy_edges_MeV": [19.0, 21.0],
+                "depth_edges_mm": [0.0, 1.0],
+            }
+            meta_path = root / "exposure_meta.json"
+            meta_path.write_text(json.dumps(document))
+            metadata = load_exposure_metadata(meta_path, exposure_path)
+            self.assertEqual(metadata.Np_per_Gy, 50.0)
+            document["Np_per_Gy"] = 40.0
+            meta_path.write_text(json.dumps(document))
+            with self.assertRaisesRegex(ValueError, "inconsistent"):
+                load_exposure_metadata(meta_path, exposure_path)
+
 
 class ExposureFoldingTests(unittest.TestCase):
     def setUp(self):
@@ -159,7 +217,7 @@ class ExposureFoldingTests(unittest.TestCase):
         result = fold_exposure(frame, self.ensemble)
         contribution = result.nominal_channel_contributions.iloc[0]
         expected = exposure * 10.0e-27
-        self.assertAlmostEqual(contribution["expected_nuclei"], expected)
+        self.assertAlmostEqual(contribution["expected_nuclei_run"], expected)
 
     def test_two_target_channels_add_to_c11(self):
         frame = pd.DataFrame([
@@ -168,12 +226,36 @@ class ExposureFoldingTests(unittest.TestCase):
         ])
         result = fold_exposure(frame, self.ensemble)
         profile = result.nominal_isotope_profiles
-        c11 = profile.loc[profile["isotope"] == "C11", "expected_nuclei"].iloc[0]
-        o15 = profile.loc[profile["isotope"] == "O15", "expected_nuclei"].iloc[0]
-        n13 = profile.loc[profile["isotope"] == "N13", "expected_nuclei"].iloc[0]
+        c11 = profile.loc[
+            profile["profile_label"] == "C11", "expected_count_run"].iloc[0]
+        o15 = profile.loc[
+            profile["profile_label"] == "O15", "expected_count_run"].iloc[0]
+        n13 = profile.loc[
+            profile["profile_label"] == "N13", "expected_count_run"].iloc[0]
         self.assertAlmostEqual(c11, 30.0)
         self.assertAlmostEqual(o15, 20.0)
         self.assertAlmostEqual(n13, 20.0)
+        self.assertEqual(
+            set(profile["profile_label"]),
+            {"C11", "O15", "N13", "all_production", "all_inroom"},
+        )
+
+    def test_inroom_aggregate_uses_named_handoff_factors(self):
+        frame = pd.DataFrame([
+            exposure_row("C12", 1.0e27),
+            exposure_row("O16", 2.0e27),
+        ])
+        result = fold_exposure(frame, self.ensemble)
+        profile = result.nominal_isotope_profiles.set_index("profile_label")
+        scenario = resolve_scenario("inroom")
+        expected = sum(
+            profile.loc[name, "expected_count_run"]
+            * scenario.measured_fraction(ISOTOPE_DATA[NAME_TO_ID[name]].lam)
+            for name in ("C11", "O15", "N13")
+        )
+        self.assertAlmostEqual(
+            profile.loc["all_inroom", "expected_count_run"], expected)
+        self.assertEqual(profile.loc["all_inroom", "quantity"], "measured_decays")
 
     def test_replicas_scale_same_frozen_exposure(self):
         rows = []
@@ -184,12 +266,12 @@ class ExposureFoldingTests(unittest.TestCase):
         result = fold_exposure(pd.DataFrame(rows), self.ensemble)
         summary = result.production_summary
         nominal = summary[(summary["model"] == "nominal")
-                          & (summary["isotope"] == "C11")].iloc[0]
+                          & (summary["profile_label"] == "C11")].iloc[0]
         replicas = summary[(summary["model"] == "replica")
-                           & (summary["isotope"] == "C11")]
+                           & (summary["profile_label"] == "C11")]
         np.testing.assert_allclose(
-            replicas["expected_nuclei"],
-            nominal["expected_nuclei"] * np.array([0.5, 1.5]),
+            replicas["expected_count_run"],
+            nominal["expected_count_run"] * np.array([0.5, 1.5]),
         )
         np.testing.assert_allclose(replicas["R50_shift_mm"], [0.0, 0.0])
 
@@ -206,9 +288,9 @@ class ExposureFoldingTests(unittest.TestCase):
         coarse_result = fold_exposure(coarse, self.ensemble)
         fine_result = fold_exposure(fine, self.ensemble)
         coarse_yield = coarse_result.nominal_channel_contributions[
-            "expected_nuclei"].sum()
+            "expected_nuclei_run"].sum()
         fine_yield = fine_result.nominal_channel_contributions[
-            "expected_nuclei"].sum()
+            "expected_nuclei_run"].sum()
         self.assertAlmostEqual(coarse_yield, fine_yield)
 
     def test_binned_fold_matches_direct_step_sum_for_linear_curve(self):
@@ -236,7 +318,7 @@ class ExposureFoldingTests(unittest.TestCase):
         result = fold_exposure(exposure, ensemble)
         folded = result.nominal_channel_contributions.loc[
             result.nominal_channel_contributions["channel_id"]
-            == "p_C12_x_C11", "expected_nuclei"].sum()
+            == "p_C12_x_C11", "expected_nuclei_run"].sum()
         direct = np.sum(
             steps["proton_weight"]
             * steps["target_number_density_cm3"]
@@ -259,10 +341,12 @@ class ExposureFoldingTests(unittest.TestCase):
                     depth_low=float(depth), depth_high=float(depth + 1),
                 ))
         result = fold_exposure(pd.DataFrame(rows), ensemble)
-        self.assertEqual(len(result.replica_isotope_profiles), 1000 * 4 * 3)
-        self.assertEqual(len(result.production_summary), (1000 + 1) * 4)
+        self.assertEqual(len(result.replica_isotope_profiles), 1000 * 5 * 3)
+        self.assertEqual(len(result.production_summary), (1000 + 1) * 5)
         self.assertTrue(
-            np.isfinite(result.production_summary["expected_nuclei"]).all())
+            np.isfinite(result.production_summary["expected_count_run"]).all())
+        self.assertEqual(len(result.profile_bands), 5 * 3)
+        self.assertEqual(len(result.uncertainty_summary), 5)
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             write_result(result, output, cross_sections=ensemble)
@@ -284,11 +368,82 @@ class ExposureFoldingTests(unittest.TestCase):
                 {
                     "nominal_channel_contributions.csv",
                     "nominal_isotope_profiles.csv",
-                    "replica_isotope_profiles.csv",
+                    "replica_isotope_profiles.csv.gz",
+                    "profile_bands.csv",
                     "production_summary.csv",
+                    "uncertainty_summary.csv",
                     "folding_meta.json",
                 },
             )
+
+    def test_result_writer_can_omit_replica_profiles(self):
+        result = fold_exposure(
+            pd.DataFrame([exposure_row("C12", 1.0e27)]), self.ensemble)
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            write_result(
+                result, output, cross_sections=self.ensemble,
+                write_replica_profiles=False)
+            self.assertFalse((output / "replica_isotope_profiles.csv.gz").exists())
+
+    def test_result_writer_records_scenario_and_native_route_fraction(self):
+        result = fold_exposure(
+            pd.DataFrame([exposure_row("C12", 1.0e27)]), self.ensemble)
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            route_path = output / "native_route_summary.csv"
+            pd.DataFrame([
+                {
+                    "profile_label": "all_production",
+                    "modeled_count": 90.0,
+                    "unmodeled_count": 10.0,
+                    "total_count": 100.0,
+                    "unmodeled_fraction": 0.10,
+                },
+                {
+                    "profile_label": "all_inroom",
+                    "modeled_count": 45.0,
+                    "unmodeled_count": 2.0,
+                    "total_count": 47.0,
+                    "unmodeled_fraction": 2.0 / 47.0,
+                },
+            ]).to_csv(route_path, index=False)
+            scenario = resolve_scenario("inroom")
+            write_result(
+                result,
+                output / "fold",
+                cross_sections=self.ensemble,
+                scenario=scenario,
+                native_route_summary_path=route_path,
+                write_replica_profiles=False,
+            )
+            metadata = json.loads(
+                (output / "fold/folding_meta.json").read_text())
+            self.assertEqual(metadata["handoff_scenario"]["name"], "inroom")
+            self.assertFalse(
+                metadata["native_route_diagnostic"]["affects_folded_source"])
+            self.assertEqual(
+                len(metadata["native_route_diagnostic"]["fractions"]), 2)
+
+    def test_run_per_proton_and_per_gy_normalizations_are_consistent(self):
+        metadata = ExposureMetadata.synthetic()
+        metadata = ExposureMetadata(
+            **{
+                **metadata.__dict__,
+                "n_protons": 10.0,
+                "target_dose_Gy": 2.0,
+                "Np_per_Gy": 5.0,
+            }
+        )
+        result = fold_exposure(
+            pd.DataFrame([exposure_row("C12", 1.0e27)]),
+            self.ensemble,
+            metadata,
+        )
+        row = result.nominal_isotope_profiles.loc[
+            result.nominal_isotope_profiles["profile_label"] == "C11"].iloc[0]
+        self.assertAlmostEqual(row["expected_count_per_proton"], row["expected_count_run"] / 10.0)
+        self.assertAlmostEqual(row["expected_count_per_Gy"], row["expected_count_run"] / 2.0)
 
 
 class DistalEdgeTests(unittest.TestCase):
