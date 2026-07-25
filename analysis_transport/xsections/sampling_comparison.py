@@ -18,6 +18,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from math import log
+from common.isotopes import ISOTOPES as ISOTOPE_TABLE, NAME_TO_ID
+from decay_sampling.scenarios import DEFAULT_SCENARIO_CONFIG, resolve_scenario
+
 from .exposure_folding import distal_r50, load_exposure_metadata
 
 ISOTOPES = ("O15", "C11", "N13")
@@ -109,6 +113,47 @@ def analyze(run_dir: Path, repo: Path):
                                              combined_g4),
         "R50_fold_mm": distal_r50(centres, combined_fold),
     })
+    # Scenario-weighted profiles: the handoff factors of each named
+    # acquisition scenario applied to both tallies. The compensation seen in
+    # raw production depends on the isotope weights; these rows measure how
+    # the paired displacement moves with the acquisition timing.
+    for scenario_name in ("inroom", "fast", "offline"):
+        scenario = resolve_scenario(scenario_name, DEFAULT_SCENARIO_CONFIG)
+        factors = {
+            isotope: scenario.measured_fraction(
+                log(2.0) / ISOTOPE_TABLE[NAME_TO_ID[isotope]].half_life_s)
+            for isotope in ISOTOPES
+        }
+        weighted_data = sum(factors[i] * profiles[i][0] for i in ISOTOPES)
+        weighted_g4 = sum(factors[i] * profiles[i][1] for i in ISOTOPES)
+        rng = np.random.default_rng(9)
+        boot = []
+        for _ in range(400):
+            a = distal_r50(centres,
+                           sum(factors[i] * rng.poisson(profiles[i][0])
+                               for i in ISOTOPES))
+            b = distal_r50(centres,
+                           sum(factors[i] * rng.poisson(profiles[i][1])
+                               for i in ISOTOPES))
+            if np.isfinite(a) and np.isfinite(b):
+                boot.append(a - b)
+        rows.append({
+            "isotope": f"combined_{scenario_name}",
+            "sampled_count": float(weighted_data.sum()),
+            "native_count": float(weighted_g4.sum()),
+            "folded_expected": float("nan"),
+            "sampled_per_Gy": weighted_data.sum() / metadata.target_dose_Gy,
+            "native_per_Gy": weighted_g4.sum() / metadata.target_dose_Gy,
+            "yield_ratio_data_over_g4":
+                weighted_data.sum() / weighted_g4.sum(),
+            "sampled_over_folded": float("nan"),
+            "R50_data_mm": distal_r50(centres, weighted_data),
+            "R50_g4_mm": distal_r50(centres, weighted_g4),
+            "delta_R50_mm": distal_r50(centres, weighted_data)
+            - distal_r50(centres, weighted_g4),
+            "delta_R50_err_mm": float(np.std(boot)) if boot else float("nan"),
+            "R50_fold_mm": float("nan"),
+        })
     summary = pd.DataFrame(rows)
 
     # Positron-range check against the stageA native reference.

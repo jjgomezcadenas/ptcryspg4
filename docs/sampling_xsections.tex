@@ -273,20 +273,61 @@ the native model produces no residuals below a proton energy of about
 \SI{17.9}{MeV} threshold; the missing near-threshold production sits at the
 deepest part of the $^{11}$C profile, and the data-driven edge is therefore
 several millimetres deeper.  For $^{13}$N the native model produces less
-than half of the measured yield.  In the combined profile these effects
-balance at this field: the net displacement is consistent with zero within
-half a millimetre, while the per-isotope edges move by millimetres --- the
-compensation is a property of this field and isotope mix, not of the models.
+than half of the measured yield.  In the raw combined profile these effects
+balance at this field, and the net displacement is consistent with zero.
+The scenario-weighted rows of Table~\ref{tab:delta} measure what that
+balance is worth: applying the decay-and-acquisition factors of the named
+timing scenarios reweights the isotopes, and the paired displacement moves
+from $+0.34\pm0.55$ mm (in-room) to $+2.59\pm0.55$ mm (offline), where the
+long delay suppresses $^{15}$O and the measured profile is carried by
+$^{11}$C.
 
 The native tally counts the residuals of all projectiles of the internal
 model, so the comparison prices the complete replacement of the production
 model; the projectile-resolved counters separate the proton-induced part
 when required.
 
-The same sampling machinery extends directly to the uncertainty band: each
-of the 1000 replica curves defines its own $\sigma_c(E)$, and the spread of
-the resulting edges gives the cross-section uncertainty of $R_{50}$.  That
-propagation, and its efficient implementation, are specified in
-\file{docs/xsections\_plan.tex} and \file{docs/shared\_plan.tex}.
+\section{Conclusions}
+
+The comparison separates cleanly what the transport code does well from
+what it cannot do.
+
+\emph{The transport is sound and is kept.}  The application used here
+reproduces the established Stage-A calculation with the same beam, phantom
+and physics settings: the target dose per proton agrees to $0.02\%$, the
+central-axis dose profile to a fraction of a percent across the field, and
+the distal dose edge to \SI{0.024}{mm}.  The positron ranges of the sampled
+emitters match the per-isotope references.  Geant4 is the transport engine
+of this calculation, and every number in this note relies on it.
+
+\emph{The native production model is disqualified for activity
+calculations.}  Its per-isotope predictions are wrong at the scale that
+matters for range verification: the $^{11}$C edge by $+5.4\pm1.0$~mm
+(production absent below $\sim$\SI{50}{MeV} against a measured threshold of
+\SI{17.9}{MeV}), the $^{13}$N yield by a factor 2.5 and its edge by
+$+14\pm4$~mm, the $^{15}$O edge by $-1.5\pm0.4$~mm, the total yield by
+10\%, and the offline-weighted activity by 21\%.  A technique whose
+specification is millimetre accuracy on an activity edge cannot be built on
+a production model with millimetre-to-centimetre edge errors per isotope.
+
+\emph{The combined-profile agreement is compensation, and the acquisition
+timing exposes it.}  The raw combined displacement, $+0.36\pm0.54$~mm,
+comes from opposite-signed per-isotope errors cancelling at this particular
+field and isotope mix.  Reweighting the same profiles by the acquisition
+scenarios moves the displacement to $+0.16\pm0.60$~mm (fast),
+$+0.34\pm0.55$~mm (in-room) and $+2.59\pm0.55$~mm (offline): the error of
+the native model in the measured edge depends on when one images.  A model
+wrong isotope by isotope is right in combination only by accident, and the
+accident does not survive a change of timing.
+
+The calculation therefore takes its production from the fitted measurements
+and its transport from Geant4.  The same sampling machinery extends
+directly to the uncertainty band: each of the 1000 replica curves defines
+its own $\sigma_c(E)$, and the spread of the resulting edges gives the
+cross-section uncertainty of $R_{50}$ --- at this field a band of about
+$\pm0.2$~mm on the production edge, an order of magnitude below the model
+displacement it replaces.  That propagation, and its efficient
+implementation, are specified in \file{docs/xsections\_plan.tex} and
+\file{docs/shared\_plan.tex}.
 
 \end{document}
