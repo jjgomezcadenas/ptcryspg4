@@ -354,6 +354,97 @@ given run, the transport-model dependence (the planned
 BIC/INCL++/Bertini exposure envelope) and all detector effects are
 separate terms, accounted for downstream.
 
+\section{One transported sample for every replica: the source bank}
+\label{sec:bank}
+
+The per-step sampling of Sec.~3 is exact for one curve set.  Propagating
+the 1000 replicas through the positron and detector stages the same way
+would cost 1000 proton transports and 1000 detector simulations.  Two facts
+permit sharing one simulation among all curves: the proton transport does
+not depend on the production cross sections (the sampler-on and sampler-off
+runs are identical), and the fate of an emitter --- positron slowing,
+annihilation, photons, detector response --- depends only on its isotope
+and position, never on the curve that priced its birth.
+
+\subsection{Definition}
+
+During the one proton transport, segment--channel candidates $(s,c)$ are
+kept with probability
+\begin{equation}
+  q_{s,c} = \min\!\bigl(1,\;
+  \alpha\, n_{t(c),s}\,\ell_s\,\sigma^{\mathrm{env}}_{c}(E_s)\bigr),
+  \label{eq:bank-q}
+\end{equation}
+where $\sigma^{\mathrm{env}}_{c}(E)$ is a fixed curve chosen at or above
+every replica of channel $c$, and the constant $\alpha$ sets the bank size.
+Each kept entry stores a permanent identifier, the channel (hence target
+and isotope), the position, the proton energy $E_s$, the material factor
+$n_{t(c),s}\ell_s$, and $q_{s,c}$ itself.
+
+\subsection{Unbiasedness}
+
+For any curve $\sigma_c$ and any spatial bin $m$, the bank estimator of the
+production is the sum over kept entries of the entry weight
+\begin{equation}
+  w_{s,c} = \frac{n_{t(c),s}\,\ell_s\,\sigma_c(E_s)}{q_{s,c}}.
+  \label{eq:bank-weight}
+\end{equation}
+Its expectation over the keep/discard draws is exact,
+\begin{equation}
+  \mathrm{E}\Bigl[\sum_{(s,c)\ \mathrm{kept},\ s\in m} w_{s,c}\Bigr]
+  = \sum_{(s,c),\ s\in m} n_{t(c),s}\,\ell_s\,\sigma_c(E_s)
+  = P_{c,m},
+  \label{eq:bank-unbiased}
+\end{equation}
+because each candidate enters with probability $q_{s,c}$ and contributes
+$1/q_{s,c}$ when it does.  The sampling curve cancels identically: it never
+appears in a physics result, only in the noise.  The one requirement is
+$q_{s,c}>0$ wherever any replica produces, which the envelope guarantees.
+
+\subsection{Weight control}
+
+For replica $r$ the weight is proportional to
+$\sigma^{(r)}_c(E)/\sigma^{\mathrm{env}}_c(E)\le 1$: bounded above by
+construction, so no replica's estimate is carried by a few inflated
+entries.  The efficiency of the bank for a given replica and channel is
+measured by the effective sample size
+\begin{equation}
+  \mathrm{ESS} = \frac{\bigl(\sum w\bigr)^2}{\sum w^2},
+  \label{eq:ess}
+\end{equation}
+the number of equally weighted entries the weighted set is worth.  The
+acceptance criterion of the implementation is an ESS floor per channel and
+per replica.
+
+\subsection{Use}
+
+Every bank entry is transported once: the residual ion created at rest at
+its position, the positron to its annihilation point, and downstream the
+two photons through phantom and scanner, every recorded signal carrying the
+entry's identifier.  Any observable of replica $r$ --- production profile,
+isotope budget, activity profile, detected image --- is then the \emph{same}
+recorded sample summed with the weights of Eq.~\eqref{eq:bank-weight}
+evaluated at $\sigma^{(r)}$:
+\begin{equation}
+  P^{(r)}_{j}(z_m)=\sum_{\mathrm{kept}\ (s,c),\, c\to j,\, s\in m}
+  w^{(r)}_{s,c},
+  \qquad
+  A^{(r)}_{j}(z_m)=f_j\,P^{(r)}_{j}(z_m),
+  \label{eq:bank-observables}
+\end{equation}
+with $f_j$ the per-isotope decay-and-acquisition factor of the named timing
+scenario.  Evaluating a replica costs one interpolation of its curves at
+the stored energies and one division per entry; the thousand-replica
+ensemble costs arithmetic, not simulation.
+
+\subsection{Acceptance}
+
+Two checks certify a bank before use.  The weighted nominal must reproduce
+the independently sampled nominal source of Sec.~3 --- the naive procedure
+as referee --- in yields, profiles and edges within their statistics; and
+the ESS floor must hold for every channel and every replica.  The measured
+values enter here when the implementation runs.
+
 \section{Conclusions}
 
 The comparison separates cleanly what the transport code does well from
