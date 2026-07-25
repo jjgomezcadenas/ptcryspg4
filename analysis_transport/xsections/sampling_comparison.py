@@ -219,6 +219,22 @@ def analyze(run_dir: Path, repo: Path):
     if ranges:
         pd.DataFrame(ranges).to_csv(generated / "positron_ranges.csv",
                                     index=False, lineterminator="\n")
+    # Cross-section systematic of the data-driven edge, from the replica fold.
+    uncertainty = pd.read_csv(run_dir / "folding/uncertainty_summary.csv")
+    band_labels = {"O15": "$^{15}$O", "C11": "$^{11}$C", "N13": "$^{13}$N",
+                   "all_production": "combined (production)",
+                   "all_inroom": "combined (in-room weighted)"}
+    with (generated / "systematic_band.tex").open("w", encoding="utf-8") as stream:
+        stream.write("\\begin{tabular}{lrr}\n\\toprule\n")
+        stream.write("Profile & $R_{50}$ (mm) & "
+                     "$u_{\\mathrm{xs}}$ (mm) \\\\\n\\midrule\n")
+        for key in ("O15", "C11", "N13", "all_production", "all_inroom"):
+            row = uncertainty[uncertainty.profile_label == key].iloc[0]
+            stream.write(
+                f"{band_labels[key]} & {row.R50_nominal_mm:.2f} & "
+                f"$\\pm${row.R50_shift_half_width_mm:.2f} \\\\\n")
+        stream.write("\\bottomrule\n\\end{tabular}\n")
+
     with (generated / "delta_r50.tex").open("w", encoding="utf-8") as stream:
         stream.write("\\begin{tabular}{lrrrrr}\n\\toprule\n")
         stream.write("Isotope & $N^{\\mathrm{data}}$/Gy & $N^{\\mathrm{G4}}$/Gy"

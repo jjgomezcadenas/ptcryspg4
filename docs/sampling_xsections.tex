@@ -290,6 +290,70 @@ model, so the comparison prices the complete replacement of the production
 model; the projectile-resolved counters separate the proton-induced part
 when required.
 
+\section{The cross-section systematic of the distal edge}
+\label{sec:systematic}
+
+Replacing the internal production model by fitted curves does more than move
+the edge to the measured place: it makes the edge's uncertainty a computable
+number.  This section defines that number and reports it.
+
+The fit of each channel provides, beyond the nominal curve, 1000 replica
+curves --- complete alternative excitation functions, each consistent with
+the world data, the quoted point errors, the campaign structure and the
+documented normalizations (\file{docs/xsection\_fit.tex}).  A replica is a
+coherent ``possible world'': one full set of five curves, correlated across
+energy.  The uncertainty of any quantity computed from the curves is the
+spread of that quantity over the replicas.
+
+Propagation costs no new transport.  The proton exposure
+$K_{t,k,m}$ --- how much beam crossed how much of target $t$ at energy bin
+$k$ and depth bin $m$ --- does not depend on the production cross sections,
+so one frozen transport serves every replica.  For replica $r$, the
+production profile of isotope $j$ is the fold
+\begin{equation}
+  P_j^{(r)}(z_m) = \sum_{k}\sum_{c\to j} K_{t(c),k,m}\,
+  \sigma_c^{(r)}(\bar E_{k}),
+  \label{eq:replica-fold}
+\end{equation}
+its edge is $R_{50}^{(r)}$, and the paired displacement from the nominal
+curve, $b^{(r)} = R_{50}^{(r)}-R_{50}^{(\mathrm{nom})}$, isolates the
+cross-section variation from everything shared.  With $q_{16}$ and $q_{84}$
+the percentiles of the $b^{(r)}$ distribution, the reported systematic is
+\begin{equation}
+  u_{\mathrm{xs}}=\frac{q_{84}-q_{16}}{2}.
+  \label{eq:uxs}
+\end{equation}
+
+One approximation enters Eq.~\eqref{eq:replica-fold}: the cross section is
+evaluated at the exposure-weighted mean energy of each bin.  Its accuracy is
+a measured property, not an assumption: coarsened tables, folded with all
+1000 replicas and compared replica by replica, quantify the binning effect
+directly.  On the frozen production grid of \SI{1.0}{MeV} the largest
+paired edge change is \SI{0.002}{mm} --- two orders of magnitude below the
+band --- while a \SI{2}{MeV} grid already fails at the $^{13}$N resonances
+(\SI{0.134}{mm}).  The decision record lives in
+\path{data/xsections/convergence}.
+
+\begin{table}[htbp]
+\centering
+\caption{The data-driven distal edges and their cross-section systematic
+$u_{\mathrm{xs}}$ (Eq.~\eqref{eq:uxs}), from the 1000-replica fold of the
+standard field.}
+\label{tab:band}
+\input{\generateddir/systematic_band.tex}
+\end{table}
+
+Table~\ref{tab:band} gives the result.  The combined production edge
+carries $u_{\mathrm{xs}} = \pm0.13$~mm, and the in-room-weighted edge
+$\pm0.12$~mm --- ten to forty times smaller than the per-isotope model
+displacements of Table~\ref{tab:delta} that the fitted curves replace.
+$^{13}$N carries the largest band ($\pm0.52$~mm), the honest imprint of its
+resonance-region data spread.  These numbers are the production-stage
+systematic from the production cross sections alone: the statistics of a
+given run, the transport-model dependence (the planned
+BIC/INCL++/Bertini exposure envelope) and all detector effects are
+separate terms, accounted for downstream.
+
 \section{Conclusions}
 
 The comparison separates cleanly what the transport code does well from
