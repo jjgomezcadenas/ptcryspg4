@@ -375,21 +375,25 @@ kept with probability
   \alpha\, n_{t(c),s}\,\ell_s\,\sigma^{\mathrm{env}}_{c}(E_s)\bigr),
   \label{eq:bank-q}
 \end{equation}
-where $\sigma^{\mathrm{env}}_{c}(E)$ is a fixed curve chosen at or above
-every replica of channel $c$, and the constant $\alpha$ sets the bank size.
-Each kept entry stores a permanent identifier, the channel (hence target
-and isotope), the position, the proton energy $E_s$, the material factor
-$n_{t(c),s}\ell_s$, and $q_{s,c}$ itself.
+where $n_{t(c),s}\,\ell_s$ is the segment's exposure --- the number
+density of the channel's target isotope in the segment's material times the
+segment length, as in Eq.~\eqref{eq:mu} --- $\sigma^{\mathrm{env}}_{c}(E)$
+is a fixed curve chosen at or above every replica of channel $c$, and the
+constant $\alpha$ sets the bank size.  Each kept entry stores a permanent
+identifier, the channel (hence target and isotope), the position, the
+proton energy $E_s$, its exposure $n_{t(c),s}\ell_s$, and $q_{s,c}$
+itself.
 
 \subsection{Unbiasedness}
 
-For any curve $\sigma_c$ and any spatial bin $m$, the bank estimator of the
-production is the sum over kept entries of the entry weight
+For any curve $\sigma_c$, each kept entry carries the weight
 \begin{equation}
   w_{s,c} = \frac{n_{t(c),s}\,\ell_s\,\sigma_c(E_s)}{q_{s,c}}.
   \label{eq:bank-weight}
 \end{equation}
-Its expectation over the keep/discard draws is exact,
+The bank estimator of the production in a spatial bin $m$ is the sum of the
+weights of the entries lying in that bin, and its expectation over the
+keep/discard draws is exact,
 \begin{equation}
   \mathrm{E}\Bigl[\sum_{(s,c)\ \mathrm{kept},\ s\in m} w_{s,c}\Bigr]
   = \sum_{(s,c),\ s\in m} n_{t(c),s}\,\ell_s\,\sigma_c(E_s)
@@ -418,9 +422,10 @@ per replica.
 
 \subsection{Use}
 
-Every bank entry is transported once: the residual ion created at rest at
-its position, the positron to its annihilation point, and downstream the
-two photons through phantom and scanner, every recorded signal carrying the
+Every bank entry is realized once in Geant4: the residual ion is created
+at rest at the entry's position and decays with its natural kinetics; the
+positron is transported to its annihilation point; downstream, the two
+photons traverse phantom and scanner.  Every recorded signal carries the
 entry's identifier.  Any observable of replica $r$ --- production profile,
 isotope budget, activity profile, detected image --- is then the \emph{same}
 recorded sample summed with the weights of Eq.~\eqref{eq:bank-weight}
