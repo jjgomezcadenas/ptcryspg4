@@ -62,6 +62,21 @@ G4double EnsembleDetector::PhantomMass() const {
   return fPhantomLV ? fPhantomLV->GetMass() : 0.;
 }
 
+bool EnsembleDetector::ContainsOnAxis(G4double z) const {
+  using namespace ensemble;
+  if (fCli.geometry == kGeometryCylinder) return std::abs(z) <= fHalfZ;
+  // Ellipsoid head in world frame: semi-axes and centre after placement.
+  double ax, ay, az, cy;
+  if (fCli.geometry == kGeometryUniformHeadEP) {
+    ax = kScalpAxMM; ay = kScalpCzMM; az = kScalpByMM; cy = kTumourPosZMM;
+  } else {  // uniform_head, lateral placement
+    ax = kScalpCzMM; ay = kScalpByMM; az = kScalpAxMM; cy = 0.;
+  }
+  const double fy = (0. - cy) / ay;
+  const double fz = (z / mm) / az;
+  return fy * fy + fz * fz <= 1.0;
+}
+
 G4double EnsembleDetector::TargetMass() const {
   if (!fPhantomLV) return 0.;
   const G4double length = fTargetDist - fTargetProx;

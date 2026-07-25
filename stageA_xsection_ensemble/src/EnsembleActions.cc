@@ -442,8 +442,12 @@ void EnsembleRunAction::EndOfRunAction(const G4Run* base_run) {
     const double vbin = pi * rcore * rcore * (binw * mm);
     for (int i = 0; i < run->DepthBins(); ++i) {
       const double zc = -run->HalfZmm() + (i + 0.5) * binw;
+      // Dose-to-medium is defined only where the axis crosses the phantom
+      // (stageA convention: air bins report zero dose).
       const double doseGy =
-          ((run->EdepZCore()[i] * MeV) / (rho * vbin)) / gray;
+          fDet.ContainsOnAxis(zc * mm)
+              ? ((run->EdepZCore()[i] * MeV) / (rho * vbin)) / gray
+              : 0.;
       f << zc << ',' << run->EdepZTotal()[i] << ',' << run->EdepZPrimary()[i]
         << ',' << run->EdepZCore()[i] << ',' << doseGy << '\n';
     }

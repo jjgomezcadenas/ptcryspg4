@@ -216,6 +216,15 @@ SHA-256, the repository revision and `Np_per_Gy = n_protons/target_dose_Gy`,
 writes `exposure_meta.json`, and runs the exposure, metadata and native-route
 validators on the finished directory.
 
+`analysis_transport/xsections/make_scenario.py` then completes the directory
+into the stageA scenario form: `run_meta.csv` (stageA columns plus the
+additive provenance `production_model`, `sampling_curves_sha256`,
+`fit_meta_sha256`), `phantom_regions.csv`, `isotopes.csv`, and the
+per-isotope sampling budgets via `decay_sampling/budget.py` for the named
+scenarios. The result passes `analysis_transport/check_run.py` and is read
+by the PTCryspMC.jl scenario reader and `tools/snapshot_scenario.py`
+unchanged.
+
 ## Direct-folding products
 
 `analysis_transport/xsections/exposure_folding.py` combines the exposure table

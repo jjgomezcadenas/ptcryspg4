@@ -26,6 +26,8 @@ class EnsembleDetector : public G4VUserDetectorConstruction {
   G4double TargetProxZ() const { return -fHalfZ + fTargetProx; }
   G4double TargetDistZ() const { return -fHalfZ + fTargetDist; }
   G4double TargetRadius() const { return fTargetRadius; }
+  /// True when the on-axis point (0,0,z) lies inside the phantom medium.
+  bool ContainsOnAxis(G4double z) const;
 
  private:
   const ensemble::EnsembleCli& fCli;

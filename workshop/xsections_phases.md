@@ -186,9 +186,30 @@ per-isotope ±0.11 (C11), ±0.17 (O15), ±0.52 mm (N13).
 
 **Status: complete.**
 
+## Phase 3a — scenario assembly for the data-driven source
+
+**Goal.** A sampling run becomes a complete, detector-consumable scenario
+directory with no detector-side code changes.
+
+**Done.** `make_scenario.py` writes `run_meta.csv` (stageA columns +
+additive provenance: production model, sampling-curves and fit digests),
+`phantom_regions.csv`, `isotopes.csv`, and drives `budget.py` for the
+inroom/fast/offline budgets. The exposure app zeroes `dose_core` on air
+bins (stageA convention) via geometry-aware on-axis containment.
+
+**Acceptance.** `check_run.py`: all 13 checks pass on the 1e7 data-driven
+run. PTCryspMC `load_scenario` reads the directory unchanged: pools
+127007/76833/14237 (O15/C11/N13), in-room 1 Gy budgets 3.81e7 / 2.43e7 /
+6.28e6 measured decays — the +31% C11 and +50% N13 against the native
+scenario reproduce the comparison's yield ratios — and a 6.8e7-event
+realization materializes.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
-- Phase 3: source bank writer + variant-source mode
-  (`docs/xsections_plan.tex`).
+- Phase 3b/3c/3d: source bank writer, the 1e8 production run and scenario
+  freeze, detector-study reruns (`docs/xsections_plan.tex`,
+  `docs/sampling_xsections.tex` Sec. bank).
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,
   weights evaluator, resampler (`docs/shared_plan.tex`;
   `PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`).
