@@ -1,0 +1,234 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{siunitx}
+
+\IfFileExists{docs/figures/xsection_fit/channels_compact.pdf}{
+  \newcommand{\figuredir}{docs/figures/xsection_fit}
+}{
+  \newcommand{\figuredir}{figures/xsection_fit}
+}
+
+\newcommand{\file}[1]{\texttt{#1}}
+
+\title{Sampling positron-emitter production\\from fitted cross sections}
+\author{J.J. G\'omez-Cadenas}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Five fitted excitation functions, with correlated uncertainty ensembles,
+describe the production of $^{11}$C, $^{13}$N and $^{15}$O by protons on the
+nuclei of tissue.  This note explains, step by step, how those curves replace
+the internal nuclear model of the transport code as the source of
+positron-emitter production, while the transport itself is unchanged.  The
+method is a per-step sampling: at every proton step, the fitted cross section
+decides whether an emitter is born there.  The deliverable is the paired
+comparison of the distal activity edge computed both ways,
+$\Delta = R_{50}^{\mathrm{data}} - R_{50}^{\mathrm{G4}}$, with identical
+proton histories, so the difference measures the production model alone.
+\end{abstract}
+
+\section{Starting point: five fitted excitation functions}
+
+The production of positron emitters by a therapeutic proton beam in tissue is
+dominated by five reaction channels,
+\begin{equation}
+\begin{split}
+  &^{12}\mathrm{C}(p,x)^{11}\mathrm{C},\qquad
+   ^{16}\mathrm{O}(p,x)^{15}\mathrm{O},\qquad
+   ^{16}\mathrm{O}(p,x)^{11}\mathrm{C},\\
+  &^{14}\mathrm{N}(p,x)^{13}\mathrm{N},\qquad
+   ^{16}\mathrm{O}(p,x)^{13}\mathrm{N}.
+\end{split}
+\label{eq:channels}
+\end{equation}
+For each channel $c$ we possess a fitted excitation function
+$\sigma_c(E)$ --- the production cross section as a function of proton kinetic
+energy --- built from curated experimental data, together with an ensemble of
+1000 correlated replica curves that represents its uncertainty.  The
+construction of these curves (data selection, fitting, replica generation) is
+documented in \file{docs/xsection\_fit.tex}.  Figure~\ref{fig:curves} shows
+the five nominal curves with their 16--84\% uncertainty bands and the
+measurements they are built from; Fig.~\ref{fig:anatomy} shows the complete
+diagnostic anatomy of one fit.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{\figuredir/channels_compact.pdf}
+\caption{The five fitted excitation functions.  Grey points: accepted
+experimental measurements.  Blue band: 16--84\% interval of the replica
+ensemble.  Black curve: the nominal fit (pointwise replica median).}
+\label{fig:curves}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{\figuredir/p_C12_x_C11.pdf}
+\caption{Anatomy of one fit, $^{12}$C(p,x)$^{11}$C: the fitted data and
+band, nine representative replicas, the replica-distance distribution, and
+the evaluated libraries as external comparisons.}
+\label{fig:anatomy}
+\end{figure}
+
+Each channel opens at its physical threshold, the lowest proton energy at
+which the reaction is energetically possible
+(Table~\ref{tab:thresholds}).  The curves are zero at and below threshold and
+are fitted from threshold to \SI{150}{MeV}, which covers the treatment field
+with margin.
+
+\begin{table}[htbp]
+\centering
+\caption{Adopted laboratory thresholds (AME2020 masses).}
+\label{tab:thresholds}
+\begin{tabular}{llS[table-format=2.2]}
+\toprule
+Channel & Lowest reaction & {Threshold (MeV)} \\
+\midrule
+$^{12}$C(p,x)$^{11}$C  & $^{12}$C(p,d)$^{11}$C            & 17.90 \\
+$^{16}$O(p,x)$^{15}$O  & $^{16}$O(p,d)$^{15}$O            & 14.29 \\
+$^{16}$O(p,x)$^{11}$C  & $^{16}$O(p,d+$\alpha$)$^{11}$C   & 25.17 \\
+$^{14}$N(p,x)$^{13}$N  & $^{14}$N(p,d)$^{13}$N            &  8.90 \\
+$^{16}$O(p,x)$^{13}$N  & $^{16}$O(p,$\alpha$)$^{13}$N     &  5.55 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{What we want to compute}
+
+The clinical observable of PET range verification is the distal edge of the
+activity profile: the depth at which the emitter production falls to half of
+its maximum, $R_{50}$.  The transport code (Geant4) predicts this edge using
+its own internal nuclear model for the reactions in
+Eq.~\eqref{eq:channels}.  The fitted curves of Fig.~\ref{fig:curves} are the
+experimental knowledge of the same reactions.  The question this note
+answers is:
+\begin{quote}
+\emph{by how much does the predicted distal edge move when the production
+cross sections of the internal model are replaced by the fitted experimental
+curves, everything else being identical?}
+\end{quote}
+The answer is one number per isotope (and one for the combined profile),
+\begin{equation}
+  \Delta_j = R_{50,j}^{\mathrm{data}} - R_{50,j}^{\mathrm{G4}},
+  \label{eq:delta}
+\end{equation}
+where ``data'' denotes production sampled from the fitted curves and ``G4''
+denotes production from the internal model, both evaluated on the same proton
+histories.
+
+\section{Production probability of one proton step}
+
+The transport code advances each proton (primary or secondary) in short
+steps.  Consider one step of length $\ell$ (cm) through a material that
+contains $n_t$ nuclei per cm$^3$ of target isotope $t$, taken by a proton of
+kinetic energy $E$ and statistical weight $a$.  The expected number of
+reactions through channel $c$ on this step is the number of target nuclei per
+unit area seen by the proton, multiplied by the cross section:
+\begin{equation}
+  \mu_{c} = a\, n_{t(c)}\,\ell\,\sigma_c(E),
+  \label{eq:mu}
+\end{equation}
+with $\sigma_c$ in cm$^2$ ($1~\mathrm{mb} = 10^{-27}\,\mathrm{cm}^2$).  For a
+therapeutic beam $\mu_c$ is of order $10^{-6}$ per step: the expected count
+is far below one, so $\mu_c$ is also, to excellent accuracy, the
+\emph{probability} that one reaction happens on the step,
+\begin{equation}
+  P(\text{one reaction on the step}) = 1 - e^{-\mu_c} \simeq \mu_c .
+  \label{eq:bernoulli}
+\end{equation}
+
+This gives the sampling rule.  At every proton step, for every channel open
+at that energy, draw a uniform random number $u \in (0,1)$; if
+$u < \mu_c$, one emitter of the channel's isotope is created at a point
+chosen uniformly along the step.  The proton itself continues exactly as
+before --- the sampled reaction changes nothing in its transport.  The
+created emitter then follows its natural fate: the isotope decays with its
+physical half-life, the positron slows down in the surrounding material and
+annihilates, and the production and annihilation points are recorded.
+
+Summing Eq.~\eqref{eq:mu} over all steps of all protons gives the expected
+production of channel $c$,
+\begin{equation}
+  N_c = \sum_{s} a_s\, n_{t(c),s}\,\ell_s\,\sigma_c(E_s),
+  \label{eq:total}
+\end{equation}
+and the sampled emitters are a Poisson realization of this expectation,
+distributed in space exactly as production demands: where the proton fluence
+is high, where the target nuclei are abundant, and where the cross section at
+the local proton energy is large.
+
+\section{Two tallies on the same protons}
+
+The comparison runs both production models on \emph{identical} proton
+histories.  During the same transport:
+\begin{enumerate}[nosep]
+  \item the \textbf{data-driven tally} samples emitters with
+        Eq.~\eqref{eq:bernoulli} from the fitted curves, as described above;
+  \item the \textbf{native tally} counts the residual nuclei that the
+        transport code's internal nuclear model produces --- the same five
+        channels, recorded with production position and identity.
+\end{enumerate}
+Because both tallies watch the same protons step by step, the statistical
+noise of the transport cancels in the comparison: $\Delta_j$ in
+Eq.~\eqref{eq:delta} measures the production model, not the luck of the run.
+
+Two rules keep the calculation consistent.  First, the residual nuclei of
+the five channels created by the internal model are counted but \emph{not}
+turned into emitters --- production of these isotopes is claimed once, by the
+fitted curves.  Second, the proton transport is left untouched by the
+sampling: attenuation of the proton fluence is governed by the total
+inelastic cross section, of which the five channels are a small part.  The
+size of this part,
+\begin{equation}
+  f(E)=\frac{\sum_c\sigma_c(E)}{\sigma_{\mathrm{inel}}(E)},
+  \label{eq:fraction}
+\end{equation}
+is of order ten percent (tens of millibarns against several hundred), and
+$f(E)$ is tracked as a diagnostic: it bounds the first-order error of
+holding the fluence fixed while the partial cross sections vary.
+
+\section{From production to the distal edge}
+
+Binning the emitters of isotope $j$ in depth $z$ along the beam axis gives
+the production profile $P_j(z)$; the sum over isotopes gives the combined
+profile.  The distal edge is the depth beyond the profile maximum at which
+the profile crosses half of that maximum.  With bin centres $z_k$ and
+contents $P_k$, let $k^\ast$ be the last bin with
+$P_{k^\ast} \ge \tfrac{1}{2}P_{\max}$; linear interpolation to the next bin
+gives
+\begin{equation}
+  R_{50} = z_{k^\ast}
+  + \left(\tfrac{1}{2}P_{\max} - P_{k^\ast}\right)
+    \frac{z_{k^\ast+1}-z_{k^\ast}}{P_{k^\ast+1}-P_{k^\ast}} .
+  \label{eq:r50}
+\end{equation}
+Absolute yields are reported per simulated run, per primary proton, and per
+gray, using the proton count and the target dose recorded with the run.
+
+\section{Deliverable}
+
+The first sampling run produces, for the standard treatment field:
+\begin{enumerate}[nosep]
+  \item the production profiles $P_j(z)$ from both tallies, per isotope and
+        combined, on the same depth axis;
+  \item the per-isotope yields per gray from both tallies;
+  \item the paired edge displacements $\Delta_j$ of Eq.~\eqref{eq:delta}.
+\end{enumerate}
+This section receives those figures and numbers when the first calculation
+runs.
+
+The same sampling machinery extends directly to the uncertainty band: each
+of the 1000 replica curves defines its own $\sigma_c(E)$, and the spread of
+the resulting edges gives the cross-section uncertainty of $R_{50}$.  That
+propagation, and its efficient implementation, are specified in
+\file{docs/xsections\_plan.tex} and \file{docs/shared\_plan.tex}.
+
+\end{document}

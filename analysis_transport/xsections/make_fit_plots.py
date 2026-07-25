@@ -153,12 +153,12 @@ def _plot(repo, channel, config, figure_path):
                              color=color, linestyle=linestyle, linewidth=1.5,
                              label=metadata["library"])
     comparison_axis.set_title("Evaluations as external comparisons")
-    comparison_axis.set_xlabel("Proton energy (MeV)")
     comparison_axis.legend(fontsize=7.3)
 
     for axis in (data_axis, replica_axis, comparison_axis):
         axis.set_xlim(config["energy_min_MeV"], config["energy_max_MeV"])
         axis.set_ylim(bottom=0)
+        axis.set_xlabel("Proton energy (MeV)")
         axis.grid(alpha=0.18)
     distance_axis.set_xlim(left=0)
     distance_axis.set_ylim(bottom=0)
@@ -312,6 +312,50 @@ def _write_generated(repo, summary, comparisons):
         stream.write("\\bottomrule\n\\end{tabular}\n")
 
 
+def _plot_compact(repo, config, figure_path):
+    """One page-width figure: the five fitted channels with data and bands."""
+    fits = repo / "data/xsections/fits"
+    figure, axes = plt.subplots(2, 3, figsize=(10.6, 6.0))
+    for axis, channel in zip(axes.flat, CHANNELS):
+        curve = pd.read_csv(fits / f"{channel.channel_id}_curve.csv")
+        points, _ = load_exfor_points(
+            repo, channel, config["energy_min_MeV"], config["energy_max_MeV"])
+        used = _fit_mask(points, config["threshold_MeV"][channel.channel_id])
+        fitted = points.loc[used]
+        yerr = fitted[["sigma_unc_minus_mb", "sigma_unc_plus_mb"]].to_numpy().T
+        axis.errorbar(fitted.energy_MeV, fitted.sigma_mb, yerr=yerr,
+                      linestyle="none", marker="o", markersize=2.2,
+                      color="0.35", alpha=0.6, elinewidth=0.45, zorder=2)
+        axis.fill_between(curve.energy_MeV, curve.sigma_lower_16_mb,
+                          curve.sigma_upper_84_mb, color="#56B4E9",
+                          alpha=0.4, zorder=3)
+        axis.plot(curve.energy_MeV, curve.sigma_nominal_mb, color="black",
+                  linewidth=1.5, zorder=4)
+        axis.set_title(channel.title, fontsize=10)
+        axis.set_xlim(config["energy_min_MeV"], config["energy_max_MeV"])
+        axis.set_ylim(bottom=0)
+        axis.set_xlabel("Proton energy (MeV)", fontsize=9)
+        axis.set_ylabel("Cross section (mb)", fontsize=9)
+        axis.tick_params(labelsize=8)
+        axis.grid(alpha=0.18)
+    legend_axis = axes.flat[len(CHANNELS)]
+    legend_axis.axis("off")
+    handles = [
+        plt.Line2D([], [], linestyle="none", marker="o", markersize=4,
+                   color="0.35", label="accepted measurements"),
+        plt.Rectangle((0, 0), 1, 1, facecolor="#56B4E9", alpha=0.4,
+                      label="16--84% replica band"),
+        plt.Line2D([], [], color="black", linewidth=1.5,
+                   label="nominal fit (replica median)"),
+    ]
+    legend_axis.legend(handles=handles, loc="center", fontsize=10,
+                       frameon=False)
+    figure.tight_layout()
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path)
+    plt.close(figure)
+
+
 def generate(repo: Path, config_path: Path):
     config = load(config_path)
     summary = pd.read_csv(repo / "data/xsections/fits/fit_summary.csv")
@@ -320,6 +364,8 @@ def generate(repo: Path, config_path: Path):
         comparisons.extend(_plot(
             repo, channel, config,
             repo / "docs/figures/xsection_fit" / f"{channel.channel_id}.pdf"))
+    _plot_compact(repo, config,
+                  repo / "docs/figures/xsection_fit/channels_compact.pdf")
     _write_generated(repo, summary, comparisons)
     return comparisons
 
