@@ -5,6 +5,9 @@ data/*
 !data/xsections/
 !data/xsections/**
 data/xsections/g4/**/logs/
+# Exposure runs are regenerable simulation output; frozen products are
+# promoted deliberately.
+data/xsections/exposure/
 *.h5
 
 # Build directories

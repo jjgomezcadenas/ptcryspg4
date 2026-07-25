@@ -53,7 +53,24 @@ Multiplying a bin by a cross section in cm² gives expected production there.
 4. ~1e6-proton pilot: exposure table and metadata pass the Python validator
    and fold cleanly with the existing layer.
 
-**Status: pending.**
+**Status: complete.** Results: (1) water slab, 2 mm, 100 MeV — O16 exposure
+per proton 1.0010 of n×l (excess = secondary-proton path). (2) 4930 common
+bins, maximum relative difference 5e-12 (CSV print precision); now the
+tracked test `test/xsections/test_exposure_app.py`. (3) uniform_headep SOBP
+vs `data/runs/uniform_headep_sobp_1e7`: target dose per proton agrees to
+0.02%, core-dose ratio over the SOBP 0.9975 (min 0.987, max 1.005), distal
+R80 difference 0.024 mm. (4) pilot
+`data/xsections/exposure/uniform_headep_sobp_QGSP_BIC_HP_1e6` (regenerable,
+gitignored): validator clean, 1000-replica fold in ~8 s; production-stage
+R50 band ±0.16 mm (all_production), N13 alone ±0.71 mm.
+
+**Implementation note — step subdivision.** Booking a whole Geant4 step at
+its midpoint aliases the depth profile with the multi-mm step length near the
+entrance (a ±2x comb, found against the stageA pencil reference). Every tally
+therefore subdivides steps into segments shorter than half a bin in depth
+(and in energy for the exposure), interpolating position and kinetic energy
+along the path. This is the "tested by subdividing" rule of
+`docs/xsections_plan.tex`, adopted permanently.
 
 ## Phase 1b — in-flight nominal sampler and the R50 comparison
 
