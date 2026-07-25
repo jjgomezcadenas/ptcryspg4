@@ -27,6 +27,16 @@ struct SampledProduction {
   double proton_energy_MeV = 0.;
 };
 
+/// One source-bank candidate: a segment-channel pair kept with probability q.
+struct BankEntry {
+  int event_id = 0;
+  int channel_index = 0;
+  double x_mm = 0., y_mm = 0., z_mm = 0.;
+  double proton_energy_MeV = 0.;
+  double exposure_cm2_inv = 0.;  ///< the segment's n*l
+  double keep_probability = 0.;  ///< q
+};
+
 }  // namespace ensemble
 
 /// Per-run accumulators: the exposure grid, the native-route counters, and the
@@ -54,6 +64,11 @@ class EnsembleRun : public G4Run {
     return fSampled;
   }
 
+  void AddBankEntry(const ensemble::BankEntry& entry) {
+    fBank.push_back(entry);
+  }
+  const std::vector<ensemble::BankEntry>& Bank() const { return fBank; }
+
   void RecordAnnihilation(int event_id, double x_mm, double y_mm, double z_mm) {
     fAnnihilations[event_id] = {x_mm, y_mm, z_mm};
   }
@@ -77,6 +92,7 @@ class EnsembleRun : public G4Run {
   ensemble::ExposureGrid fGrid;
   std::map<ensemble::NativeKey, long long> fNative;
   std::vector<ensemble::SampledProduction> fSampled;
+  std::vector<ensemble::BankEntry> fBank;
   std::map<int, std::array<double, 3>> fAnnihilations;
   double fEdepTotal = 0.;   // G4 units
   double fTargetEdep = 0.;  // G4 units

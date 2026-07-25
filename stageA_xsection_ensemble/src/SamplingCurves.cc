@@ -9,18 +9,30 @@
 
 namespace ensemble {
 
-double SamplingChannel::SigmaMb(double energy) const {
-  if (energy <= threshold_MeV || energy < energy_MeV.front()) return 0.;
-  if (energy > energy_MeV.back())
-    throw std::runtime_error(channel_id + ": energy " + std::to_string(energy) +
+namespace {
+double Interpolate(const std::vector<double>& grid,
+                   const std::vector<double>& values, double threshold,
+                   const std::string& label, double energy) {
+  if (energy <= threshold || energy < grid.front()) return 0.;
+  if (energy > grid.back())
+    throw std::runtime_error(label + ": energy " + std::to_string(energy) +
                              " MeV exceeds the fitted range");
-  auto upper = std::lower_bound(energy_MeV.begin(), energy_MeV.end(), energy);
-  if (upper == energy_MeV.begin()) return sigma_mb.front();
-  const std::size_t hi = upper - energy_MeV.begin();
+  auto upper = std::lower_bound(grid.begin(), grid.end(), energy);
+  if (upper == grid.begin()) return values.front();
+  const std::size_t hi = upper - grid.begin();
   const std::size_t lo = hi - 1;
-  const double fraction =
-      (energy - energy_MeV[lo]) / (energy_MeV[hi] - energy_MeV[lo]);
-  return sigma_mb[lo] + fraction * (sigma_mb[hi] - sigma_mb[lo]);
+  const double fraction = (energy - grid[lo]) / (grid[hi] - grid[lo]);
+  return values[lo] + fraction * (values[hi] - values[lo]);
+}
+}  // namespace
+
+double SamplingChannel::SigmaMb(double energy) const {
+  return Interpolate(energy_MeV, sigma_mb, threshold_MeV, channel_id, energy);
+}
+
+double SamplingChannel::SigmaEnvMb(double energy) const {
+  return Interpolate(energy_MeV, sigma_env_mb, threshold_MeV, channel_id,
+                     energy);
 }
 
 SamplingCurves SamplingCurves::Load(const std::string& path) {
@@ -32,13 +44,14 @@ SamplingCurves SamplingCurves::Load(const std::string& path) {
   while (std::getline(f, line)) {
     if (line.empty()) continue;
     std::stringstream ss(line);
-    std::string id, target, residual, threshold, energy, sigma;
+    std::string id, target, residual, threshold, energy, sigma, envelope;
     std::getline(ss, id, ',');
     std::getline(ss, target, ',');
     std::getline(ss, residual, ',');
     std::getline(ss, threshold, ',');
     std::getline(ss, energy, ',');
     std::getline(ss, sigma, ',');
+    std::getline(ss, envelope, ',');
     auto& channel = channels[id];
     if (channel.channel_id.empty()) {
       channel.channel_id = id;
@@ -53,6 +66,8 @@ SamplingCurves SamplingCurves::Load(const std::string& path) {
     }
     channel.energy_MeV.push_back(std::stod(energy));
     channel.sigma_mb.push_back(std::stod(sigma));
+    channel.sigma_env_mb.push_back(
+        envelope.empty() ? std::stod(sigma) : std::stod(envelope));
   }
   SamplingCurves curves;
   curves.fPath = path;

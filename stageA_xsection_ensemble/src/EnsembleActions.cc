@@ -300,18 +300,32 @@ void EnsembleSteppingAction::UserSteppingAction(const G4Step* step) {
         const auto& channel = fCurves->Channels()[c];
         const G4double density = densities[channel.target_index];
         if (density <= 0.) continue;
+        const G4double exposure = weight * density * (stepLenCm / n);
         const G4double sigma = channel.SigmaMb(energyMeV);
-        if (sigma <= 0.) continue;
-        const G4double probability =
-            weight * density * (stepLenCm / n) * sigma * 1.0e-27;
-        if (fUniform(fSampleEngine) >= probability) continue;
-        const G4double u = fUniform(fSampleEngine);
-        const G4double g = (k + u) / n;
-        const auto position = prePos + g * (postPos - prePos);
-        run->AddSampledProduction(
-            {G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID(),
-             static_cast<int>(c), position.x() / mm, position.y() / mm,
-             position.z() / mm, energyMeV});
+        if (sigma > 0. &&
+            fUniform(fSampleEngine) < exposure * sigma * 1.0e-27) {
+          const G4double u = fUniform(fSampleEngine);
+          const G4double g = (k + u) / n;
+          const auto position = prePos + g * (postPos - prePos);
+          run->AddSampledProduction(
+              {G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID(),
+               static_cast<int>(c), position.x() / mm, position.y() / mm,
+               position.z() / mm, energyMeV});
+        }
+        if (fCli.bank_alpha > 0.) {
+          const G4double sigmaEnv = channel.SigmaEnvMb(energyMeV);
+          if (sigmaEnv <= 0.) continue;
+          const G4double q = std::min(
+              1.0, fCli.bank_alpha * exposure * sigmaEnv * 1.0e-27);
+          if (fUniform(fSampleEngine) >= q) continue;
+          const G4double u = fUniform(fSampleEngine);
+          const G4double g = (k + u) / n;
+          const auto position = prePos + g * (postPos - prePos);
+          run->AddBankEntry(
+              {G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID(),
+               static_cast<int>(c), position.x() / mm, position.y() / mm,
+               position.z() / mm, energyMeV, exposure, q});
+        }
       }
     }
   }
@@ -523,11 +537,33 @@ void EnsembleRunAction::EndOfRunAction(const G4Run* base_run) {
         << production.y_mm << ',' << production.z_mm << ','
         << production.proton_energy_MeV << '\n';
     }
+    if (fCli.bank_alpha > 0.) {
+      std::ofstream bank(dir + "/source_bank.csv");
+      bank << "bank_id,event_id,channel_id,target,residual,isotope_id,"
+              "x_mm,y_mm,z_mm,proton_energy_MeV,exposure_cm2_inv,"
+              "keep_probability\n";
+      bank << std::setprecision(9);
+      long bank_id = 0;
+      for (const auto& entry : run->Bank()) {
+        const auto& channel = fCurves->Channels()[entry.channel_index];
+        bank << bank_id++ << ',' << entry.event_id << ','
+             << channel.channel_id << ','
+             << ensemble::kTargetNames[channel.target_index] << ','
+             << ensemble::kBetaPlusResiduals[channel.residual_index].name
+             << ',' << channel.residual_index << ',' << entry.x_mm << ','
+             << entry.y_mm << ',' << entry.z_mm << ','
+             << entry.proton_energy_MeV << ',' << entry.exposure_cm2_inv
+             << ',' << entry.keep_probability << '\n';
+      }
+    }
     std::ofstream meta(dir + "/sampling_meta.json");
     meta << "{\n  \"curves_file\": \"" << fCurves->Path() << "\",\n"
-         << "  \"sampled_productions\": " << run->Sampled().size() << "\n}\n";
+         << "  \"sampled_productions\": " << run->Sampled().size() << ",\n"
+         << "  \"bank_alpha\": " << fCli.bank_alpha << ",\n"
+         << "  \"bank_entries\": " << run->Bank().size() << "\n}\n";
     G4cout << "[ensemble] sampled " << run->Sampled().size()
-           << " productions from " << fCurves->Path() << G4endl;
+           << " productions, banked " << run->Bank().size()
+           << " candidates from " << fCurves->Path() << G4endl;
   }
 
   // Copy the SOBP layer table (and its provenance meta) into the run dir.

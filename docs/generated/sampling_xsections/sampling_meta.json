@@ -1,9 +1,11 @@
 {
   "run_id": "uniform_headep_sobp_QGSP_BIC_HP_1e7",
   "n_protons": 10000000.0,
-  "target_dose_Gy": 0.0014353631767934734,
+  "target_dose_Gy": 0.0014353631767934948,
   "sampling_meta": {
     "curves_file": "data/xsections/fits/sampling_curves.csv",
-    "sampled_productions": 219123
+    "sampled_productions": 219473,
+    "bank_alpha": 2.4802,
+    "bank_entries": 1000670
   }
 }

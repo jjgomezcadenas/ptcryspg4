@@ -23,6 +23,7 @@ void EnsembleRun::Merge(const G4Run* other_run) {
   for (const auto& [key, count] : other->fNative) fNative[key] += count;
   fSampled.insert(fSampled.end(), other->fSampled.begin(),
                   other->fSampled.end());
+  fBank.insert(fBank.end(), other->fBank.begin(), other->fBank.end());
   for (const auto& [event, xyz] : other->fAnnihilations)
     fAnnihilations[event] = xyz;
   fEdepTotal += other->fEdepTotal;

@@ -79,6 +79,7 @@ struct EnsembleCli {
   double zmax_mm = 0.0;                  ///< offline depth-grid maximum
   std::string curves;       ///< sampling_curves.csv: in-flight sampler on
   std::string emitters_in;  ///< sampled_productions.csv: emitter transport
+  double bank_alpha = 0.0;  ///< source-bank keep scale; 0 = no bank
 };
 
 }  // namespace ensemble

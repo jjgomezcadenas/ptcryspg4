@@ -70,6 +70,7 @@ ensemble::EnsembleCli parse(int argc, char** argv) {
     else if (arg == "--steps-out") cli.steps_out = value;
     else if (arg == "--zmax-mm") cli.zmax_mm = std::stod(value);
     else if (arg == "--curves") cli.curves = value;
+    else if (arg == "--bank-alpha") cli.bank_alpha = std::stod(value);
     else if (arg == "--emitters-in") cli.emitters_in = value;
     else throw std::runtime_error("unknown option: " + arg);
   }

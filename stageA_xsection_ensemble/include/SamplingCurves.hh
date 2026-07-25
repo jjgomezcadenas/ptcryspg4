@@ -18,10 +18,12 @@ struct SamplingChannel {
   double threshold_MeV = 0.;
   std::vector<double> energy_MeV;
   std::vector<double> sigma_mb;
+  std::vector<double> sigma_env_mb;  ///< bank sampling envelope
 
   /// Linear interpolation; zero at and below threshold and below the grid;
   /// throws above the fitted range.
   double SigmaMb(double energy) const;
+  double SigmaEnvMb(double energy) const;
 };
 
 class SamplingCurves {

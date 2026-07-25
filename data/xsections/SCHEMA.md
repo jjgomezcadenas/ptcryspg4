@@ -216,6 +216,25 @@ SHA-256, the repository revision and `Np_per_Gy = n_protons/target_dose_Gy`,
 writes `exposure_meta.json`, and runs the exposure, metadata and native-route
 validators on the finished directory.
 
+When the sampler runs with `--bank-alpha`, the directory also contains the
+source bank:
+
+| `source_bank.csv` column | Meaning |
+|---|---|
+| `bank_id` | Stable candidate identifier (row order) |
+| `event_id` | Proton event of the parent segment |
+| `channel_id`, `target`, `residual`, `isotope_id` | The candidate's fixed channel |
+| `x_mm`, `y_mm`, `z_mm` | Production position |
+| `proton_energy_MeV` | Proton energy at the segment |
+| `exposure_cm2_inv` | The segment's n x l |
+| `keep_probability` | The keep probability q of Eq. (bank-q) |
+
+`sampling_meta.json` records `bank_alpha` and `bank_entries`;
+`analysis_transport/xsections/validate_bank.py` writes
+`bank_validation.json` (per-channel closure against the fold for the
+nominal and all replicas, ESS totals and distal-window ESS against the
+configured floors) and fails loudly on any violation.
+
 `analysis_transport/xsections/make_scenario.py` then completes the directory
 into the stageA scenario form: `run_meta.csv` (stageA columns plus the
 additive provenance `production_model`, `sampling_curves_sha256`,

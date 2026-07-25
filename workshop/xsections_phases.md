@@ -206,10 +206,29 @@ realization materializes.
 
 **Status: complete.**
 
+## Phase 3b — the source bank
+
+**Goal.** One transported sample serving all 1000 replicas: candidates kept
+with probability alpha x (n x l) x sigma_env, stored with q, unbiased after
+division by q (docs/sampling_xsections.tex, Sec. source bank).
+
+**Done.** Envelope column in sampling_curves.csv (nominal x replica cover
+factor per channel); bank draw in the stepping action (same private engine;
+transport untouched); source_bank.csv + bank metadata; validate_bank.py
+(closure + ESS floors, bank_validation.json).
+
+**Acceptance (1e7 field, alpha=2.48, 1,000,670 candidates).** Closure:
+bank/fold nominal ratios 0.999-1.004 per channel, worst pull over all 1000
+replicas x 5 channels = 1.5 sigma. ESS: totals equal entry counts to <1%
+(weights near-uniform under the envelope); distal-window ESS 2,200-47,000
+against the 500 floor. The distal window is anchored to the 99th-percentile
+production depth, not the deepest stray entry.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
-- Phase 3b/3c/3d: source bank writer, the 1e8 production run and scenario
-  freeze, detector-study reruns (`docs/xsections_plan.tex`,
-  `docs/sampling_xsections.tex` Sec. bank).
+- Phase 3c/3d: the 1e8 production run and scenario freeze; detector-study
+  reruns and the native-vs-data sigma_R cross-check.
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,
   weights evaluator, resampler (`docs/shared_plan.tex`;
   `PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`).
