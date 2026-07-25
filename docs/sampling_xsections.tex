@@ -188,16 +188,32 @@ Two rules keep the calculation consistent.  First, the residual nuclei of
 the five channels created by the internal model are counted but \emph{not}
 turned into emitters --- production of these isotopes is claimed once, by the
 fitted curves.  Second, the proton transport is left untouched by the
-sampling: attenuation of the proton fluence is governed by the total
-inelastic cross section, of which the five channels are a small part.  The
-size of this part,
+sampling.  This second rule deserves a closer look.
+
+As the beam penetrates, protons are removed from it by nuclear collisions:
+a proton that undergoes an inelastic collision with a nucleus scatters away
+and leaves the beam, so the proton fluence decreases with depth --- roughly
+one percent of the protons per centimetre of tissue.  The removal rate is
+set by the \emph{total} inelastic cross section, the probability of a
+nuclear collision with any outcome whatsoever, several hundred millibarns.
+The five channels of Eq.~\eqref{eq:channels} are particular outcomes of
+such collisions; together they amount to tens of millibarns, the fraction
 \begin{equation}
-  f(E)=\frac{\sum_c\sigma_c(E)}{\sigma_{\mathrm{inel}}(E)},
+  f(E)=\frac{\sum_c\sigma_c(E)}{\sigma_{\mathrm{inel}}(E)}
   \label{eq:fraction}
 \end{equation}
-is of order ten percent (tens of millibarns against several hundred), and
-$f(E)$ is tracked as a diagnostic: it bounds the first-order error of
-holding the fluence fixed while the partial cross sections vary.
+of the total, about ten percent.
+
+Replacing the five partial cross sections while the transport keeps the
+total fixed introduces a first-order inconsistency: a channel whose fitted
+cross section exceeds the internal model's should, strictly, remove slightly
+more protons from the beam.  The size of the inconsistency is set by the
+\emph{change} of the partial cross sections --- a few millibarns against
+several hundred --- so the removal rate is altered by well below one
+percent, and most of that cancels in the shape of the profile that
+determines $R_{50}$.  The fraction $f(E)$ is the conservative ceiling of
+the effect, and it is tracked as a diagnostic over the energies and
+materials sampled by the treatment field.
 
 \section{From production to the distal edge}
 
