@@ -281,9 +281,9 @@ zero.
 The scenario-weighted rows of Table~\ref{tab:delta} measure what that
 balance is worth: applying the decay-and-acquisition factors of the named
 timing scenarios reweights the isotopes, and the paired displacement moves
-from $+0.19\pm0.58$ mm (in-room) to $+2.67\pm0.58$ mm (offline), where the
-long delay suppresses $^{15}$O and the measured profile is carried by
-$^{11}$C.
+from $-0.19\pm0.16$ mm (fast) and $+0.33\pm0.19$ mm (in-room) to
+$+2.66\pm0.22$ mm (offline), where the long delay suppresses $^{15}$O and
+the measured profile is carried by $^{11}$C.
 
 The native tally counts the residuals of all projectiles of the internal
 model, so the comparison prices the complete replacement of the production
@@ -461,6 +461,12 @@ channel: 17\,600 of 17\,638 entries), and the distal-window ESS ranges
 from 2\,200 ($^{14}$N$\to$$^{13}$N) to 47\,000 ($^{15}$O) against a floor
 of 500.
 
+The production bank, $1.00\times10^{7}$ candidates written during the
+$10^{8}$-proton run that defines the frozen data-driven scenario, passes the
+same certification: closure ratios 0.997--1.002 with a worst pull of
+$3.5\sigma$ over the 5\,000 checks (the expected extreme of that many
+draws), and distal-window ESS between 22\,000 and 465\,000.
+
 \section{Conclusions}
 
 The comparison separates cleanly what the transport code does well from
@@ -476,20 +482,20 @@ of this calculation, and every number in this note relies on it.
 
 \emph{The native production model is disqualified for activity
 calculations.}  Its per-isotope predictions are wrong at the scale that
-matters for range verification: the $^{11}$C edge by $+5.0\pm0.9$~mm
+matters for range verification: the $^{11}$C edge by $+4.6\pm0.4$~mm
 (production absent below $\sim$\SI{50}{MeV} against a measured threshold of
 \SI{17.9}{MeV}), the $^{13}$N yield by a factor 1.5 and its edge by
-$+28\pm4$~mm, the $^{15}$O edge by $-1.8\pm0.5$~mm, the total yield by
+$+23.3\pm1.4$~mm, the $^{15}$O edge by $-1.7\pm0.2$~mm, the total yield by
 10\%, and the offline-weighted activity by 21\%.  A technique whose
 specification is millimetre accuracy on an activity edge cannot be built on
 a production model with millimetre-to-centimetre edge errors per isotope.
 
 \emph{The combined-profile agreement is compensation, and the acquisition
-timing exposes it.}  The raw combined displacement, $-0.03\pm0.62$~mm,
+timing exposes it.}  The raw combined displacement, $+0.05\pm0.18$~mm,
 comes from opposite-signed per-isotope errors cancelling at this particular
 field and isotope mix.  Reweighting the same profiles by the acquisition
-scenarios moves the displacement to $+0.11\pm0.67$~mm (fast),
-$+0.19\pm0.58$~mm (in-room) and $+2.67\pm0.58$~mm (offline): the error of
+scenarios moves the displacement to $-0.19\pm0.16$~mm (fast),
+$+0.33\pm0.19$~mm (in-room) and $+2.66\pm0.22$~mm (offline): the error of
 the native model in the measured edge depends on when one images.  A model
 wrong isotope by isotope is right in combination only by accident, and the
 accident does not survive a change of timing.

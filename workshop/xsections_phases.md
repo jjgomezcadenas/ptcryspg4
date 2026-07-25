@@ -226,9 +226,28 @@ production depth, not the deepest stray entry.
 
 **Status: complete.**
 
+## Phase 3c — the 1e8 production run and the frozen data-driven scenario
+
+**Done.** One 1e8-proton transport on the frozen 1.0 MeV grid with sampler
+and bank (alpha 2.48): 2,194,871 sampled emitters, 10,001,867 bank
+candidates; emitter transport, finalize, 1000-replica fold, comparison,
+scenario assembly; check_run 13/13. Bank certified at scale (chunked
+validator): closure ratios 0.997-1.002, worst pull 3.5 sigma over 5,000
+checks (the expected extreme), distal-window ESS 22k-465k. Scenario frozen
+as `ptcrysp-scenarios/scenarios/uniform_headep_sobp_1e8_dd` (26 files,
+figures included; scenarios-repo commit d6f887f).
+
+**Final comparison at 1e8** (in docs/sampling_xsections.tex): Delta R50 =
+-1.72 +- 0.17 (O15), +4.58 +- 0.38 (C11), +23.35 +- 1.45 (N13),
++0.05 +- 0.18 (combined); scenario-weighted -0.19 +- 0.16 (fast),
++0.33 +- 0.19 (in-room), +2.66 +- 0.22 (offline, 12 sigma). Fold closure
+0.999-1.001. u_xs bands unchanged: +-0.13 mm production, +-0.12 mm in-room.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
-- Phase 3c/3d: the 1e8 production run and scenario freeze; detector-study
-  reruns and the native-vs-data sigma_R cross-check.
+- Phase 3d: detector-study reruns on the data-driven scenario and the
+  native-vs-data sigma_R cross-check (PTCryspMC, unweighted pipeline).
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,
   weights evaluator, resampler (`docs/shared_plan.tex`;
   `PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`).

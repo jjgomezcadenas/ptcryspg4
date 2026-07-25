@@ -21,7 +21,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .exposure_folding import CrossSectionEnsemble, load_exposure_metadata
+from .exposure_folding import (CrossSectionEnsemble, interpolate_curves,
+                               load_exposure_metadata)
 
 ESS_FLOOR_TOTAL = 5.0e3       # per channel, worst replica
 ESS_FLOOR_DISTAL = 5.0e2      # per channel, worst replica, distal window
@@ -51,7 +52,6 @@ def validate(run_dir: Path, fit_dir: Path):
             entries.keep_probability.to_numpy()
 
         nominal_sigma = ensemble.nominal(channel_id, energies)
-        replica_sigma = ensemble.replicas(channel_id, energies)
 
         fold_nominal = float((rows.target_exposure_cm2_inv * np.asarray(
             ensemble.nominal(channel_id, rows.energy_mean_MeV.to_numpy()))
@@ -61,32 +61,52 @@ def validate(run_dir: Path, fit_dir: Path):
                              channel_id, rows.energy_mean_MeV.to_numpy()))
                          ).sum(axis=1) * 1.0e-27
 
-        weights = replica_sigma * base[None, :] * 1.0e-27
         nominal_weights = nominal_sigma * base * 1.0e-27
-        bank_totals = weights.sum(axis=1)
         bank_nominal = float(nominal_weights.sum())
-
-        # Bank sampling error of a total: sqrt(sum w^2 (1-q)) per replica.
         one_minus_q = 1.0 - entries.keep_probability.to_numpy()
         error_nominal = float(np.sqrt(
             (nominal_weights ** 2 * one_minus_q).sum()))
-        errors = np.sqrt((weights ** 2 * one_minus_q[None, :]).sum(axis=1))
-        pulls = (bank_totals - fold_replicas) / np.maximum(errors, 1e-300)
         pull_nominal = (bank_nominal - fold_nominal) / max(error_nominal,
                                                            1e-300)
 
-        ess_total = (weights.sum(axis=1) ** 2 /
-                     np.maximum((weights ** 2).sum(axis=1), 1e-300))
         # Distal window anchored to the production edge: the 99th percentile
         # of the nominal-weighted depth, not the deepest stray entry.
         order = np.argsort(entries.depth_mm.to_numpy())
         cumulative = np.cumsum(nominal_weights[order])
         d99 = float(entries.depth_mm.to_numpy()[order][
             np.searchsorted(cumulative, 0.99 * cumulative[-1])])
-        distal = entries.depth_mm > d99 - DISTAL_WINDOW_MM
-        wd = weights[:, distal.to_numpy()]
-        ess_distal = (wd.sum(axis=1) ** 2 /
-                      np.maximum((wd ** 2).sum(axis=1), 1e-300))
+        distal = (entries.depth_mm > d99 - DISTAL_WINDOW_MM).to_numpy()
+
+        # Replicas streamed in blocks: the full replica x entry array does
+        # not fit in memory for a production-size bank.
+        curve = ensemble.channels[channel_id]
+        n_replicas = len(cursor := ensemble.replica_ids)
+        bank_totals = np.empty(n_replicas)
+        errors = np.empty(n_replicas)
+        sum_w = np.empty(n_replicas)
+        sum_w2 = np.empty(n_replicas)
+        sum_wd = np.empty(n_replicas)
+        sum_wd2 = np.empty(n_replicas)
+        block = 40
+        for start in range(0, n_replicas, block):
+            stop = min(start + block, n_replicas)
+            sigma = interpolate_curves(
+                curve.replica_energy_MeV,
+                curve.replica_sigma_mb[start:stop],
+                energies, threshold_MeV=curve.threshold_MeV,
+                label=f"{channel_id} replicas")
+            w = sigma * base[None, :] * 1.0e-27
+            bank_totals[start:stop] = w.sum(axis=1)
+            errors[start:stop] = np.sqrt(
+                (w ** 2 * one_minus_q[None, :]).sum(axis=1))
+            sum_w[start:stop] = w.sum(axis=1)
+            sum_w2[start:stop] = (w ** 2).sum(axis=1)
+            wd = w[:, distal]
+            sum_wd[start:stop] = wd.sum(axis=1)
+            sum_wd2[start:stop] = (wd ** 2).sum(axis=1)
+        pulls = (bank_totals - fold_replicas) / np.maximum(errors, 1e-300)
+        ess_total = sum_w ** 2 / np.maximum(sum_w2, 1e-300)
+        ess_distal = sum_wd ** 2 / np.maximum(sum_wd2, 1e-300)
 
         summary = {
             "entries": int(len(entries)),
