@@ -305,8 +305,10 @@ detector-facing interface; the extended product provides the additional
 information required by the uncertainty analysis.
 
 The existing beam-off handoff then applies isotope half-lives and acquisition
-timing to the production budgets.  The nominal source and a stratified subset
-of replicas proceed through the full detector simulation and reconstruction.
+timing to the production budgets.  The nominal source proceeds through the
+full detector simulation and reconstruction.  The replica ensemble is carried
+by the weighted source bank defined in \file{docs/shared\_plan.tex}; variant
+sources regenerated for selected replicas validate that weighted propagation.
 Production-profile, annihilation-profile and reconstructed-edge displacements
 remain distinct outputs throughout the analysis.
 

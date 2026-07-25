@@ -1,6 +1,7 @@
 # CLAUDE.md — Proton-therapy PET source generation (Stage A + handoff)
 
-Orientation for any Claude Code session on this repo.
+Orientation for any Claude Code session on this repo. Read `AGENTS.md` first:
+it holds the working rules and the record of the active feature branches.
 
 ## Working style
 

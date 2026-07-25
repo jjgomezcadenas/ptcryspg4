@@ -184,6 +184,11 @@ normal studies and provides an independent closure test: the weighted nominal
 profile from mode 3 must agree with the unweighted nominal profile from mode 2
 within the predefined Monte Carlo tolerances.
 
+The weighted bank carries the replica ensemble through the detector
+calculation.  Regenerating an unweighted source for one selected curve
+retraces the same bank events and validates the weighted result for that curve
+at full detector level.
+
 The weighted method changes the spatial density of LOR contributions.  The
 weight depends on channel and proton energy, both of which vary with depth.
 The stored LOR endpoints remain fixed while the weighted activity profile and
@@ -244,6 +249,11 @@ $e_1$ and $e_2$, its expected contribution is
 The existing random builder already has both identifiers while forming the
 pair; the extended schema preserves them through detector smearing and
 selection.
+
+The random pair list is formed once, at the nominal activity.  Reweighting
+this fixed list describes a replica's accidental contribution to first order
+in its activity change; the weighted random-rate closure in the acceptance
+list measures the residual of this approximation.
 
 The detector code will retain two input paths:
 \begin{enumerate}[nosep]
