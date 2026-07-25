@@ -165,6 +165,9 @@ to the direct cross-section folding calculation.
 Multiplication of `target_exposure_cm2_inv` by a channel cross section in
 square centimetres gives the expected number of residual nuclei produced in
 that bin. The table contains the summed exposure of the simulated run.
+The scorer subdivides every Geant4 step into segments shorter than half a
+bin in depth and in energy, interpolating position and kinetic energy along
+the path, so the stored bins and moments are free of step-length aliasing.
 
 ### `exposure_meta.json`
 
@@ -191,6 +194,27 @@ production for the simulated run, per primary proton and per Gy using the same
 The first implementation is longitudinal because its immediate observable is
 the production-depth edge. A separate proposal sample of proton step segments
 will provide three-dimensional production sites for positron transport.
+
+### Exposure-run directory
+
+One run of `stageA_xsection_ensemble/xsection_ensemble` owns one directory
+`data/xsections/exposure/<geometry>_<beam>_<physics-list>_<N>/` (regenerable,
+gitignored):
+
+| File | Meaning |
+|---|---|
+| `proton_exposure.csv` | The target-resolved exposure table above |
+| `native_route_counts.csv` | Native-route diagnostic counters (see below) |
+| `depth_dose.csv` | Bragg/SOBP profile, stageA five-column format |
+| `sobp_layers.csv`, `sobp_layers_meta.csv` | The beam's layer table and provenance, copied in |
+| `run_meta_raw.json` | Scorer-written metadata, digest and revision pending |
+| `exposure_meta.json` | The validated contract above |
+
+The scorer writes `run_meta_raw.json`;
+`analysis_transport/xsections/finalize_exposure.py` adds the exposure-file
+SHA-256, the repository revision and `Np_per_Gy = n_protons/target_dose_Gy`,
+writes `exposure_meta.json`, and runs the exposure, metadata and native-route
+validators on the finished directory.
 
 ## Direct-folding products
 
