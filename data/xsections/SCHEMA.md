@@ -257,6 +257,14 @@ corresponding fine-grid replica half-width, and its R50 effect is also below
 0.1 mm. The convergence output records the fine and candidate grids,
 metrics, tolerances and pass state.
 
+The accepted decision record is promoted to `data/xsections/convergence/`
+(one CSV + meta pair per deciding run). The frozen production grid is
+**1.0 MeV** (`frozen_energy_width_MeV` in
+`config/xsection_exposure_convergence.toml`), decided on
+`uniform_headep_sobp_QGSP_BIC_HP_1e7`: 1.0 MeV passes every criterion with
+two orders of magnitude of margin; 2.0 MeV fails the N13 edge criterion
+(0.134 mm against its 0.052 mm tolerance, resonance structure).
+
 ## Folding diagnostic figures
 
 `analysis_transport/xsections/make_folding_plots.py` consumes one complete

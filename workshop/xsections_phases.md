@@ -165,10 +165,28 @@ Replica band on the data-driven production edge: ±0.13 mm.
 
 **Status: complete.**
 
-## Later phases (scoped when reached)
+## Phase 2 — energy-grid convergence and the frozen grid
 
-- Phase 2: fine-grid pilot, energy-bin convergence study, frozen grid,
-  production folding of all 1000 replicas (b_prod distribution).
+**Goal.** Decide, by measurement, how coarse the exposure energy bins may be
+before the folding results change, and freeze that grid for production.
+
+**Method.** The 1e7 fine-grid (0.5 MeV) run is coarsened offline and
+losslessly (exposures and moments re-summed); each candidate (1, 2, 5 MeV)
+is folded with the nominal curve and all 1000 replicas and compared to the
+fine grid replica by replica, so only the binning effect remains.
+
+**Result.** 1.0 MeV passes every criterion for every profile with ~two
+orders of magnitude of margin (largest paired R50 change 0.002 mm against
+tolerances of 0.011–0.052 mm). 2.0 MeV fails on the N13 edge (0.134 mm vs
+0.052 mm — the resonance structure), 5 MeV fails broadly. Frozen grid:
+**1.0 MeV** (`frozen_energy_width_MeV` in the convergence config); decision
+record promoted to `data/xsections/convergence/`. The production-stage
+b_prod replica band at this field: ±0.13 mm (all_production and in-room),
+per-isotope ±0.11 (C11), ±0.17 (O15), ±0.52 mm (N13).
+
+**Status: complete.**
+
+## Later phases (scoped when reached)
 - Phase 3: source bank writer + variant-source mode
   (`docs/xsections_plan.tex`).
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,

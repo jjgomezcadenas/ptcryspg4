@@ -2,3 +2,10 @@ schema_version = 1
 relative_tolerance_fraction = 0.10
 r50_absolute_tolerance_mm = 0.10
 candidate_energy_widths_MeV = [0.5, 1.0, 2.0, 5.0]
+
+# Frozen production grid, decided by the paired replica-by-replica study on
+# uniform_headep_sobp_QGSP_BIC_HP_1e7 (record in data/xsections/convergence/):
+# 1.0 MeV passes every criterion with two orders of magnitude of margin;
+# 2.0 MeV fails the N13 edge criterion (0.134 mm vs 0.052 mm tolerance,
+# resonance structure). Production exposure runs score this grid.
+frozen_energy_width_MeV = 1.0
