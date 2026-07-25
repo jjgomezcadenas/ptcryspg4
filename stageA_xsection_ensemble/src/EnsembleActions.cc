@@ -6,13 +6,16 @@
 #include "G4Event.hh"
 #include "G4HadronicProcess.hh"
 #include "G4HadronicProcessType.hh"
+#include "G4IonTable.hh"
 #include "G4Material.hh"
 #include "G4ParticleGun.hh"
 #include "G4PhysicalConstants.hh"
+#include "G4Positron.hh"
 #include "G4Proton.hh"
 #include "G4RunManager.hh"
 #include "G4Step.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Threading.hh"
 #include "G4Track.hh"
 #include "G4Version.hh"
 #include "Randomize.hh"
@@ -46,6 +49,81 @@ std::string NucleusLabel(int Z, int A) {
 }
 
 }  // namespace
+
+namespace ensemble {
+
+std::vector<EmitterSeed> ReadEmitterSeeds(const std::string& path) {
+  std::ifstream f(path);
+  if (!f) throw std::runtime_error("cannot open " + path);
+  std::vector<EmitterSeed> seeds;
+  std::string line;
+  std::getline(f, line);  // header
+  while (std::getline(f, line)) {
+    if (line.empty()) continue;
+    std::stringstream ss(line);
+    std::string field;
+    EmitterSeed seed;
+    std::getline(ss, field, ',');  // event_id
+    seed.event_id = std::stoi(field);
+    std::getline(ss, field, ',');  // channel_id
+    std::getline(ss, field, ',');  // target
+    std::getline(ss, field, ',');  // residual
+    std::getline(ss, field, ',');  // isotope_id
+    seed.isotope_index = std::stoi(field);
+    std::getline(ss, field, ',');
+    seed.x_mm = std::stod(field);
+    std::getline(ss, field, ',');
+    seed.y_mm = std::stod(field);
+    std::getline(ss, field, ',');
+    seed.z_mm = std::stod(field);
+    seeds.push_back(seed);
+  }
+  return seeds;
+}
+
+}  // namespace ensemble
+
+// ---------------------------------------------------------------------------
+// Emitter-transport mode
+
+EmitterPrimaryGenerator::EmitterPrimaryGenerator(
+    const ensemble::EnsembleCli& cli)
+    : fGun(new G4ParticleGun(1)),
+      fSeeds(ensemble::ReadEmitterSeeds(cli.emitters_in)) {}
+
+EmitterPrimaryGenerator::~EmitterPrimaryGenerator() { delete fGun; }
+
+void EmitterPrimaryGenerator::GeneratePrimaries(G4Event* event) {
+  const auto& seed = fSeeds.at(event->GetEventID());
+  const auto& residual = ensemble::kBetaPlusResiduals[seed.isotope_index];
+  auto* ion = G4IonTable::GetIonTable()->GetIon(residual.Z, residual.A, 0.);
+  fGun->SetParticleDefinition(ion);
+  fGun->SetParticleCharge(0.);
+  fGun->SetParticleEnergy(0.);
+  fGun->SetParticlePosition(
+      {seed.x_mm * mm, seed.y_mm * mm, seed.z_mm * mm});
+  fGun->GeneratePrimaryVertex(event);
+}
+
+void EnsembleTrackingAction::PreUserTrackingAction(const G4Track* track) {
+  // The beta-plus positron is the positron child of the primary ion.
+  if (track->GetParticleDefinition() == G4Positron::Definition() &&
+      track->GetParentID() == 1) {
+    fPositronTrackID = track->GetTrackID();
+  }
+}
+
+void EnsembleTrackingAction::PostUserTrackingAction(const G4Track* track) {
+  if (track->GetTrackID() != fPositronTrackID) return;
+  fPositronTrackID = -1;
+  auto* run = static_cast<EnsembleRun*>(
+      G4RunManager::GetRunManager()->GetNonConstCurrentRun());
+  const auto* event =
+      G4RunManager::GetRunManager()->GetCurrentEvent();
+  const auto& position = track->GetPosition();
+  run->RecordAnnihilation(event->GetEventID(), position.x() / mm,
+                          position.y() / mm, position.z() / mm);
+}
 
 // ---------------------------------------------------------------------------
 // Primary generator
@@ -120,9 +198,14 @@ void EnsemblePrimaryGenerator::GeneratePrimaries(G4Event* event) {
 // ---------------------------------------------------------------------------
 // Stepping action
 
-EnsembleSteppingAction::EnsembleSteppingAction(const ensemble::EnsembleCli& cli,
-                                               const EnsembleDetector& det)
-    : fCli(cli), fDet(det) {}
+EnsembleSteppingAction::EnsembleSteppingAction(
+    const ensemble::EnsembleCli& cli, const EnsembleDetector& det,
+    const ensemble::SamplingCurves* curves)
+    : fCli(cli), fDet(det), fCurves(curves),
+      // Production sampling draws from its own engine, so the Geant4
+      // transport stream is identical with the sampler on or off.
+      fSampleEngine(static_cast<std::uint64_t>(cli.seed) * 1000003ULL +
+                    static_cast<std::uint64_t>(G4Threading::G4GetThreadId() + 2)) {}
 
 const std::array<G4double, ensemble::kNTargets>&
 EnsembleSteppingAction::Densities(const G4Material* material) {
@@ -195,12 +278,14 @@ void EnsembleSteppingAction::UserSteppingAction(const G4Step* step) {
 
   if (!inPhantom) return;
 
-  // --- proton exposure ----------------------------------------------------
+  // --- proton exposure and in-flight production sampling ------------------
   if (track->GetParticleDefinition() == G4Proton::Definition()) {
     const auto& densities = Densities(pre->GetMaterial());
     const G4double weight = track->GetWeight();
     const int n = subdivisions(true);
     const G4double stepLenCm = step->GetStepLength() / cm;
+    const auto& prePos = pre->GetPosition();
+    const auto& postPos = post->GetPosition();
     for (int k = 0; k < n; ++k) {
       const G4double f = (k + 0.5) / n;
       const G4double energyMeV = (preE + f * (postE - preE)) / MeV;
@@ -210,6 +295,34 @@ void EnsembleSteppingAction::UserSteppingAction(const G4Step* step) {
           run->Grid().Add(t, energyMeV, depthMm,
                           weight * densities[t] * stepLenCm / n);
       }
+      if (!fCurves) continue;
+      for (std::size_t c = 0; c < fCurves->Channels().size(); ++c) {
+        const auto& channel = fCurves->Channels()[c];
+        const G4double density = densities[channel.target_index];
+        if (density <= 0.) continue;
+        const G4double sigma = channel.SigmaMb(energyMeV);
+        if (sigma <= 0.) continue;
+        const G4double probability =
+            weight * density * (stepLenCm / n) * sigma * 1.0e-27;
+        if (fUniform(fSampleEngine) >= probability) continue;
+        const G4double u = fUniform(fSampleEngine);
+        const G4double g = (k + u) / n;
+        const auto position = prePos + g * (postPos - prePos);
+        run->AddSampledProduction(
+            {G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID(),
+             static_cast<int>(c), position.x() / mm, position.y() / mm,
+             position.z() / mm, energyMeV});
+      }
+    }
+  }
+
+  // --- keep escaping positrons at the phantom surface ---------------------
+  // stageA convention: a positron leaving into air is stopped at the
+  // boundary, so its end point is the recorded annihilation position.
+  if (track->GetParticleDefinition() == G4Positron::Definition()) {
+    const auto* postVol = post->GetPhysicalVolume();
+    if (postVol == nullptr || postVol->GetMotherLogical() == nullptr) {
+      step->GetTrack()->SetTrackStatus(fStopAndKill);
     }
   }
 
@@ -244,8 +357,9 @@ void EnsembleSteppingAction::UserSteppingAction(const G4Step* step) {
 // Run action
 
 EnsembleRunAction::EnsembleRunAction(const ensemble::EnsembleCli& cli,
-                                     const EnsembleDetector& det)
-    : fCli(cli), fDet(det) {}
+                                     const EnsembleDetector& det,
+                                     const ensemble::SamplingCurves* curves)
+    : fCli(cli), fDet(det), fCurves(curves) {}
 
 G4Run* EnsembleRunAction::GenerateRun() {
   return new EnsembleRun(fDet.BeamAxisHalfExtent() / mm, fCli.ebin_width_MeV,
@@ -255,6 +369,33 @@ G4Run* EnsembleRunAction::GenerateRun() {
 void EnsembleRunAction::EndOfRunAction(const G4Run* base_run) {
   if (!IsMaster()) return;
   const auto* run = static_cast<const EnsembleRun*>(base_run);
+
+  // Emitter-transport mode: join the input seeds with the recorded
+  // annihilations and write the core emitters.csv next to the input file.
+  if (!fCli.emitters_in.empty()) {
+    const auto seeds = ensemble::ReadEmitterSeeds(fCli.emitters_in);
+    const auto& annihilations = run->Annihilations();
+    const std::string dir =
+        std::filesystem::path(fCli.emitters_in).parent_path().string();
+    std::ofstream f(dir + "/emitters.csv");
+    f << "event_id,isotope_id,prod_x_mm,prod_y_mm,prod_z_mm,"
+         "anh_x_mm,anh_y_mm,anh_z_mm\n";
+    f << std::setprecision(7);
+    long missing = 0;
+    for (std::size_t i = 0; i < seeds.size(); ++i) {
+      const auto found = annihilations.find(static_cast<int>(i));
+      if (found == annihilations.end()) { ++missing; continue; }
+      const auto& seed = seeds[i];
+      f << seed.event_id << ',' << seed.isotope_index << ',' << seed.x_mm
+        << ',' << seed.y_mm << ',' << seed.z_mm << ','
+        << found->second[0] << ',' << found->second[1] << ','
+        << found->second[2] << '\n';
+    }
+    G4cout << "[ensemble] wrote " << seeds.size() - missing << " emitters ("
+           << missing << " without a captured positron) -> " << dir
+           << "/emitters.csv" << G4endl;
+    return;
+  }
 
   if (run->Grid().Overflow() > 0) {
     G4Exception("EnsembleRunAction", "ExposureOverflow", FatalException,
@@ -363,6 +504,28 @@ void EnsembleRunAction::EndOfRunAction(const G4Run* base_run) {
            << run->Native().size() << G4endl;
   }
 
+  // Productions sampled in flight from the fitted curves.
+  if (fCurves) {
+    std::ofstream f(dir + "/sampled_productions.csv");
+    f << "event_id,channel_id,target,residual,isotope_id,prod_x_mm,"
+         "prod_y_mm,prod_z_mm,proton_energy_MeV\n";
+    f << std::setprecision(9);
+    for (const auto& production : run->Sampled()) {
+      const auto& channel = fCurves->Channels()[production.channel_index];
+      f << production.event_id << ',' << channel.channel_id << ','
+        << ensemble::kTargetNames[channel.target_index] << ','
+        << ensemble::kBetaPlusResiduals[channel.residual_index].name << ','
+        << channel.residual_index << ',' << production.x_mm << ','
+        << production.y_mm << ',' << production.z_mm << ','
+        << production.proton_energy_MeV << '\n';
+    }
+    std::ofstream meta(dir + "/sampling_meta.json");
+    meta << "{\n  \"curves_file\": \"" << fCurves->Path() << "\",\n"
+         << "  \"sampled_productions\": " << run->Sampled().size() << "\n}\n";
+    G4cout << "[ensemble] sampled " << run->Sampled().size()
+           << " productions from " << fCurves->Path() << G4endl;
+  }
+
   // Copy the SOBP layer table (and its provenance meta) into the run dir.
   if (!fCli.layers.empty()) {
     std::error_code ec;
@@ -381,11 +544,16 @@ void EnsembleRunAction::EndOfRunAction(const G4Run* base_run) {
 // ---------------------------------------------------------------------------
 
 void EnsembleActionInitialization::BuildForMaster() const {
-  SetUserAction(new EnsembleRunAction(fCli, fDet));
+  SetUserAction(new EnsembleRunAction(fCli, fDet, fCurves));
 }
 
 void EnsembleActionInitialization::Build() const {
-  SetUserAction(new EnsemblePrimaryGenerator(fCli, fDet));
-  SetUserAction(new EnsembleRunAction(fCli, fDet));
-  SetUserAction(new EnsembleSteppingAction(fCli, fDet));
+  if (fCli.emitters_in.empty()) {
+    SetUserAction(new EnsemblePrimaryGenerator(fCli, fDet));
+  } else {
+    SetUserAction(new EmitterPrimaryGenerator(fCli));
+    SetUserAction(new EnsembleTrackingAction());
+  }
+  SetUserAction(new EnsembleRunAction(fCli, fDet, fCurves));
+  SetUserAction(new EnsembleSteppingAction(fCli, fDet, fCurves));
 }

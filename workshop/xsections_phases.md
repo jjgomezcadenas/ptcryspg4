@@ -99,7 +99,33 @@ the identical protons. Headline result: the paired distal-edge comparison
 4. Exposure-only and sampling runs with equal seeds produce identical
    depth-dose (transport untouched by sampling).
 
-**Status: pending.**
+**Design decisions.** Two-pass sampling: the proton run samples production
+points from its own random engine and writes `sampled_productions.csv`; a
+separate emitter-transport mode (`--emitters-in`) creates each residual ion
+at rest at its point and records the positron annihilation into
+`emitters.csv`. The nominal curves reach the app as one flat file,
+`data/xsections/fits/sampling_curves.csv` (tracked, written by
+`export_sampling_curves.py`). Run-to-run reproducibility required
+pre-generating the Geant4 per-event seed table
+(`SetSeedOncePerCommunication(0)`): with the default per-communication
+seeding, two identical runs did not reproduce. With the fix, sampler-on and
+sampler-off runs give byte-identical depth-dose and native counters, and
+exposure tables equal to summation round-off (~6e-12) — acceptance 4.
+Acceptance 1: slab pulls -0.5σ / +0.2σ / +1.2σ on the three O16 channels.
+
+**Status: complete.** Acceptance 2 at 1e7 protons: sampled/folded yields
+0.9997 (O15), 1.0056 (C11), 1.0004 (N13); the folded R50 matches the
+sampled R50 within its Poisson error for every isotope. Acceptance 3:
+median positron ranges 1.920/0.764/1.073 mm vs the stageA reference
+1.918/0.751/1.105 mm (O15/C11/N13). Emitter transport captured 99.87% of
+sampled productions (the rest decay without a positron).
+
+**Headline result** (run `uniform_headep_sobp_QGSP_BIC_HP_1e7`, reported in
+`docs/sampling_xsections.tex`): Delta = R50(data) − R50(G4) per isotope:
+O15 −1.48 ± 0.44 mm; C11 +5.36 ± 0.95 mm (the BIC near-threshold deficit
+priced in millimetres); N13 +14.3 ± 4.1 mm (native yield low by 2.5x);
+combined +0.36 ± 0.54 mm — the per-isotope shifts compensate at this field
+and isotope mix. Yield ratios data/G4: 0.99 / 1.13 / 2.45 / 1.10.
 
 ## Later phases (scoped when reached)
 

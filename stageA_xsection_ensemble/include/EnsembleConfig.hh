@@ -77,6 +77,8 @@ struct EnsembleCli {
   std::string steps_csv;                 ///< offline accumulation input
   std::string steps_out;                 ///< offline accumulation output
   double zmax_mm = 0.0;                  ///< offline depth-grid maximum
+  std::string curves;       ///< sampling_curves.csv: in-flight sampler on
+  std::string emitters_in;  ///< sampled_productions.csv: emitter transport
 };
 
 }  // namespace ensemble

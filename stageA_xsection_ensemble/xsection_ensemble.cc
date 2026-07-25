@@ -18,6 +18,7 @@
 #include "EnsembleConfig.hh"
 #include "EnsembleDetector.hh"
 #include "ExposureGrid.hh"
+#include "G4MTRunManager.hh"
 #include "G4PhysListFactory.hh"
 #include "G4RunManagerFactory.hh"
 #include "Randomize.hh"
@@ -68,6 +69,8 @@ ensemble::EnsembleCli parse(int argc, char** argv) {
     else if (arg == "--steps-csv") cli.steps_csv = value;
     else if (arg == "--steps-out") cli.steps_out = value;
     else if (arg == "--zmax-mm") cli.zmax_mm = std::stod(value);
+    else if (arg == "--curves") cli.curves = value;
+    else if (arg == "--emitters-in") cli.emitters_in = value;
     else throw std::runtime_error("unknown option: " + arg);
   }
   return cli;
@@ -117,13 +120,27 @@ int main(int argc, char** argv) {
   try {
     const auto cli = parse(argc, argv);
     if (!cli.steps_csv.empty()) return RunStepTableMode(cli);
-    if (cli.protons <= 0)
-      throw std::runtime_error("--protons must be positive (or use --steps-csv)");
+
+    long events = cli.protons;
+    if (!cli.emitters_in.empty())
+      events = static_cast<long>(ensemble::ReadEmitterSeeds(cli.emitters_in).size());
+    if (events <= 0)
+      throw std::runtime_error(
+          "--protons must be positive (or use --steps-csv / --emitters-in)");
+
+    ensemble::SamplingCurves curves;
+    const bool sampling = !cli.curves.empty();
+    if (sampling) curves = ensemble::SamplingCurves::Load(cli.curves);
 
     G4Random::setTheSeed(cli.seed);
     auto* runManager =
         G4RunManagerFactory::CreateRunManager(G4RunManagerType::MT);
     runManager->SetNumberOfThreads(cli.threads);
+    // Pre-generate the whole per-event seed table so every event's physics is
+    // set by the master seed alone; runs are then reproducible regardless of
+    // thread scheduling.
+    if (auto* mt = dynamic_cast<G4MTRunManager*>(runManager))
+      mt->SetSeedOncePerCommunication(0);
     auto* detector = new EnsembleDetector(cli);
     runManager->SetUserInitialization(detector);
     G4PhysListFactory factory;
@@ -132,10 +149,10 @@ int main(int argc, char** argv) {
       throw std::runtime_error("unknown Geant4 physics list: " +
                                cli.physics_list);
     runManager->SetUserInitialization(physics);
-    runManager->SetUserInitialization(
-        new EnsembleActionInitialization(cli, *detector));
+    runManager->SetUserInitialization(new EnsembleActionInitialization(
+        cli, *detector, sampling ? &curves : nullptr));
     runManager->Initialize();
-    runManager->BeamOn(static_cast<G4int>(cli.protons));
+    runManager->BeamOn(static_cast<G4int>(events));
     delete runManager;
   } catch (const std::exception& error) {
     std::cerr << "xsection_ensemble: " << error.what() << "\n";

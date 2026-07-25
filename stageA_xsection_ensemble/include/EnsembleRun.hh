@@ -7,7 +7,9 @@
 #include "G4Run.hh"
 #include "globals.hh"
 
+#include <array>
 #include <map>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -16,6 +18,14 @@ namespace ensemble {
 /// Native-route key: projectile name, target label (element symbol + A),
 /// beta-plus residual index into kBetaPlusResiduals, depth bin.
 using NativeKey = std::tuple<std::string, std::string, int, int>;
+
+/// One production sampled in flight from the fitted curves.
+struct SampledProduction {
+  int event_id = 0;
+  int channel_index = 0;  ///< index into the loaded SamplingCurves channels
+  double x_mm = 0., y_mm = 0., z_mm = 0.;
+  double proton_energy_MeV = 0.;
+};
 
 }  // namespace ensemble
 
@@ -37,6 +47,20 @@ class EnsembleRun : public G4Run {
     return fNative;
   }
 
+  void AddSampledProduction(const ensemble::SampledProduction& production) {
+    fSampled.push_back(production);
+  }
+  const std::vector<ensemble::SampledProduction>& Sampled() const {
+    return fSampled;
+  }
+
+  void RecordAnnihilation(int event_id, double x_mm, double y_mm, double z_mm) {
+    fAnnihilations[event_id] = {x_mm, y_mm, z_mm};
+  }
+  const std::map<int, std::array<double, 3>>& Annihilations() const {
+    return fAnnihilations;
+  }
+
   void AddEdep(double edep) { fEdepTotal += edep; }
   void AddTargetEdep(double edep) { fTargetEdep += edep; }
   void AddDepthEdep(int bin, double edep_MeV, bool primary, bool core);
@@ -52,6 +76,8 @@ class EnsembleRun : public G4Run {
  private:
   ensemble::ExposureGrid fGrid;
   std::map<ensemble::NativeKey, long long> fNative;
+  std::vector<ensemble::SampledProduction> fSampled;
+  std::map<int, std::array<double, 3>> fAnnihilations;
   double fEdepTotal = 0.;   // G4 units
   double fTargetEdep = 0.;  // G4 units
   double fHalfZmm = 0.;
