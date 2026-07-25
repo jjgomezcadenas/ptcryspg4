@@ -106,10 +106,36 @@ $\longrightarrow$ beam-off handoff and reconstructed $R_{50}$.
 \end{minipage}
 \end{center}
 
-The physical calculation requires a dedicated Geant4 proton-transport run.
-That run is performed once for the nominal cross section and all replicas.  It
-records steps from primary and secondary protons in the phantom and accumulates
-the target-resolved proton exposure needed by Eq.~\eqref{eq:step-yield}.  The
+\subsection{Independent Geant4 application}
+
+The calculation will be implemented as a new standalone application under
+\file{stageA\_xsection\_ensemble/}.  It has its own CMake target, detector
+construction, primary generator, action classes, macros, run scripts,
+documentation and tests.  It neither links source files from nor modifies
+\file{stageA\_transport}.  The two applications may read the same versioned
+SOBP-layer and material inputs, and their agreement in geometry, dose and
+depth dose is an explicit validation rather than an implementation dependency.
+
+The new application has two modes, implemented as separate executables or as
+two explicit run modes with disjoint output contracts:
+\begin{enumerate}[nosep]
+  \item the \emph{proton-exposure mode} transports primary and secondary
+        protons once, writes the target-resolved exposure and a spatial
+        proposal bank, and records dose and native-production diagnostics;
+  \item the \emph{variant-source mode} reads the frozen proposal bank and one
+        nominal or replica cross-section set, samples the externally defined
+        production source, transports the emitted positron, and writes the
+        production and annihilation information required by the detector
+        simulation.
+\end{enumerate}
+The first mode is common to the nominal curve and all replicas.  The second is
+run for the nominal case and for the selected replica subset propagated through
+the full detector.  It can therefore be repeated without repeating proton
+transport.
+
+The physical calculation begins with one proton-exposure run.  It records
+steps from primary and secondary protons in the phantom and accumulates the
+target-resolved proton exposure needed by Eq.~\eqref{eq:step-yield}.  The
 required step information is
 \begin{itemize}[nosep]
   \item event and proton-track identifiers;
@@ -122,7 +148,7 @@ A representative step energy is obtained from the pre- and post-step energies.
 The adopted midpoint or path-averaged rule will be tested by subdividing the
 steps.
 
-Two tracked transport products serve different stages of the calculation.
+Two tracked products from the exposure mode serve different stages of the calculation.
 First, a binned target-resolved proton exposure table stores
 \begin{equation}
  K_{t,k,m}=\sum_{s\in(t,k,m)}a_s n_{t,s}\ell_s,
@@ -133,10 +159,10 @@ multidimensional histogram rather than a fitted function.  Its units are
 inverse area, and multiplication by a cross section gives the expected number
 of reactions.  This compact table is sufficient for isotope budgets,
 production profiles and $R_{50,\mathrm{prod}}$.  Second, a fixed proposal
-sample of step segments
-retains their positions and sampling probabilities.  It supplies production
-sites to the positron-transport stage without storing the complete raw step
-history for every replica.
+sample of step segments retains their positions, energies, targets, path
+lengths, statistical weights and sampling probabilities.  It supplies
+production sites to the variant-source mode without storing the complete raw
+step history separately for every replica.
 
 Development and validation of the folding calculation precede the dedicated
 Geant4 run.  Synthetic exposure tables with analytic yields establish the data
@@ -193,8 +219,14 @@ definition and authoritative bin edges.  The normalization satisfies
  \label{eq:np-per-gy}
 \end{equation}
 where $D_{\mathrm{sim,target}}$ is the same \file{target\_dose\_Gy} written by
-Stage A and consumed by \file{decay\_sampling/budget.py}.  Folded yields are
+the exposure mode and consumed by \file{decay\_sampling/budget.py}.  Folded yields are
 reported for the simulated run, per primary proton and per Gy.
+
+The exposure-mode run directory additionally contains
+\file{depth\_dose.csv}, \file{native\_route\_counts.csv}, the proposal-bank
+data and their metadata.  The run tag includes the physics list.  Every product
+records the proton count, dose convention, coordinate system, Geant4 version,
+random seed and software revision.
 
 \section{Direct folding of external cross sections}
 
@@ -256,11 +288,26 @@ The nominal and all replicas use the same proposal sites and random-number
 streams.  The resulting pairing reduces Monte Carlo noise in the displacement
 between two edge estimates.
 
-The selected residual isotope is created at the sampled production site and
-its positron is transported through the local Geant4 material.  The output
-contains both the production and annihilation coordinates.  The existing
-beam-off handoff then applies isotope half-lives and acquisition timing to the
-production budgets.  Production-profile and reconstructed-edge displacements
+The variant-source mode creates the selected residual isotope at the sampled
+production site and transports its positron through the local Geant4 material.
+For detector compatibility, each variant writes the complete core
+\file{emitters.csv} interface used by \file{stageA\_transport}: event and
+isotope identifiers together with production and annihilation coordinates.
+The companion metadata retain the exposure-run and proposal-bank digests,
+cross-section variant identifier, fit digest, physics list, random seed and
+normalization.
+
+An extended event product records the production channel, target isotope,
+proton energy at production, proposal probability and source weight.  These
+fields support paired comparisons and audit the conversion from the proposal
+bank to each variant source.  The legacy-compatible core file remains the
+detector-facing interface; the extended product provides the additional
+information required by the uncertainty analysis.
+
+The existing beam-off handoff then applies isotope half-lives and acquisition
+timing to the production budgets.  The nominal source and a stratified subset
+of replicas proceed through the full detector simulation and reconstruction.
+Production-profile, annihilation-profile and reconstructed-edge displacements
 remain distinct outputs throughout the analysis.
 
 The longitudinal outputs distinguish the raw sum
@@ -415,6 +462,13 @@ The implementation is accepted when the following checks pass:
         replica evaluated on a frozen transport.
   \item Fixed seeds reproduce the proposal sites, isotope budgets and paired
         edge shifts.
+  \item With matched beam, phantom and physics-list settings, the new exposure
+        application and \file{stageA\_transport} agree statistically in target
+        dose and depth-dose shape.
+  \item The variant-source mode reproduces the core \file{emitters.csv} schema
+        and positron-range reference distributions while its extended event
+        table preserves the channel, target, proton energy, proposal weight
+        and variant provenance.
   \item Exposure metadata reproduce \file{Np\_per\_Gy} from the primary count
         and target-box dose, and folding and handoff resolve identical named-
         scenario factors.
@@ -437,16 +491,23 @@ The implementation is accepted when the following checks pass:
   \item Implement run-metadata validation, per-Gy normalization, named-scenario
         activity profiles, vectorized outputs, convergence analysis and the
         native-route diagnostic.
-  \item Add target-resolved proton step scoring to Stage A and generate a
-        dedicated moderate-statistics nominal SOBP transport.  This run
-        constructs the physical target--energy--position exposure table.
+  \item Create the independent \file{stageA\_xsection\_ensemble/} Geant4
+        application and implement its proton-exposure mode, metadata, dose,
+        native-route counters and proposal bank.  Validate it with analytic
+        slabs and matched depth-dose comparisons to \file{stageA\_transport}.
+  \item Generate a moderate-statistics nominal SOBP exposure run.  This run
+        constructs the physical target--energy--position exposure table and
+        freezes the proposal bank used by all cross-section variants.
   \item Fold the nominal curves and all 1000 replicas, then write isotope
         budgets, production profiles, $R_{50,\mathrm{prod}}$ values and the
         paired uncertainty distribution.
-  \item Implement the common spatial proposal and Geant4 positron-source pass,
-        preserving both production and annihilation coordinates.
-  \item Apply the existing beam-off handoff and propagate a stratified replica
-        set through the downstream detector and reconstruction calculation.
+  \item Implement the variant-source mode.  Write the detector-compatible
+        \file{emitters.csv}, extended event information and complete variant
+        provenance while preserving both production and annihilation
+        coordinates.
+  \item Apply the existing beam-off handoff and propagate the nominal source
+        and a stratified replica subset through the downstream detector and
+        reconstruction calculation.
   \item Repeat the proton transport with INCL++ and Bertini, fold the common
         external curves and report the independent transport envelope.
   \item Generate the final high-statistics source after the closure tests and

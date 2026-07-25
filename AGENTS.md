@@ -10,6 +10,13 @@ authorization to perform it: answer the question and wait for an explicit
 instruction before searching, reading, editing, running commands, or otherwise
 acting.
 
+**Never create, switch, or otherwise change Git branches with an uncommitted
+worktree.** Before every branch operation, inspect the current branch and full
+worktree status. Existing changes must first be committed on their current
+branch, or the user must explicitly direct how they are to be handled. Do not
+carry uncommitted changes onto another branch, and do not assume that a dirty
+change belongs to the branch being created.
+
 **Use readable formulas in terminal-facing output.** Write formulas as plain
 text and do not use LaTeX notation in terminal or conversational responses.
 

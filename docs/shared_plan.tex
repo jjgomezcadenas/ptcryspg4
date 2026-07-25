@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{siunitx}
+
+\newcommand{\file}[1]{\texttt{#1}}
+
+\title{Shared plan for data-driven emitter generation and\\
+weighted list-mode propagation}
+\author{J.J. G\'omez-Cadenas}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note defines the interface between the Geant4 proton and positron
+calculation in \file{ptcryspg4} and the PET detector calculation in
+\file{PTCryspMC.jl}.  Three source-generation modes are retained: native
+Geant4 residual production for historical compatibility, an unweighted source
+generated from the nominal experimental cross-section curves for routine
+data-driven studies, and a shared weighted source bank for propagation of the
+full cross-section ensemble.  The first two modes produce ordinary emitter
+lists.  The third transports each sampled source and detector event once and
+assigns curve-dependent weights afterwards.  This document records the common
+method, data contracts and division of responsibilities between the two
+repositories.
+\end{abstract}
+
+\section{Purpose and relationship to the other notes}
+
+The experimental data selection, curation, fitted excitation functions and
+1000 correlated replicas are documented in \file{docs/xsection\_fit.tex}.
+The proton-exposure estimator and its Geant4 implementation are specified in
+\file{docs/xsections\_plan.tex}.  The present document is the cross-repository
+plan: it describes how a production event is carried from the Geant4
+calculation to detector-level list-mode lines of response (LORs), and how the
+nominal and replica-dependent event populations are represented.
+
+Implementation details local to \file{PTCryspMC.jl} will be recorded in a
+separate developer note in that repository.  Its generated
+\file{docs/SCHEMA.md} remains the authoritative description of the implemented
+singles and LOR formats.
+
+All implementation changes are made on dedicated feature branches.  The G4
+work uses \file{xsection-source-bank}; the detector-side work will use
+\file{xsection-weighted-lors}.  The existing production applications remain
+available while the new calculation is validated.
+
+\section{Terminology}
+
+The earlier plan used \emph{proposal distribution} and \emph{proposal source},
+which are standard importance-sampling terms but obscure the role of the data
+product.  The implementation and user documentation will use the following
+terms:
+
+\begin{description}[style=nextline,leftmargin=0pt]
+  \item[Shared source bank]
+  A reusable collection of candidate emitter events covering the selected
+  targets, production channels, proton energies and spatial regions.
+
+  \item[Bank sampling distribution]
+  The probability rule used to select the candidate events.  It has support
+  wherever the nominal curve or any retained replica can produce an emitter.
+
+  \item[Source-bank mode]
+  The Geant4 mode that generates the shared source bank and transports the
+  positron associated with each bank event.
+
+  \item[Weighted source event]
+  A bank event after assigning its contribution for the nominal curve or one
+  cross-section replica.
+\end{description}
+
+The symbol $q_{s,c}$ remains useful in equations as the bank sampling
+probability for proton segment $s$ and production channel $c$.  The word
+``proposal'' is unnecessary in filenames, run modes and user-facing text.
+
+\section{Three source-generation modes}
+
+The three modes are scientifically distinct and mutually exclusive for a
+given source calculation.  Table~\ref{tab:modes} summarizes their roles.
+
+\begin{table}[ht]
+\centering\small
+\caption{Source-generation modes.}
+\label{tab:modes}
+\begin{tabular}{p{0.18\textwidth}p{0.22\textwidth}p{0.25\textwidth}p{0.25\textwidth}}
+\toprule
+Mode & Production cross sections & Principal purpose & Detector input \\
+\midrule
+Native G4 & Geant4 physics-list residual production & Reproduce the
+established Stage-A calculation and provide a model comparison & Ordinary
+unweighted \file{emitters.csv} plus the existing handoff budget \\
+Data-driven nominal & Median experimental excitation functions & Routine
+best-estimate production studies & Ordinary unweighted
+\file{emitters.csv} plus a nominal data-driven handoff budget \\
+Shared weighted bank & Nominal curve and all correlated replicas & Propagate
+cross-section uncertainty with common source and detector histories & Shared
+source-event table and detector LOR bank with stable event identifiers \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Mode 1: native Geant4}
+
+The current \file{stageA\_transport} application defines the native-G4 mode.
+Geant4 selects the inelastic interaction, residual isotope and final state from
+the chosen physics list.  Its standard radioactive-decay and positron
+transport produce the annihilation point.  The existing
+\file{emitters.csv}, \file{run\_meta.csv}, depth-dose and handoff products keep
+their present meanings.
+
+This mode provides exact backward compatibility with earlier studies.  It is
+also a useful comparison because differences between it and the data-driven
+nominal source measure the practical consequence of replacing the Geant4
+partial residual-production model with the fitted experimental excitation
+functions.  Native-G4 results are identified explicitly in filenames,
+metadata, plots and tables.
+
+The existing application remains the implementation of this mode.  The new
+cross-section application may read the same versioned beam and geometry
+inputs, while agreement is established through dose and depth-dose closure.
+
+\subsection{Mode 2: data-driven nominal}
+
+The nominal mode uses the median fitted experimental curve
+$\sigma_c^{\mathrm{nom}}(E)$ for each selected channel.  For proton segment
+$s$ and channel $c$, its expected production contribution is
+\begin{equation}
+ \Delta N_{s,c}^{\mathrm{nom}}
+ = a_s n_{t(c),s}\ell_s\sigma_c^{\mathrm{nom}}(E_s),
+ \label{eq:nominal-contribution}
+\end{equation}
+where $a_s$ is the proton statistical weight, $n_{t(c),s}$ is the target-isotope
+number density and $\ell_s$ is the step length.
+
+Production sites and channels are sampled in proportion to
+Eq.~\eqref{eq:nominal-contribution}.  The associated residual isotope is
+created at the sampled production position and its positron is transported to
+annihilation.  The resulting per-isotope point pools are unweighted.  Their
+physical production budgets are obtained from the folded nominal yields and
+the established per-Gy normalization.  The beam-off handoff applies the named
+irradiation, delay and acquisition scenario.
+
+This mode is the routine data-driven calculation.  It writes the ordinary core
+\file{emitters.csv} interface and an ordinary sampling budget, so the existing
+\file{PTCryspMC.jl} API path can consume it without cross-section weights.  The
+data-driven provenance identifies the fit version and nominal-curve digest.
+
+The data-driven nominal result can differ substantially from the native-G4
+result, particularly where the Geant4 residual model has incomplete support.
+The nominal experimental fit defines the best-estimate production source;
+the native-G4 result remains a separately labelled comparison.
+
+\subsection{Mode 3: shared weighted source bank}
+
+The uncertainty calculation uses a common bank of sampled proton-segment and
+channel combinations.  The bank sampling distribution $q_{s,c}$ covers the
+support of the nominal fit and the complete retained replica ensemble.  For
+curve $r$, bank event $e=(s,c)$ carries weight
+\begin{equation}
+ w_e^{(r)}=
+ \frac{a_s n_{t(c),s}\ell_s\sigma_c^{(r)}(E_s)}{q_{s,c}}.
+ \label{eq:event-weight}
+\end{equation}
+Common overall sampling and per-Gy factors are recorded in the bank metadata
+and applied consistently to every curve.
+
+Each bank event fixes the production channel, isotope, production point and
+proton energy.  Geant4 transports its positron once and records the
+annihilation point.  The PET calculation then transports the two annihilation
+photons through the phantom and scanner once.  The event consequently has one
+stored detector response and one weight for every cross-section curve.
+
+The nominal curve is included in this weighted calculation.  Its weighted
+source and reconstructed profiles provide the reference for all paired
+replica displacements.  Mode 2 remains the convenient unweighted route for
+normal studies and provides an independent closure test: the weighted nominal
+profile from mode 3 must agree with the unweighted nominal profile from mode 2
+within the predefined Monte Carlo tolerances.
+
+The weighted method changes the spatial density of LOR contributions.  The
+weight depends on channel and proton energy, both of which vary with depth.
+The stored LOR endpoints remain fixed while the weighted activity profile and
+its distal $R_{50}$ change from one curve to another.
+
+\section{Shared source-event contract}
+
+The source bank requires one stable record per transported positron.  The
+record contains at least
+\begin{itemize}[nosep]
+  \item a stable source-event identifier;
+  \item the residual isotope and production-channel identifiers;
+  \item the target isotope;
+  \item the proton kinetic energy or a reference to its validated energy bin;
+  \item the production and annihilation coordinates;
+  \item the bank sampling probability or an equivalent precomputed base
+        factor;
+  \item the proton-exposure run identifier and digest;
+  \item the cross-section fit and bank-definition digests.
+\end{itemize}
+
+The source-event table stores these values once.  Detector singles and LORs
+carry compact source-event identifiers rather than duplicating the complete
+record.  Replica weights are evaluated from the source-event table and the
+cross-section lookup tables.  A matrix containing one stored weight per LOR
+and replica is therefore unnecessary.
+
+The production and annihilation coordinates have different roles.  The
+production position defines the activity-production profile and its
+$R_{50,\mathrm{prod}}$.  The annihilation position is the source of the two
+\SI{511}{keV} photons and defines the position entering the detector
+simulation.
+
+\section{PTCryspMC.jl propagation}
+
+The current detector pipeline is
+\begin{center}
+source events $\longrightarrow$ singles $\longrightarrow$ truth LORs and
+random LORs $\longrightarrow$ detector LORs.
+\end{center}
+The existing event number already propagates through singles and same-decay
+truth/scatter LORs.  It can serve as the source-event lookup key when its
+mapping to the shared source-event table is preserved.
+
+For a true or scattered LOR $L$ produced by source event $e$,
+\begin{equation}
+ W_L^{(r)}=w_e^{(r)}.
+ \label{eq:true-lor-weight}
+\end{equation}
+A random LOR combines photons from two distinct source events.  Its schema
+therefore requires both event identifiers.  If its photons originate from
+$e_1$ and $e_2$, its expected contribution is
+\begin{equation}
+ W_{L,\mathrm{random}}^{(r)}=
+ w_{e_1}^{(r)}w_{e_2}^{(r)}.
+ \label{eq:random-lor-weight}
+\end{equation}
+The existing random builder already has both identifiers while forming the
+pair; the extended schema preserves them through detector smearing and
+selection.
+
+The detector code will retain two input paths:
+\begin{enumerate}[nosep]
+  \item the existing unweighted API source for native-G4 and data-driven
+        nominal scenarios; and
+  \item an optional shared-bank source that preserves source-event identity
+        through the detector list.
+\end{enumerate}
+
+The reconstruction stage can consume weighted list-mode events directly.  A
+tracked resampling program can alternatively materialize ordinary unweighted
+LOR lists for a selected replica subset.  Both routes reuse the same photon
+transport, detector smearing and selection realization.  The chosen route and
+all weight-table digests form part of the reconstruction provenance.
+
+\section{Beam-off handoff and normalization}
+
+All three modes retain the established division of responsibilities.  Geant4
+determines production and annihilation space.  The handoff determines the
+expected number of measured decays for a named irradiation and acquisition
+scenario.  For isotope $j$, its production contribution is multiplied by the
+same build-up, delay and acquisition-window factors already used by
+\file{decay\_sampling/budget.py}.
+
+In modes 1 and 2, the handoff writes an ordinary per-isotope sampling budget.
+In mode 3, the isotope-dependent handoff factor multiplies each source-event
+weight.  The named handoff scenario and its file digest are common to the G4
+folding products, detector source and reconstructed LOR analysis.
+
+Per-proton and per-Gy normalization use the proton-exposure run metadata.  The
+target dose convention is shared with the current Stage-A budget calculation.
+The native-G4, unweighted nominal and weighted nominal outputs are all reported
+for the same primary count, target-dose definition and beam-off scenario.
+
+\section{Geant4 work still required}
+
+The experimental curves, replica ensemble, folding implementation, synthetic
+exposure tests and forced-final-state Geant4 diagnostic already exist.  The
+physical application \file{stageA\_xsection\_ensemble/} remains to be built.
+Its required components are:
+
+\begin{enumerate}
+  \item An independent Geant4 application with its own CMake target, geometry,
+        primary generator, actions, run macros and tests.
+
+  \item A proton-exposure mode scoring primary and secondary proton track
+        length by target isotope, energy and position, together with dose,
+        depth dose, native-route diagnostics and complete run metadata.
+
+  \item A source-bank mode implementing a documented bank sampling
+        distribution, stable event identifiers, channel and energy retention,
+        positron transport and the shared source-event table.
+
+  \item A data-driven nominal mode producing unweighted emitter pools and
+        nominal handoff budgets from the median experimental curves.
+
+  \item Runtime selection of BIC, INCL++ and Bertini for the independent
+        proton-exposure envelope.  The external production curves remain
+        common to these runs.
+
+  \item Closure tests connecting per-step exposure, binned folding,
+        unweighted nominal sampling and weighted-bank sampling.
+\end{enumerate}
+
+\section{Validation and acceptance}
+
+The shared calculation is accepted when the following conditions hold:
+
+\begin{enumerate}
+  \item The native-G4 mode reproduces the existing Stage-A output and handoff
+        semantics.
+
+  \item The unweighted nominal source reproduces the nominal folded isotope
+        yields and production profiles.
+
+  \item The weighted nominal source reproduces the unweighted nominal source
+        in isotope yield, production $R_{50}$, annihilation $R_{50}$ and
+        reconstructed $R_{50}$ within the frozen statistical tolerances.
+
+  \item Every replica reproduces its direct-fold production profile when the
+        shared source-event weights are summed before detector transport.
+
+  \item The event-weighted detector result is invariant, within its tolerance,
+        under enlargement of the shared source bank.
+
+  \item True and scattered LORs preserve one source identifier; random LORs
+        preserve both source identifiers and satisfy the expected weighted
+        random-rate closure.
+
+  \item A schema-version guard prevents mixing native, nominal and shared-bank
+        files with incompatible semantics.
+
+  \item All reported calculations, comparisons and plots are generated by
+        tracked repository code.
+\end{enumerate}
+
+\section{Implementation sequence across repositories}
+
+\begin{enumerate}
+  \item Finalize this shared contract and update
+        \file{docs/xsections\_plan.tex} on the G4 feature branch.
+
+  \item Implement and validate the physical proton-exposure scorer in the new
+        G4 application.
+
+  \item Implement the data-driven nominal source and establish closure with
+        the direct nominal fold.
+
+  \item Implement the shared source bank and establish weighted-nominal versus
+        unweighted-nominal closure before detector propagation.
+
+  \item Create the detector-side feature branch and document its exact source,
+        singles and LOR schema changes.
+
+  \item Add the shared-bank source mode, source-event lookup and the second
+        random-event identifier to \file{PTCryspMC.jl}; preserve the existing
+        unweighted API path.
+
+  \item Propagate the weighted nominal and a controlled replica subset through
+        the full detector and reconstruction chain, then compare weighted and
+        resampled list-mode reconstruction where required.
+
+  \item Run the complete replica ensemble through the validated offline
+        weighting layer and report the paired reconstructed-edge distribution.
+\end{enumerate}
+
+\end{document}
