@@ -225,8 +225,9 @@ def analyze(run_dir: Path, repo: Path):
                      " & ratio & $R_{50}^{\\mathrm{data}}$ (mm) & "
                      "$\\Delta$ (mm) \\\\\n\\midrule\n")
         for row in summary.to_dict("records"):
+            label = row["isotope"].replace("_", " ")
             stream.write(
-                f"{row['isotope']} & {row['sampled_per_Gy']:.3e} & "
+                f"{label} & {row['sampled_per_Gy']:.3e} & "
                 f"{row['native_per_Gy']:.3e} & "
                 f"{row['yield_ratio_data_over_g4']:.3f} & "
                 f"{row['R50_data_mm']:.2f} & "
