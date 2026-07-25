@@ -12,8 +12,19 @@
     2.0,
     3.0
   ],
-  "campaign_normalization_fraction": {},
-  "config_sha256": "0e80a0581c7372f2adb72d714a206c58967ec9f9d6be21dfb3cc01bf608c7f6d",
+  "campaign_normalization_fraction": {
+    "exfor_E2449_002_p_O16_x_O15": 0.049,
+    "exfor_E2449_004_p_O16_x_N13": 0.045,
+    "exfor_E2449_005_p_C12_x_C11": 0.041,
+    "exfor_O2576_003_p_O16_x_C11": 0.055,
+    "exfor_O2576_004_p_O16_x_N13": 0.055,
+    "exfor_O2582_002_p_C12_x_C11": 0.046,
+    "exfor_O2582_003_p_O16_x_C11": 0.046,
+    "exfor_O2582_004_p_O16_x_N13": 0.046,
+    "exfor_O2582_005_p_O16_x_O15": 0.046,
+    "exfor_O2582_007_p_N14_x_N13": 0.046
+  },
+  "config_sha256": "badba3ed02857ba824acc7c91b89bc3616f6fa6df35531a0a24f83647f7cdb64",
   "curation_sha256": "5f396ecf099ed62b00e6600c30d0303d439a386c49873dd8e1831740648a2cdc",
   "energy_max_MeV": 150.0,
   "energy_min_MeV": 5.0,
@@ -80,6 +91,9 @@
     0.95
   ],
   "schema_version": 1,
+  "segment_boundary_MeV": {
+    "p_O16_x_N13": 22.0
+  },
   "sensitivity_include_dataset_ids": [
     "exfor_B0095_002_p_C12_x_C11"
   ],

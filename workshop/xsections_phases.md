@@ -127,6 +127,44 @@ priced in millimetres); N13 +14.3 ± 4.1 mm (native yield low by 2.5x);
 combined +0.36 ± 0.54 mm — the per-isotope shifts compensate at this field
 and isotope mix. Yield ratios data/G4: 0.99 / 1.13 / 2.45 / 1.10.
 
+## Fit revision — level anchoring (triggered by the N13 check)
+
+**Trigger.** The planned check of the O-16(p,x)N-13 fit found the curve
+1.85x above four mutually consistent plateau campaigns, insensitive to the
+smoothing and spread parameters.
+
+**Diagnosis.** In the campaign-offset model every campaign constrains the
+curve *level* with equal weight regardless of precision; where one region's
+campaigns are numerous and discrepant (the N13 resonances), they set the
+level everywhere through the shared spline. Three of five channels were
+affected (data/fit above 40 MeV: N13-from-O16 0.54, N13-from-N14 0.78,
+C11-from-O16 1.32).
+
+**Fixes (fit v4).**
+1. Campaigns with a documented normalization uncertainty anchor the curve
+   level at that value (covariance, CV selection and replica draws); values
+   with citations in `config/xsection_fit.toml`: Akagi 2013 (EXFOR
+   ERR-ANALYS, 4.1-4.9%) and Rodriguez-Gonzalez 2022/2023 (published
+   budgets, 4.6-5.5%; paper in `papers/`).
+2. The Akagi anchor is withdrawn in C11-from-O16 only: its level is
+   contradicted there by the monitor-validated 2023 campaign and every
+   independent campaign (its points stay, unanchored).
+3. O-16(p,x)N-13 is fitted in two segments joined at 22 MeV (resonance /
+   plateau), blended over 2 MeV, each with its own campaign-offset model.
+
+**Result.** All five channels sit on their high-energy data
+(data/fit 1.04 / 0.97 / 0.98 / 0.98 / 0.97). Bands tightened (production
+median half-widths 2.6-4.8%). Method documented in `docs/xsection_fit.tex`.
+
+**Updated headline numbers** (1e7 rerun, `docs/sampling_xsections.tex`):
+Delta R50 O15 −1.78 ± 0.46, C11 +5.02 ± 0.91, N13 +28.4 ± 4.5 (its
+measured production persists to the lowest energies, reaching deepest),
+combined −0.03 ± 0.62; scenario-weighted +0.11 (fast), +0.19 (in-room),
++2.67 ± 0.58 (offline). Yield ratios data/G4: 0.97 / 1.32 / 1.49 / 1.10.
+Replica band on the data-driven production edge: ±0.13 mm.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
 
 - Phase 2: fine-grid pilot, energy-bin convergence study, frozen grid,

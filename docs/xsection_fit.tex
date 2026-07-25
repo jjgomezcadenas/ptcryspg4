@@ -212,15 +212,37 @@ mapped to the logarithmic error
 
 For experimental points $i$ and $j$, the covariance model is
 \begin{equation}
-  C_{ij}=u_i^2\delta_{ij}+s_c^2 I[c(i)=c(j)],
+  C_{ij}=u_i^2\delta_{ij}+s_{c(i)}^2\, I[c(i)=c(j)],
   \label{eq:covariance}
 \end{equation}
-where $c(i)$ denotes the campaign and $s_c$ is a common logarithmic
-between-campaign spread.  The second term represents a coherent displacement
-of a campaign rather than independent fluctuations of all its points.
+where $c(i)$ denotes the campaign.  The second term represents a coherent
+displacement of a campaign rather than independent fluctuations of all its
+points.  A campaign whose source documents its normalization uncertainty
+uses that documented value as its offset scale $s_c$, anchoring the level of
+the fitted curve at the precision its authors established; the documented
+components and citations accompany the values in
+\path{config/xsection_fit.toml} (Akagi 2013 from the EXFOR error analysis;
+Rodr\'iguez-Gonz\'alez 2022 and 2023 from the published budgets).  The
+remaining campaigns share one fitted spread $s_c$.  A level set by one equal
+vote per campaign would hand the plateau of a channel to the region where
+campaigns are most numerous and least consistent; the anchors give the level
+to the campaigns that measured it.
 
-The curvature penalty and $s_c$ are selected from fixed grids by
-leave-one-campaign-out prediction.  Each complete campaign is predicted by a
+Two channel-level decisions accompany the anchors.  In
+$^{16}$O(p,x)$^{11}$C the documented Akagi normalization is contradicted by
+the monitor-validated 2023 campaign and by the independent campaigns, which
+sit 25--70\% above its level; its anchor is withdrawn in that channel (the
+configuration records the reason) and its points remain in the fit under the
+fitted spread.  $^{16}$O(p,x)$^{13}$N is fitted in two segments joined at
+\SI{22}{MeV}: the single-segment model transmits the level of the
+resonance-region campaigns --- numerous and mutually discrepant --- into the
+plateau through the shared offsets, placing the curve 25\% above four
+mutually consistent plateau campaigns.  Each segment carries its own
+campaign-offset model, and the two curves are blended geometrically over
+\SI{2}{MeV}.
+
+The curvature penalty and the shared $s_c$ are selected from fixed grids by
+leave-one-campaign-out prediction, per segment where a channel is split.  Each complete campaign is predicted by a
 fit to the remaining campaigns, and the selection score is the Gaussian
 predictive loss including its variance term.  The fractional campaign spread
 reported in the results is $\exp(s_c)-1$.
@@ -235,16 +257,14 @@ high-energy trend.
 
 One thousand replicas are generated with a recorded random seed.  For each
 replica, every fitted point receives a draw from its reported logarithmic
-cross-section error and every campaign receives one common draw with standard
-deviation $s_c$.  The curvature penalty is reselected from the fixed grid, and
-the varied data are refitted.
+cross-section error and every campaign receives one common draw with its
+offset scale: the documented normalization for anchored campaigns, the
+fitted $s_c$ for the others.  The curvature penalty is reselected from the
+fixed grid, and the varied data are refitted.
 
-The implementation also defines within-campaign correlated draws for
-separately quantified normalization errors and verified incident-energy
-uncertainties.  No such numerical component is active in the current
-configuration: the curated metadata contain no separate campaign
-normalization value, and no CX4 energy field has yet been verified as an
-uncertainty rather than an energy interval.
+No CX4 energy field has yet been verified as an uncertainty rather than an
+energy interval, so the energy-displacement variation remains inactive;
+adding a verified value activates it without changing the procedure.
 
 At each energy, the replica median defines the nominal cross section.  The
 16th and 84th percentiles define the primary uncertainty interval.  Its

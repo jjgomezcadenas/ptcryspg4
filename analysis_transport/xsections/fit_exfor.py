@@ -65,18 +65,26 @@ def _penalty(size):
     return np.diff(np.eye(size), n=2, axis=0)
 
 
-def inverse_covariance(frame, log_uncertainty, campaign_log_spread):
-    """Point errors plus one fully correlated offset per campaign."""
+def inverse_covariance(frame, log_uncertainty, campaign_log_spread,
+                       campaign_spreads=None):
+    """Point errors plus one fully correlated offset per campaign.
+
+    A campaign with a documented normalization uncertainty (an entry in
+    campaign_spreads) uses that value as its offset scale; the others use
+    the fitted global spread. Anchored campaigns therefore pin the level of
+    the curve to the precision their source published.
+    """
     size = len(frame)
     inverse = np.zeros((size, size))
     campaigns = frame["campaign_id"].to_numpy()
     for campaign in np.unique(campaigns):
+        spread = (campaign_spreads or {}).get(campaign, campaign_log_spread)
         indices = np.flatnonzero(campaigns == campaign)
         variances = np.maximum(log_uncertainty[indices], 1.0e-6) ** 2
         diagonal_inverse = np.diag(1.0 / variances)
-        if campaign_log_spread > 0:
+        if spread > 0:
             column = (1.0 / variances)[:, None]
-            denominator = (1.0 / campaign_log_spread ** 2
+            denominator = (1.0 / spread ** 2
                            + np.sum(1.0 / variances))
             block = diagonal_inverse - column @ column.T / denominator
         else:
@@ -86,9 +94,10 @@ def inverse_covariance(frame, log_uncertainty, campaign_log_spread):
 
 
 def fit_coefficients(model, frame, log_sigma, log_uncertainty, smoothing,
-                     campaign_log_spread):
+                     campaign_log_spread, campaign_spreads=None):
     design = model.design(frame.energy_MeV)
-    weight = inverse_covariance(frame, log_uncertainty, campaign_log_spread)
+    weight = inverse_covariance(frame, log_uncertainty, campaign_log_spread,
+                                campaign_spreads)
     differences = _penalty(model.coefficient_count)
     system = (design.T @ weight @ design
               + smoothing * differences.T @ differences
@@ -97,7 +106,7 @@ def fit_coefficients(model, frame, log_sigma, log_uncertainty, smoothing,
 
 
 def choose_smoothing(model, frame, log_sigma, log_uncertainty, candidates,
-                     campaign_log_spread):
+                     campaign_log_spread, campaign_spreads=None):
     """Select smoothing by prediction of complete held-out campaigns."""
     campaigns = frame["campaign_id"].unique()
     scores = []
@@ -111,14 +120,14 @@ def choose_smoothing(model, frame, log_sigma, log_uncertainty, candidates,
             coefficients = fit_coefficients(
                 model, frame.loc[train].reset_index(drop=True),
                 log_sigma[train], log_uncertainty[train], smoothing,
-                campaign_log_spread)
+                campaign_log_spread, campaign_spreads)
             prediction = model.predict(
                 coefficients, frame.loc[test, "energy_MeV"].to_numpy())
             predicted_log = model.transform(
                 frame.loc[test, "energy_MeV"].to_numpy(), prediction)
             residual = predicted_log - log_sigma[test]
-            variance = (log_uncertainty[test] ** 2
-                        + campaign_log_spread ** 2)
+            spread = (campaign_spreads or {}).get(campaign, campaign_log_spread)
+            variance = log_uncertainty[test] ** 2 + spread ** 2
             campaign_scores.append(np.mean(
                 residual ** 2 / variance + np.log(variance)))
         scores.append(np.mean(campaign_scores) if campaign_scores else np.inf)
@@ -126,12 +135,13 @@ def choose_smoothing(model, frame, log_sigma, log_uncertainty, candidates,
 
 
 def choose_campaign_spread(model, frame, log_sigma, log_uncertainty,
-                           smoothing_candidates, spread_candidates):
+                           smoothing_candidates, spread_candidates,
+                           campaign_spreads=None):
     results = []
     for spread in spread_candidates:
         smoothing, scores = choose_smoothing(
             model, frame, log_sigma, log_uncertainty,
-            smoothing_candidates, float(spread))
+            smoothing_candidates, float(spread), campaign_spreads)
         results.append((float(np.min(scores)), float(spread), smoothing, scores))
     return min(results, key=lambda result: result[0])
 
@@ -214,11 +224,15 @@ def load_pending_exfor_points(repo, channel, energy_min, energy_max):
         curation[["dataset_id", "reason_code"]], on="dataset_id", how="left")
 
 
-def _apply_normalizations(log_values, frame, config, rng):
+def _apply_normalizations(log_values, frame, config, rng, skip=()):
+    """Correlated normalization draws for shared groups; datasets whose
+    campaign offset already uses the documented value are skipped."""
     campaign_uncertainties = config.get("campaign_normalization_fraction", {})
     shared_groups = config.get("shared_normalization_group", {})
     shifts = {}
     for dataset_id, fraction in campaign_uncertainties.items():
+        if dataset_id in skip:
+            continue
         shifts[dataset_id] = rng.normal(0.0, float(fraction))
     grouped_draws = {}
     for dataset_id, group in shared_groups.items():
@@ -258,10 +272,76 @@ def fit_channel(repo, channel, config, rng):
     log_sigma = model.transform(usable.energy_MeV, usable.sigma_mb)
     relative_uncertainty = usable.sigma_unc_mb.to_numpy() / usable.sigma_mb.to_numpy()
     log_uncertainty = np.sqrt(np.log1p(relative_uncertainty ** 2))
-    _, campaign_log_spread, smoothing, cv_scores = choose_campaign_spread(
-        model, usable, log_sigma, log_uncertainty,
-        config["lambda_candidates"],
-        config["campaign_log_spread_candidates"])
+
+    # Campaigns whose source documents a normalization uncertainty anchor the
+    # curve level at that documented precision (config table, with citations).
+    documented = config.get("campaign_normalization_fraction", {})
+    anchors = {}
+    anchored_datasets = set()
+    for dataset_id, fraction in documented.items():
+        rows = usable[usable.dataset_id == dataset_id]
+        if rows.empty:
+            continue
+        campaign = rows.campaign_id.iloc[0]
+        spread = float(np.log1p(float(fraction)))
+        anchors[campaign] = min(anchors.get(campaign, spread), spread)
+        anchored_datasets.add(dataset_id)
+    if anchors:
+        print(f"{channel.channel_id}: anchored campaigns "
+              f"{sorted(anchors)} at documented normalization")
+
+    # Optional two-segment fit: the campaign-offset model applied separately
+    # below and above a configured boundary, blended over 2 MeV. Prevents a
+    # resonance region with large inter-campaign spread from setting the
+    # plateau level (docs/xsection_fit.tex).
+    boundary = config.get("segment_boundary_MeV", {}).get(channel.channel_id)
+    if boundary is not None:
+        boundary = float(boundary)
+        segment_masks = [
+            usable.energy_MeV.to_numpy() <= boundary + 2.0,
+            usable.energy_MeV.to_numpy() > boundary,
+        ]
+    else:
+        segment_masks = [np.ones(len(usable), dtype=bool)]
+
+    segment_selection = []
+    for mask in segment_masks:
+        segment = usable.loc[mask].reset_index(drop=True)
+        _, seg_spread, seg_smoothing, cv_scores = choose_campaign_spread(
+            model, segment, log_sigma[mask], log_uncertainty[mask],
+            config["lambda_candidates"],
+            config["campaign_log_spread_candidates"], anchors)
+        segment_selection.append((mask, seg_spread, seg_smoothing))
+    # The reported spread/smoothing are those of the (last) plateau segment.
+    campaign_log_spread = segment_selection[-1][1]
+    smoothing = segment_selection[-1][2]
+
+    def blended_predict(coefficient_sets, energies):
+        values = np.asarray(energies, dtype=float)
+        if boundary is None:
+            return model.predict(coefficient_sets[0], values)
+        low = model.predict(coefficient_sets[0], values)
+        high = model.predict(coefficient_sets[1], values)
+        weight = np.clip((values - boundary) / 2.0, 0.0, 1.0)
+        with np.errstate(divide="ignore"):
+            log_low = np.where(low > 0, np.log(np.maximum(low, 1e-300)), -690.0)
+            log_high = np.where(high > 0, np.log(np.maximum(high, 1e-300)), -690.0)
+        blended = np.exp((1.0 - weight) * log_low + weight * log_high)
+        return np.where((low <= 0) & (weight < 1.0), high * weight,
+                        np.where((high <= 0) & (weight > 0.0),
+                                 low * (1.0 - weight), blended))
+
+    # Per-campaign draw scale: documented anchor if present, else the fitted
+    # spread of the segment holding the campaign's median energy.
+    draw_spread = {}
+    for campaign in usable.campaign_id.unique():
+        cmask = usable.campaign_id.to_numpy() == campaign
+        median_energy = float(np.median(usable.energy_MeV.to_numpy()[cmask]))
+        if boundary is not None and median_energy <= boundary:
+            draw_spread[campaign] = segment_selection[0][1]
+        else:
+            draw_spread[campaign] = campaign_log_spread
+    campaign_scales = {**draw_spread, **anchors}
 
     dense_energy = np.linspace(
         config["energy_min_MeV"], config["energy_max_MeV"],
@@ -291,9 +371,10 @@ def fit_channel(repo, channel, config, rng):
         varied_log_sigma = log_sigma + rng.normal(size=len(usable)) * log_uncertainty
         for campaign in usable.campaign_id.unique():
             mask = usable.campaign_id.to_numpy() == campaign
-            varied_log_sigma[mask] += rng.normal(0.0, campaign_log_spread)
+            varied_log_sigma[mask] += rng.normal(
+                0.0, campaign_scales[campaign])
         varied_log_sigma = _apply_normalizations(
-            varied_log_sigma, usable, config, rng)
+            varied_log_sigma, usable, config, rng, skip=anchored_datasets)
         # Keep the sampled physical cross section fixed when the sampled
         # energy changes, then re-express it in the threshold transform.
         varied_sigma = np.exp(
@@ -301,14 +382,19 @@ def fit_channel(repo, channel, config, rng):
             * np.log(usable.energy_MeV.to_numpy() - threshold))
         varied_log_sigma = model.transform(varied.energy_MeV, varied_sigma)
         varied["sigma_mb"] = varied_sigma
-        replica_smoothing, _ = choose_smoothing(
-            model, varied, varied_log_sigma, log_uncertainty,
-            config["lambda_candidates"], campaign_log_spread)
-        coefficients = fit_coefficients(
-            model, varied, varied_log_sigma, log_uncertainty,
-            replica_smoothing, campaign_log_spread)
-        dense_replicas[replica_id] = model.predict(coefficients, dense_energy)
-        table_replicas[replica_id] = model.predict(coefficients, table_energy)
+        coefficient_sets = []
+        replica_smoothing = None
+        for mask, seg_spread, _ in segment_selection:
+            segment = varied.loc[mask].reset_index(drop=True)
+            seg_smoothing, _ = choose_smoothing(
+                model, segment, varied_log_sigma[mask], log_uncertainty[mask],
+                config["lambda_candidates"], seg_spread, anchors)
+            coefficient_sets.append(fit_coefficients(
+                model, segment, varied_log_sigma[mask], log_uncertainty[mask],
+                seg_smoothing, seg_spread, anchors))
+            replica_smoothing = seg_smoothing
+        dense_replicas[replica_id] = blended_predict(coefficient_sets, dense_energy)
+        table_replicas[replica_id] = blended_predict(coefficient_sets, table_energy)
         smoothing_values[replica_id] = replica_smoothing
         if (replica_id + 1) % 100 == 0:
             print(f"{channel.channel_id}: fitted {replica_id + 1}/{replica_count} replicas")
@@ -332,7 +418,7 @@ def fit_channel(repo, channel, config, rng):
         for values in replica_at_data
     ])
     covariance_inverse = inverse_covariance(
-        usable, log_uncertainty, campaign_log_spread)
+        usable, log_uncertainty, campaign_log_spread, campaign_scales)
     replica_residual = replica_log_at_data - nominal_log_at_data[None, :]
     distances = np.einsum(
         "ri,ij,rj->r", replica_residual, covariance_inverse,
@@ -427,7 +513,7 @@ def fit_channel(repo, channel, config, rng):
         "subthreshold_points_excluded": int((all_points.energy_MeV <= threshold).sum()),
         "nominal_smoothing_lambda": smoothing,
         "campaign_log_spread": campaign_log_spread,
-        "campaign_fractional_spread": math.exp(campaign_log_spread) - 1.0,
+        "campaign_fractional_spread": math.exp(segment_selection[0][1]) - 1.0,
         "chi2": chi2,
         "effective_dof": dof,
         "chi2_per_dof": chi2 / dof,
