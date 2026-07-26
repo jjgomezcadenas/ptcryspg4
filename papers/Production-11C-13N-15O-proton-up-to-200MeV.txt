@@ -1,0 +1,2796 @@
+Available online at www.sciencedirect.com
+
+Nuclear Data Sheets 187 (2023) 579–596
+www.elsevier.com/locate/nds
+
+Production of 11 C, 13 N and 15 O in proton-induced nuclear reactions up to 200 MeV
+T. Rodrı́guez-González,1, 2, ∗ C. Guerrero,1, 2, † C. M. Bäcker,3, 4, 5, 6 J. Bauer,7 C. Bäumer,8, 4, 5, 6, 9
+S. Brons,7 W. Jentzen,5, 6, 10 M.C. Jiménez-Ramos,2, 11 M. Á. Millán-Callado,1, 2
+C. Schömers,7 B. Timmermann,4, 5, 6, 9, 12 J. M. Quesada,1 and R. Capote13
+1
+
+Dept. de Fı́sica Atómica, Molecular y Nuclear. Universidad de Sevilla,
+Avda. Reina Mercedes s/n, Seville, 41012, Spain
+2
+Centro Nacional de Aceleradores (Universidad de Sevilla-Junta de Andalucı́a-CSIC),
+C/ Thomas Alva Edison 7, Seville, 41092, Spain
+3
+TU Dortmund University, Department of Physics,
+Otto-Hahn-Str. 4a, Dortmund, D-44227, Germany
+4
+West German Proton Therapy Centre Essen, Hufelandstr. 55, Essen, D-45147, Germany
+5
+West German Cancer Center, Hufelandstr. 55, Essen, D-45147, Germany
+6
+University Hospital Essen, Hufelandstr. 55, Essen, D-45147, Germany
+7
+Heidelberg Ion-Beam Therapy Center (HIT), Department of Radiation Oncology,
+Heidelberg University Hospital, Heidelberg, Germany.
+8
+TU Dortmund University, Faculty of Physics, Otto-Hahn-Str. 4a, Dortmund, D-44227, Germany
+9
+German Cancer Consortium (DKTK), Heidelberg, Germany
+10
+University Hospital Essen, Clinic for Nuclear Medicine, Hufelandstr. 55, Essen, D-45147, Germany
+11
+Dept. de Fı́sica Aplicada II. Universidad de Sevilla,Avda. Reina Mercedes 2, Seville, 41092, Spain
+12
+University Hospital Essen, Department of Particle Therapy, Hufelandstr. 55, Essen, D-45147, Germany
+13
+NAPC–Nuclear Data Section, International Atomic Energy Agency, Vienna, A-1400, Austria
+(Received 17 August 2022; Revised 29 September 2022)
+Production cross sections of light positron emitters 11 C (t1/2 =20.36 min), 13 N (t1/2 =9.97 min)
+and 15 O (t1/2 =122 s) have been measured for proton-induced reactions on the main relevant
+constituents of the human body (C, N and O) from threshold up to 200 MeV of proton incident
+energy. This has been accomplished by means of two complementary experiments at the clinical
+proton treatment centers WPE (Essen) and HIT (Heidelberg), both in Germany. In the ﬁrst case,
+the multi-foil activation technique was combined with PET imaging, a methodology previously
+developed at CNA (Seville, Spain). In the second experiment, aimed at energies below 50 MeV, the
+activation of single foils was measured with conventional LaBr3 detectors. In both cases the IAEA
+monitor reaction nat Cu(p,x)63 Zn data was used for validation purposes.
+The most complete and accurate set of excitation functions for the production of light-positron
+emitters 11 C, 13 N and 15 O in proton induced reactions on human tissue up to 200 MeV is presented.
+These data are needed for nuclear reaction model development and are extremely important to
+improve the accuracy of the PET range veriﬁcation in proton radiotherapy. Seven excitation functions
+have been measured: 12 C(p,x)11 C, 14 N(p,x)11 C, 14 N(p,x)13 N, 14 N(p,γ)15 O, 16 O(p,x)11 C, 16 O(p,x)13 N
+and 16 O(p,x)15 O up to 200 MeV of proton incident energy.
+
+https://doi.org/10.1016/j.nds.2023.01.004
+0090-3752/© 2023 Published by Elsevier Inc.
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+
+CONTENTS
+
+I. INTRODUCTION AND MOTIVATION
+
+580
+
+II. IRRADIATION FACILITIES AND
+DETECTION SYSTEMS
+A. West German Proton Therapy Center
+1. Beam delivery system at WPE
+2. PET/CT scanner at WPE
+B. Heidelberg Ion-Beam Therapy Center
+1. Beam delivery system at HIT
+2. LaBr3 (Ce) detectors used at HIT
+
+581
+581
+581
+581
+582
+582
+582
+
+III. METHODOLOGY
+A. Multi-foil activation and PET/CT
+measurement at WPE
+B. Low-energy activation measurements using
+conventional scintillator detectors at HIT
+C. Analysis of the activity curves
+D. Cross-checking with monitor foils
+E. Validation with the IAEA monitor reaction
+
+582
+
+583
+584
+585
+585
+
+IV. RESULTS AND DISCUSSION
+A. Production of 11 C in C, O and N
+B. Production of 13 N in O and N
+C. Production of 15 O in O and N
+
+585
+587
+588
+589
+
+V. SUMMARY AND CONCLUSIONS
+
+589
+
+582
+
+ACKNOWLEDGEMENTS
+
+590
+
+References
+
+590
+
+APPENDIX
+A. Production cross sections
+B. Parametrization of the production cross
+sections
+
+593
+593
+
+I.
+
+596
+
+INTRODUCTION AND MOTIVATION
+
+Excitation function of light-positron emitters in protoninduced nuclear reactions are of fundamental interest for
+in-vivo treatment veriﬁcation methods in proton radiotherapy. Additionally, the production cross sections are
+very sensitive to reaction modeling mechanism and associated parameters and measured data can be used to
+validate existing evaluated nuclear databases, or to improve nuclear reaction models in the energy range up to
+200 MeV, especially in the range above 20 MeV where
+existing data are scarce.
+In the context of proton therapy, the Positron Emission
+Tomography (PET) range veriﬁcation technique relies on
+the comparison of the measured and estimated activity
+
+∗ Corresponding author: mrodriguezg@us.es
+† Corresponding author: cguerrero4@us.es
+
+580
+
+T. Rodrı́guez-González et al.
+
+distributions of β + emitters produced by the proton beam
+in the patient, hence relying on the knowledge of the
+reaction cross sections involved. In order to improve the
+accuracy with which they are known, we have measured
+the reaction cross sections that result in 11 C (t1/2 =20.36
+min), 13 N (t1/2 =9.97 min) and 15 O (t1/2 =122 s) in the
+main elements of the human body (C, N and O) in the
+full energy range of interest, i.e., up to clinical energies of
+200 MeV.
+The main advantage of proton therapy over conventional radiation therapy is that it oﬀers a better conformation of the dose in the tumor volume while reducing
+the dose delivered to the surrounding healthy tissues [1].
+This is possible due to the particular way in which ions interact with the matter, showing a ﬁnite penetration depth
+(range) at the end of which the dose deposition is maximum, resulting in what is known as the Bragg peak. The
+mentioned sparing of the healthy tissue makes proton therapy highly recommended for tumors close to organs at risk
+and in pediatric cases, as it reduces the long-term eﬀects
+of the irradiation such as the appearance of secondary
+tumours [2].
+In order to fully exploit the beneﬁts of proton therapy it
+is necessary to make sure that the dose is delivered according to the treatment planning. This can be accomplished
+with a PET scanner by acquiring the activity map of the
+patient corresponding to the β + decay of the radioactive
+nuclei produced along the trace of the proton beam [3–5].
+The PET image can be acquired during the treatment
+(in-beam) or after the treatment (oﬄine), detecting the
+decay of short- or long-lived β + emitters, respectively.
+The PET measured activity proﬁles need then to be
+compared with a calculation, usually made by Monte
+Carlo simulations, in order to asses if the delivery of the
+ﬁelds has been made according to the treatment planning. Leaving aside biological wash-out eﬀects [6], the
+accuracy of the simulated activity distribution depends
+on the underlying cross sections to produce the β + emitters of interest. In the case of delayed (oﬄine or in-room)
+PET veriﬁcation, the isotopes of interest are 11 C, 13 N
+and 15 O. At the clinical energies, the main reactions producing these isotopes are 12 C(p,x)11 C, 14 N(p,x)13 N and
+16
+O(p,x)15 O. Other reactions of interest are 16 O(p,x)11 C,
+16
+O(p,x)13 N, 14 N(p,x)11 C and 14 N(p,γ)15 O (see Table I
+for details).
+A limitation is that experimental data corresponding
+to these reactions is quite limited, especially for energies
+above 20 MeV, and shows sizable discrepancies [7, 8].
+Therefore, new measurements and subsequent data evaluations are required in the full energy range of interest
+in order to reduce uncertainties in the estimation of the
+activity depth proﬁles, enabling then the aimed submillimetric beam range veriﬁcation [9, 10]. Such data needs
+were highlighted at the IAEA Technical meeting held in
+Vienna on December 2018 [11].
+In this work, the cross sections for the production of the
+mentioned longer lived β + emitters have been measured
+in the full proton energy range of interest. The range
+
+Production of 11 C, 13 N and 15 O. . .
+
+ber of monitor units (MU) for each irradiation (5000 MU).
+The number of protons per monitor unit (MU) was characterized with a Faraday Cup (FC), whose description can
+be found in [15, 16], and veriﬁed periodically during the
+quality assurance (QA) procedures in the proton therapy
+center. Table II summarizes the nominal beam size and
+accumulated charge for each irradiation.
+
+TABLE I. Positron emitters considered in this work, listing
+their half-lifes (t1/2 ), branching ratios [13], and the target and
+speciﬁc material foil in which they are produced: polyethylene
+(PE), silicon dioxide (SiO2 ), aluminium nitride (AlN) or copper
+(Cu).
+t1/2
+
+β + emission
+branching ratio
+
+Target
+(foil material)
+
+20.36 min
+9.97 min
+122 s
+38.33 min
+
+99.9%
+99.8%
+92.9%
+92.8%
+
+C (PE)
+C (PE), N (AlN), O (SiO2 )
+C (PE), N (AlN), O (SiO2 )
+Cu
+
+β + emitter
+11
+
+C
+N
+O
+63
+Zn
+13
+
+15
+
+2.
+
+between 30 and 200 MeV was covered in a single experiment at the West German Proton Therapy Center (WPE)
+combining the multi-foil activation technique with PET
+imaging [12]. The lower energy range was assessed at the
+Heidelberg Ion-Beam Therapy Center (HIT) using conventional scintillation detectors to measure the activation
+of single foils.
+In this paper the experiments are described and the
+results are presented and compared with the previous data
+available in the literature. Furthermore, the point-wise
+cross sections have been ﬁtted to an analytical curve that
+can be used for PET range veriﬁcation calculations and
+could serve as starting point in forthcoming evaluations.
+
+II.
+
+IRRADIATION FACILITIES AND
+DETECTION SYSTEMS
+
+A.
+
+West German Proton Therapy Center
+1.
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+PET/CT scanner at WPE
+
+The induced activity of all the irradiated foils (see Section III A) was determined through a single measurement
+with a Siemens Healthineers - Biograph Vision PET/CT
+scanner from the Nuclear Medicine department of the University Hospital Essen, located at the same building than
+the WPE. This scanner is made of 3.2x3.2x20 mm3 LSO
+crystals and silicon photomultiplier (SiPMs) providing a
+time resolution of just 214 ps, allowing for time-of-ﬂight
+position reconstruction that improves both contrast and
+signal-to-noise ratio [17].
+The PET/CT scanner is located close to the treatment
+rooms, which allowed to transport the irradiated foils to
+the PET scanner rapidly enough to measure the decay of
+15
+O, with a half-life of just 122 s.
+The reliability of the PET scanner was assessed with
+two diﬀerent experiments:
+a) A calibrated 1.70(3) kBq 22 Na source was placed at
+5 diﬀerent positions and PET images were taken in
+intervals of 1 and 15 minutes. The short exposures
+would result in values in agreement within 3.3%, a
+reproducibility that improved down to 0.7% for the 15
+minutes exposures.
+
+Beam delivery system at WPE
+
+The West German Proton Therapy Centre (WPE) is
+a cyclotron-based proton therapy center with four treatments rooms (IBA ProteusPlus) located in Essen, Germany. The isochronous cyclotron accelerates protons to
+an energy of 228 MeV, which can then be degraded to
+a minimum of 100 MeV with a system consisting in a
+wheel-mounted wedge followed by analyzing magnets and
+energy slits [14]. The experiments were performed in the
+ﬁxed beam treatment room, where the pencil beam scanning (PBS) mode was chosen in order to deliver the quasi
+mono-energetic proton beams with less secondary particles compared to the passive beam scanning techniques.
+The beam is deﬂected by dipole magnets in order to select
+the desired lateral position on a time scale in the order of
+milliseconds. A ﬁrst ionization chamber is placed at the
+nozzle entrance checking the centering of the beam, then
+two monitor chambers are placed close to the nozzle exit
+to check the spot position and width. Table II summarizes
+the nominal beam size (sigma for both x- and y-axis) at
+the isocenter for each energy. The lateral spreading of the
+beam as it traverses the degraders and target foils has
+been checked using radiochromic foils.
+The delivery beam system allows to ﬁx the total num581
+
+b) Two 150x30x1 mm3 graphite sheets were activated
+with at 150 MeV proton beam to produce an homogeneous (within 1.5% [18]) 11 C source. Then, a dynamic
+PET measurement for 30 minutes of 1 minute interval
+was acquired selecting as VOIs (Volumes of Interest)
+the same used later for the experiment (see Section
+III A). The analysis of the 36 VOIs shows that the activity variations between VOIs is constant within 4.4%,
+yielding a value of 3.04(13) kBq.
+The results from a) show that the PET spatial eﬃciency
+is essentially constant. The deviations observed in the
+activity measurements are merely statistical, due to the
+limited acquisition times and/or low activities. The outcome from b) conﬁrms the mentioned homogeneity of the
+PET spacial eﬃciency, and the 4.4% variations observed
+are consistent with the contributions from the statistics
+of 1 minute acquisitions ( 3% for a few kBq) and the 1.5%
+inhomogeneities of the irradiation ﬁeld used to activate
+the graphite sheet. Overall, as the activities produced in
+the irradiations discussed later on are in the order of tens
+of kBq (see Fig. 4), with some of then of just a few kBq, a
+conservative value of 3% is taken as uncertainty of spatial
+eﬃciency.
+
+Production of 11 C, 13 N and 15 O. . .
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+TABLE II. Details of the performed irradiations at WPE, listing the initial irradiation energy (Ei ), the polyethylene (PE)
+degrader used in each case, beam characteristics, accumulated charge and production yields of the monitor foils at the end of
+bombardment in each case.
+Ei (MeV)
+
+Initial PE
+degrader
+
+PE degrader between foils
+
+100
+100
+150
+190
+
+40 mm
+-
+
+5 mm after the ﬁrst three foils and 3 mm after the fourth foil
+5 mm (2 mm after the last two foils of AlN & SiO2 assemblies)
+10 mm
+10 mm
+
+Beam size
+σx (mm) σx (mm)
+8.08
+8.08
+5.53
+4.07
+
+TABLE III. Details of the performed irradiations at HIT, listing the initial irradiation energy (Ei ), the polyethylene (PE)
+degrader used in each case, the two target materials used in
+each irradiation, beam characteristics and accumulated charge.
+Ei (MeV)
+
+PE degrader
+Beam size Accumulated
+Target 1 Target 2
+(mm)
+FWHM (mm) charge (nC)
+
+50.60
+50.60
+50.60
+50.60
+50.60
+
+B.
+
+14
+15
+13
+16
+16
+
+PE
+SiO2
+AlN
+AlN
+PE
+
+PE
+SiO2
+AlN
+Cu
+Cu
+
+31.3
+31.3
+31.3
+31.3
+31.3
+
+8.9(3)
+19.3(6)
+19.3(6)
+19.3(6)
+19.3(6)
+
+Heidelberg Ion-Beam Therapy Center
+1.
+
+Beam delivery system at HIT
+
+The Heidelberg Ion-Beam Therapy Center (HIT) is a
+synchrotron-based particle therapy center with two horizontal treatment rooms, a gantry and an experimental
+room. The synchrotron accelerates protons to 255 discrete energies between 48 and 220 MeV. After the extraction [19, 20], the beam is sent to one of the rooms and
+then passed through a monitoring system (BAMS), which
+consists of three ionization chambers and two multi-wire
+proportional chambers in the beam line before the exit
+window [21]. The experiments were performed in the experimental room. The BAMS monitoring system allows
+to check beam position, width and current. Table III summarizes the nominal beam size (FWHM) at the isocenter.
+As described before, the lateral spreading of the beam
+as it traverses the degraders and target foils was checked
+using radiochromic foils.
+The beam current is measured with an ionization chamber (IC) placed at the nozzle before the exit window. The
+number of protons Ibeam is determined from the secondary
+current Isec measured with the IC as [22]:
+
+ICsec =
+
+dE Lchamber
+·
+· Ibeam ,
+dx
+WAr
+
+(1)
+
+where the active length of the BAMS-IC (Lchamber ) is
+2 cm, the W-value of Argon is 26 eV and dE
+dx is the energy
+loss according to the Bethe-Bloch-formula in the target
+material of the IC (mainly Ar). Table III summarized the
+beam current for each irradiation.
+582
+
+7.81
+7.81
+5.23
+4.02
+
+Accumulated Production yield at EOB of the monitor foils (kBq/nC)
+charge (nC)
+PE
+SiO2
+AlN
+Std. Dev.
+64.9(7)
+64.9(7)
+87.2(9)
+103.0(10)
+
+2.
+
+1.16(4) 1.12(4) 1.16(5)
+0.92(4) 0.94(4) 0.96(4)
+0.92(4) 0.94(4) 0.92(4)
+0.69(3) 0.67(3) 0.68(3)
+
+1.8%
+1.7%
+0.88%
+1.5%
+
+LaBr3 (Ce) detectors used at HIT
+
+The activity induced in the irradiated foils at HIT was
+measured with a conventional γ-ray detection system consisting in two cylindrical 1.5”x1.5” LaBr3 (Ce) detectors.
+These were installed in a room next to the irradiation
+room, so the time span between the end of the irradiation
+and the start of the measurement is minimized and allows
+the measurement of the shortest-lived isotope (15 O).
+The detection eﬃciency at a speciﬁc target-detector distance was determined with an accuracy of 1.4% from a
+Geant4 [23] Monte Carlo simulation of the β + decay, validated experimentally with calibrated 137 Cs and 22 Na γray sources. This work led to conclude that the LaBr3 (Ce)
+crystal size is actually 1.44”x1.44”, 12% smaller in volume
+than indicated by the manufacturer. Ref. [12] provides a
+detailed explanation of the validation of the corresponding
+detection and β + conversion eﬃciencies.
+
+III.
+A.
+
+METHODOLOGY
+
+Multi-foil activation and PET/CT measurement
+at WPE
+
+The employed technique consists in the irradiation of a
+set of stacks of thin foils made of diﬀerent materials which
+activity in then determined in a single PET measurement
+for all the foils. A detailed explanation and the validation
+of this technique is given in Ref. [12].
+In this work, three stacks (see Fig. 1) made of 10 thin
+target foils rich in carbon (polyethylene, PE), oxygen (silicon dioxide, SiO2 ) and nitrogen (aluminium nitride, AlN)
+have been irradiated at four diﬀerent energies, allowing
+the measurement of the reaction cross sections of interest
+from ∼30 MeV up to 200 MeV in small energy steps.
+The target thicknesses were 1 mm for the PE and SiO2
+foils and 0.64 mm in the case of AlN (see Table IV for
+details). For the irradiations the thin foils were embedded
+between 5 or 10 mm thick PE slabs (see Fig. 1, bottom)
+in order to degrade the proton beam energy and to have a
+beam of the desired energy in each foil. As the minimum
+extracted energy at WPE is 100 MeV, a PE slab of 40 mm
+was used in front of each stack to degrade the beam energy below 60 MeV. The optimization of the degraders
+conﬁguration was assessed with Geant4 simulations, and
+the thicknesses of the PE slabs used in each irradiation
+
+Production of 11 C, 13 N and 15 O. . .
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+TABLE IV. Detailed information of the target assemblies.
+Material
+
+ρ (g/cm3 ) Composition Thickness (mm) Reactions channels*
+
+PE
+0.96
+C 2 H4
+Quartz
+2.2
+SiO2
+Aluminum nitride
+3.3
+AlN
+Copper
+8.92
+Cu
+*In bold the main reactions for the production of 11 C, 13 N and 15 O
+**Copper target placed always behind SiO2 assembly
+
+are shown in Table II.
+As an illustrative example, the energy probability distributions inside each PE target for each initial beam energy
+are shown in Fig. 2. The proton energy in each foil is then
+deﬁned as the mean value of the corresponding distribution, with an asymmetric energy spread calculated from
+the mean value to the energy for which the probability
+function reaches half of the maximum.
+The PBS delivery mode allows the irradiation of three
+stacks with the same initial beam energy without entering
+the treatment room. In this way, the time span between
+the irradiation of the diﬀerent targets was practically negligible, and the radioactive decay between the irradiations
+and the PET measurement was minimized. The alignment
+and targets positioning at the isocenter was carried out
+with the help of the laser positioning system. In front of
+each assembly there was a 1 mm thick PE foil used for
+monitoring purposes: the activity induced in the monitor
+foil of the three stacks must be proportional to the beam
+charge accumulated by each stack. Then, for validation
+purposes, a 2 mm nat Cu target was placed behind the
+SiO2 stack in order to measure the production yield of
+the IAEA standard reaction nat Cu(p,x)63 Zn (t1/2 =38.33
+min) [24] (see Fig. 1, bottom).
+The details of each irradiation (initial energy, degraders
+and accumulated charge) are summarized in Table II. After each irradiation with a given beam energy, the activity
+from all the irradiated foils was measured simultaneously
+using the PET scanner: a total of 36 foils from the PE,
+SiO2 , AlN, the monitor foils and Cu foils were inserted
+into a 16x32 cm2 PE matrix, which serves both as positioning system inside the PET scanner and conversor of
+the positrons into two 511 keV photons. This is necessary
+because the range of the positrons emitted by 11 C, 13 N
+and 15 O is of a few meters in air, and only 5, 6 and 9 mm,
+respectively, in PE. Fig. 3 shows: (top) the disposition of
+the irradiated foils in two layers within the PE matrix,
+(bottom) the complete PE matrix inside the PET scanner.
+The PET/CT scanner was operated in dynamic mode
+to obtain the activity in each foil as a function of time,
+recording images of 1 minute during 4 hours, time enough
+to reach the background level. Two diﬀerent reconstruction protocols (iterative and TrueX, both with Time of
+Flight algorithm) were used, providing compatible results
+within always less than 1%. The images obtained include
+the corresponding attenuation corrections within the PE
+matrix according to the computerized tomographies (CT)
+images taken with the PET/CT scanner. The image pro583
+
+1
+1
+0.64
+1
+
+12
+
+C(p,x)11 C
+O(p,x)11 C, 16 O(p,x)13 N, 16 O(p,x)15 O
+14
+N(p,x)11 C, 14 N(p,x)13 N, 14 N(p,γ)15 O
+nat
+Cu(p,x)63 Zn (monitor)
+16
+
+FIG. 1. (Color online) Top: Experimental setup during the
+irradiations at WPE. Bottom: The SiO2 stack made of 10 thin
+foils of SiO2 between thicker PE degraders. The ﬁrst and last
+foils are the PE and copper monitor foils, respectively.
+
+cessing software PMOD [25] allows quantitative analysis of the images, deﬁning the corresponding Volumes-ofInterests (VOIs) for each foil and obtaining the number
+of counts per second within each VOI as a function of
+time. The calibration from number of counts per second
+to activity units was achieved by measuring the calibrated
+1.70(3) kBq 22 Na source inside the PE matrix.
+
+B.
+
+Low-energy activation measurements using
+conventional scintillator detectors at HIT
+
+The minimum initial beam energy available at WPE
+is 100 MeV, which means that the energy spread is too
+large when one degrades the beam down to ∼30 MeV.
+Therefore the measurements at such low energies were
+performed at the HIT facility, which can deliver proton
+
+Production of 11 C, 13 N and 15 O. . .
+
+2
+
+Probability distribution
+
+1.8
+1.6
+1.4
+
+lowing the same strategy as at WPE, a copper target was
+irradiated together with a PE target and a AlN target
+in order to validate the analysis and corrections applied
+using the IAEA standard reaction nat Cu(p,x)63 Zn [24]
+below 20 MeV. Table III summarizes the details of each
+irradiation: initial energy, targets, degraders in front of
+each target and accumulated charge.
+After each irradiation, the activity in the corresponding
+foil was studied with the LaBr3 γ-ray detectors discussed
+in Section II B 2. For this, each target was sandwiched
+between a pair of 1 mm thick lead foils, acting as positron
+converters, and placed at 150 mm from the front face of
+the detector. The detectors were connected to a CAEN
+V1750 digitizer that provided the signals’ integral with
+the corresponding timestamp, allowing then to study the
+decay curve from the positron emitters of interest.
+
+Ei=190 MeV @ WPE
+Ei=150 MeV @ WPE
+Ei=100 MeV @ WPE
+Ei=100 MeV + 40 mm PE deg. @ WPE
+Ei=50 MeV + 14 mm PE deg. @ HIT
+Ei=50 MeV + 16 mm PE deg. @ HIT
+
+1.2
+1
+0.8
+0.6
+0.4
+0.2
+0
+0
+
+20
+
+40
+
+60
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+80 100 120 140 160 180 200
+Energy (MeV)
+
+FIG. 2. (Color online) Proton energy distribution inside PE
+foils at diﬀerent initial beam energies for the WPE and HIT
+irradiations. Dotted lines: Proton energy distributions inside
+PE degraders placed between target foils.
+
+C.
+
+Analysis of the activity curves
+
+As the outcome of the two experiments is the induced
+activity curve in each target as a function of time, the data
+analysis for both experiments is quite similar: it consists
+in the determination of the induced activity at the end of
+the irradiation and, from that value, the calculation of the
+production yields and the corresponding cross sections for
+the corresponding energy and reaction.
+The diﬀerential equation describing the process of radioisotope formation (fprod ) and decay during the irradiation (−λN ) assuming the thin target approximation is:
+dN
+= fprod − λN = ni σI − λN,
+dt
+
+FIG. 3. (Color online) Up: Positioning of the irradiated foils
+between the polyethylene thick layers. Bottom: PET measurement of the activity of the irradiated foils embedded in the
+PE matrix.
+
+beams with a minimum of 50 MeV. Unfortunately, HIT
+does not host a PET/CT scanner and hence a diﬀerent
+approach had to be followed for measuring the induced
+β + activities.
+As in WPE, the proton energy was degraded using PE
+layers with diﬀerent thicknesses to achieve the desired
+proton energy distribution inside each foil. The abovementioned Fig. 2 displays as well the energy probability
+distribution in the PE foils measured at HIT, illustrating the improved energy resolution achieved at HIT with
+respect to WPE in the low proton energy range. The
+production yields in carbon and nitrogen are obtained at
+three energy points, and two in the case of oxygen. Fol584
+
+(2)
+
+where λ is the corresponding decay constant, ni is the
+surface density of foil i in units of atoms per unit area,
+I is the proton beam current and σ is the cross section,
+considered constant for each foil i.
+The limits of this approximation have been studied at
+the lower energies, i.e., where the spread of the energy
+distributions reaches its maximum value and there is a
+sharp increase in the cross sections. In the experiment described in Sec. III A, the comparison of the cross sections
+at the entrance/exit of the last foil with the cross section
+in the full target is always less than 10%, then allowing
+the thin target approximation in this limit case.
+Solving this equation for N (0) = 0, the number of produced nuclei at the end of bombardment (EOB) is:
+N = ni σI ·
+
+1 − e−λtirrad
+.
+λ
+
+(3)
+
+If λt << 1 (tirr << t1/2 ), then equation 3 becomes:
+Nλt<<1 = ni σItirr ,
+
+(4)
+
+thus the fraction of nuclei that decayed during the irradiation can be deﬁned as:
+cdecay =
+
+λtirr
+Nλt<<1
+=
+.
+N
+1 − e−λtirr
+
+(5)
+
+Production of 11 C, 13 N and 15 O. . .
+
+Taking into account that the radioisotope activity is
+A = λN , the production yield Y (activity per unit charge,
+Ctotal ) in each foil is calculated as:
+Y =
+
+AEOB
+· cdecay .
+Ctotal
+
+(6)
+
+From the previous expressions, the production cross
+section at the energy Ei of the beam traversing foil i,
+from the corresponding yield Yi , can be expressed as:
+σ(Ei ) =
+
+Yi (Ei )
+AEOB
+i
+=
+· cdecay .
+λ · ni
+Ctotal · λ · ni
+
+(7)
+
+In both experiments, the measured quantity was the
+counting rate as a function of time, which has been converted into an activity decay curve A(t) by dividing it by
+the detection eﬃciency (of the PET or the LaBr3 in each
+case) and by the intensity associated to the decay (see
+Table I). The corresponding activity value at the end of
+the bombardment AEOB , was determined by ﬁtting each
+decay curve to the expected exponential decay:
+−λ11 C t
++
+A(t) = C + AEOB
+11 C e
+−λ13 N t
+−λ15 O t
++ AEOB
+.
+AEOB
+13 N e
+15 O e
+
+(8)
+
+Given the large count statistics acquired and the suﬃcient
+length of the measurements that allow reaching the background level, the uncertainty in the ﬁt is in most cases
+negligible, i.e. less than 1% (ﬁt and uncertainty given by
+ROOT [26], see Fig. 4). The total uncertainty in the yield
+is calculated as detailed in Sec. IV.
+
+D.
+
+Cross-checking with monitor foils
+
+listed in Table II. At HIT, two Cu targets of 1 mm were
+irradiated behind a PE and a AlN targets, respectively.
+The activities were measured as function of time with the
+PET scanner and LaBr3 detectors, respectively, and the
+corresponding activity curves were ﬁtted to the sum of
+three exponentials, each one corresponding to the production of 63 Zn (t1/2 =38.47 min), 62 Cu (t1/2 =9.673 min) and
+62
+Zn (t1/2 =9.186 h). As an example, the activity curve
+and the corresponding ﬁt of the WPE experiment are
+shown in Fig. 6. The experimental production yields were
+then calculated from Eq. 6.
+Regarding the expected 63 Zn production yields, as the
+energy of the protons hitting the copper target is not
+mono-energetic, they were calculated as the convolution
+of the IAEA production yield as function of the proton
+energy [24] with the proton energy distribution in the Cu
+targets given by Geant4.
+The expected and measured thick target physical yields
+for each Cu irradiation, at both WPE and HIT, are given
+in Table V. In both cases, the good agreement (in the order
+of 3-6%) between the expected and the measured values
+are compatible with the ∼4% accuracy of the experimental
+value (see Sec. IV).
+Considering that the nat Cu(p,x)63 Zn cross section is an
+IAEA monitor cross section featuring low uncertainties,
+these results serve as validation of the measuring technique, the analysis strategy and corrections applied for
+both experiments; it validates the beam current measurements as well as the detection eﬃciency calculation.
+TABLE V. Comparison between the IAEA and experimental
+production yields of the nat Cu(p,x)63 Zn reaction
+Experiment
+
+As mentioned in section III A, the ﬁrst foil in each stack
+of the multi-foil experiment at WPE for each irradiation
+was a PE foil used for monitoring and validation purposes.
+These monitor foils were measured simultaneously with
+the rest of the foils with the PET/CT scanner.
+The decay curves of the three monitor foils for 150 MeV
+irradiation are displayed in Fig. 5. The corresponding
+production yield of 11 C in the total of the twelve monitor
+foils used are summarized in Table II and are in a very
+good agreement (less than 2% in the four irradiations),
+providing evidence of the reliability of the relative beam
+current measurement.
+
+E.
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+Validation with the IAEA monitor reaction
+
+In both experiments, a nat Cu target was irradiated together with at least one of the target foils. This allows
+to measure the integral production yield below 20 MeV
+and compare it with the value expected from the IAEA
+evaluation [24].
+At WPE, a 3 mm of nat Cu target was irradiated together with the SiO2 assembly during the ﬁrst irradiation
+585
+
+WPE
+HIT
+HIT
+
+IV.
+
+Target with which
+Yexp (kBq) Ytheo (kBq) Ratio
+it is irradiated
+SiO2
+PE
+AlN
+
+2.72(11)
+2.28(8)
+2.16(7)
+
+2.62(11)
+2.38(10)
+2.28(9)
+
+1.04
+1.04
+1.06
+
+RESULTS AND DISCUSSION
+
+The cross sections for all the measured reactions have
+been calculated from the production yields using Eq. 7.
+The obtained point-wise cross section are presented in
+Tables VI, VII and VIII in V A, where the quoted uncertainties have contributions from the ﬁt, the spatial
+dependence of the PET scanner eﬃciency (3%, see Section II A 2), the activity of the 22 Na calibration source
+(1.5%), the uncertainty in the foil thicknesses (1%) and
+the accuracy of the measurement in the beam current (1%
+in the measurements at WPE [15] [16] and less than 3% in
+all cases in the measurements at HIT [20]). The accuracy
+of the measurements ranges between ∼2.3%-8.9%.
+As the data presented herein have been obtained using
+a multi-foil activation technique, the very good agreement
+between the ﬁrst and last point of two consecutive irradiation energies serves also as cross-check of the results.
+
+Production of 11 C, 13 N and 15 O. . .
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+PE foil @ 33(3) MeV
+
+PE foil @ 189.3(3) MeV
+Exp. points
+11
+C (t = 20.4 min)
+
+Exp. points
+11
+
+1/2
+
+= 20.4 min)
+
+1/2
+
+Activity (kBq)
+
+Activity (kBq)
+
+C (t
+
+10
+
+10
+
+0
+
+10
+
+20
+
+30
+
+40
+50
+Time (min)
+
+60
+
+70
+
+0
+
+80
+
+10
+
+SiO2 foil @ 35(3) MeV
+
+30
+
+40
+50
+Time (min)
+
+60
+
+70
+
+80
+
+SiO2 foil @ 189.1(5) MeV
+2
+
+102
+
+10
+
+Exp. points
+11
+C (t1/2 = 20.4 min)
+13
+N (t1/2 = 9.97 min)
+15
+O (t1/2 = 122 s)
+
+Activity (kBq)
+
+Activity (kBq)
+
+20
+
+Total ﬁt
+
+10
+
+Exp. points
+11
+C (t = 20.4 min)
+1/2
+13
+N (t = 9.97 min)
+1/2
+15
+O (t1/2 = 122 s)
+Total ﬁt
+
+10
+
+1
+1
+0
+
+10
+
+20
+
+30
+
+40
+50
+Time (min)
+
+60
+
+70
+
+80
+
+0
+
+10
+
+20
+
+AlN foil @ 37.8(24) MeV
+
+30
+
+40
+50
+Time (min)
+
+Exp. points
+C (t = 20.4 min)
+1/2
+13
+N (t1/2 = 9.97 min)
+15
+O (t = 122 s)
+1/2
+Total ﬁt
+
+80
+
+Exp. points
+C (t1/2 = 20.4 min)
+13
+N (t1/2 = 9.97 min)
+15
+O (t1/2 = 122 s)
+Total ﬁt
+11
+
+Activity (kBq)
+
+Activity (kBq)
+
+70
+
+AlN foil @ 189.1(4) MeV
+
+11
+
+10
+
+60
+
+10
+
+1
+1
+
+0
+
+10
+
+20
+
+30
+
+40
+50
+Time (min)
+
+60
+
+70
+
+80
+
+0
+
+10
+
+20
+
+30
+
+40
+50
+Time (min)
+
+60
+
+70
+
+80
+
+FIG. 4. (Color online) Induced activity distribution in full VOI of PE (top), SiO2 (middle) and AlN (bottom) foils at low
+(E=∼35 MeV) and high (E=∼190 MeV) energy including exponential ﬁts. For the sake of clearness, the decay curves are
+displayed only up to 80 minutes, although they are ﬁtted up to 300 minutes.
+
+The measured cross sections are displayed as well in
+the top panel of Fig. 7, while the bottom panel shows the
+cross sections weighted by the percentage of the number of
+atoms of C (12%), N (1.1%) and O (24%), relative to the
+total number of atoms in the human body, in order to illustrate their importance for beam range veriﬁcation. Fig.
+7 also displays the parametrization of the cross sections
+
+586
+
+to the analytical curve:
+4
+i
+i=0 ai · x
+f (x) =
+,
+
+4
+x5 + j=0 bj · xj
+
+(9)
+
+which can be used for PET range veriﬁcation calculations
+and could serve as starting point in forthcoming evaluations. The parameters ai and bj of the ﬁt for each reaction
+
+Production of 11 C, 13 N and 15 O. . .
+
+0.8
+
+100
+
+Irradiation performed
+at 150 MeV
+
+0.6
+0.5
+
+12
+
+0.4
+0.3
+0.2
+
+11
+
+C(p,pn) C
+
+16
+
+11
+
+O(p,3p3n) C
+
+90
+
+Monitor foil for:
+PE
+SiO2
+AlN
+
+Cross section (mb)
+
+0.7
+
+Yield (Bq/nC)
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+14
+
+N(p, )11C
+
+80
+
+16
+
+70
+
+16
+
+13
+
+O(p, ) N
+
+14
+
+13
+
+N(p,pn) N
+15
+
+O(p,pn) O
+
+14
+
+15
+
+N(p,) O
+
+60
+50
+40
+30
+20
+
+0.1
+
+10
+
+0
+0
+
+20
+
+40
+
+60
+80
+Time (min)
+
+100
+
+0
+
+120
+
+Weighted cross section:
+12
+
+11
+
+C(p,pn) C
+
+16
+
+16
+
+11
+
+O(p,3p3n) C
+
+14
+
+11
+
+16
+
+13
+
+N(p, ) C
+
+10
+
+Exp. points
+63
+62
+
+Yield (kBq/nC)
+
+Cross section (mb)
+
+FIG. 5. (Color online) Induced activity distribution per total
+charge of the PE monitor foils at Ei = 150 MeV.
+
+62
+
+Zn (t
+
+1/2
+
+Cu (t
+
+1/2
+
+O(p, ) N
+
+14
+
+13
+
+N(p,pn) N
+
+12
+
+16
+
+15
+
+O(p,pn) O
+
+14
+
+15
+
+N(p,) O
+
+10
+8
+6
+4
+
+= 38.47 min)
+
+2
+
+= 9.673 min)
+
+0
+0
+
+Zn (t = 9.186 h)
+1/2
+Total ﬁt
+
+1
+
+20
+
+40
+
+60
+
+80 100 120 140 160 180 200
+Proton energy (MeV)
+
+FIG. 7. (Color online) Top: Proton-induced reaction cross section to produce 11 C, 13 N and 15 O in C, N and O. Bottom:
+Proton-induced reaction cross section to produce 11 C, 13 N
+and 15 O weighted by the C, N and O composition in human
+body.
+
+101
+0
+
+14
+
+20
+
+40
+
+60
+
+80 100 120 140 160 180 200 220 240
+Time (min)
+
+FIG. 6. (Color online) Induced activity distribution per total
+charge in the nat Cu target at WPE.
+
+are attached in Appendix V B.
+In the following, the results of this work for the production of 11 C, 13 N and 15 O on C, N and O are presented and discussed separately, comparing in each case
+our results with those available in the literature, both the
+experimental and evaluated data. Note that the ICRU63
+library [27] is the extension to 250 MeV of ENDF/B-VII.0
+(LA-150) library for several isotopes of particular interest in proton therapy (as the ones studied in this work),
+whereas TENDL-2019 includes ENDF/B-VII.0 data whenever they are available, which is also the situation in the
+present study. Therefore in the following we will refer to
+all of them as the ENDF/B-VII.0 library.
+
+A.
+
+Production of 11 C in C, O and N
+
+There are quite some data sets in the literature for the
+C(p,pn)11 C reaction, as it dominates the production of
+11
+C in the human body at the typical energies of proton
+therapy, but none of them until now covers the full energy
+12
+
+587
+
+range of interest. From the data displayed in Fig. 8 one can
+observe two main groups: one including the data of Hintz
+et al. (1952) [28], Aamodt et al. (1952) [29], Bäumer et al.
+(2019) [16] and Bäcker et al. (2019) [30], and another one
+with Gauvin et al. (1962) [31], Matsushita et a. (2016) [32]
+or Horst et al. (2019) [33]; the latter being about 15 to 25%
+lower than the ﬁrst, even though there are recent works
+in both groups. It is noticeable that the two most recent
+data sets, reported by Bäumer et al. [16] and Horst et al.
+[33], show diﬀerences, partially resolved in [34], beyond
+15% at about 100 MeV. Furthermore, all measurements
+indicate an underestimation of this cross section in the
+ENDF/B-VII.0 library.
+This situation illustrates the need of new data with
+enhance accuracy covering the full range of interest, as
+done in this work.
+The cross section reported herein is in very good agreement with Hintz et al. (1952) [28] and Aamodt et al. (1952)
+[29], and also with the recent work by Bäumer et al. (2019)
+[16] and Bäcker et al. (2019) [30], i.e. with the ﬁrst group
+of measurement mentioned in the previous paragraph.
+The 16 O(p,x)11 C production channel has been less investigated in previous studies, but it is also of interest
+in PET range veriﬁcation, as about the 65% of the human body is composed by oxygen. Indeed, Fig. 7 (bottom)
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+
+ﬁrms a ∼25% overestimation of the ENDF/B-VII.0 data.
+In the 100 to 150 MeV region our data are about 20%
+larger than the only data available (Albouy et al.). Last, at
+lower energies, our cross section is in general higher than
+all others, specially right above the threshold at ∼30 MeV
+and up to ∼60 MeV, which is the region closest to the
+Bragg peak and hence of most importance.
+Nitrogen is the fourth most abundant element in the
+body after oxygen, carbon, and hydrogen. However, although the production of 11 C in N is not as signiﬁcant as
+the production in C or O, at high energies, the 14 N(p,x)11 C
+reaction features a threshold of only 3.1 MeV, which makes
+it the dominant reaction for 11 C production below the reaction thresholds around 20 MeV on C and O, hence at
+the very end of the beam range. While the low energy region has been studied in a previous work of ours [12] and
+there is actually an IAEA evaluation below 30 MeV, the
+measurement at higher energies reported in this work is
+important for having a complete and accurate data base.
+As it can be seen in Fig. 8, there are only two data
+sets for this reaction between 20 and 200 MeV, being our
+data well above those of Fassbender et al. (1997) [39] and,
+compared to the recent data of Kettern et al. (2004) [36],
+not far below ∼70 MeV but as much as a factor two larger
+beyond 100 MeV.
+
+
+
+
+
+  
+
+
+
+   
+
+   
+
+ !  
+
+"# $
+
+
+
+  
+
+%
+
+
+
+%   
+
+&!   $
+
+ '( 
+
+%)# 
+
+*!) 
+
+" ' +
+
+, +
+
+-./0123445
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+6 '#! , 
+
+
+
+%   
+0  '  7
+
++
+
+-./0123445
+
+
++
+
+
+
+
+
+
+.
+
+  
+
++
+
+
+
+
+
+
+
+      
+8    #(  3
+
+
+
+
+
+
+
+  
+
++
+
+
+
+
+
+9 
+
+  
+
+ !' 
+
+"# $
+
+%   
+
+": !( 
+
+-./0123445
+
+B.
+
+
++
+
++
+
+
+
+
+
+
+
+
+
+T. Rodrı́guez-González et al.
+
+      
+8    #(  3
+
+FIG. 8. (Color online) Cross sections for the production of 11 C
+on C, N and O. Note that, although the original evaluated
+data correspond to the ENDF/B-VII.0 library, in order to
+cover our full energy range we have included also their ICRU63
+extrapolation, which originates the change of style above 150
+MeV.
+
+shows that its contribution to the production of 11 C in
+the human body is about half of the production in carbon,
+hence not negligible, thus supporting the importance of
+measuring the production cross sections, not only in carbon, but in the other main elements of the human body.
+As illustrated in Fig. 8, the previous data from Albouy
+et al. (1962) [35], Kettern et al. (2004) [36], Akagi et al.
+(2013) [37] and Masuda et al. (2018) [38] show signiﬁcant
+discrepancies, reaching diﬀerences up to 40% at the low
+energy region (∼50 MeV) and even larger discrepancies
+right above the reaction threshold. The new data presented herein shows a reasonable agreement with the only
+data available around 200 MeV (Kettern et al.), which con588
+
+Production of 13 N in O and N
+
+The production of 13 N in the human body is dominated by its production in nitrogen (see Fig. 7, bottom).
+However, the 14 N(p,pn)13 N reaction channel has not been
+investigated much, being there only three data sets: Kettern et al (2004) [36], Sajjad et al. (1986) [40] and Valentin
+et al. (1965) [41]. As shown in Fig. 9, our data is in good
+agreement with Valentin et al. [41], while the quite recent
+data of Kettern et al. seems to have an issue because it
+falls too rapidly to negligible values at a few tens of MeV.
+Below 30 MeV, the two previous data sets of Sajjad et al.
+and Valentin et al. show considerable diﬀerence in the estimation of the reaction threshold, and thus would show a
+diﬀerence in the activation proﬁles for PET range veriﬁcation. The data presented herein at low energy constitute
+a new data set and agree with Valentin et al., solving the
+discrepancy.
+Regarding the production in oxygen via 16 O(p,x)13 N
+reactions, there is actually an IAEA evaluation below
+30 MeV, against which the technique presented herein
+was validated in a previous work [12]. However, because
+most previous studies were motivated by the production
+of radioisotopes for PET diagnostic, data above 30 MeV
+are not so proliﬁc. Comparing our results in Fig. 9 with
+the four data sets available (Foley et al. (1962) [42] (only
+one point), Albouy et al. (1962) [35], Valentin et al. (1963)
+[43] and Kettern et al. (2004) [36]): in the region between
+20 and 40 MeV, the data presented herein are considerable
+lower than Albouy et al.; from 40 to 200 MeV, our data
+are about a ∼25-30% higher than Albouy et al., Kettern
+
+Production of 11 C, 13 N and 15 O. . .
+
+70
+
+16
+
+Rodriguez 2022
+
+7
+
+Kettern 2004
+
+6
+
+ 
+
+40
+
+This work
+
+8
+Cross section (mb)
+
+Cross section (mb)
+
+50
+
+
+
+13
+
+O(p,*) N
+
+9
+
+60
+
+Valentin 1963
+
+5
+
+Albouy 1962
+
+4
+
+Foley 1962
+
+3
+
+ENDF/B-VII.0
+
+2
+1
+
+30
+
+0
+0
+
+20
+
+40
+
+60
+
+80 100 120 140 160 180 200
+Proton energy (MeV)
+
+
+
+ 
+! 
+
+
+"#$%#
+
+& #'
+
+
+
+(#))#%
+
+
+
+*#+ 
+
+&+ $, 
+
+-./0123*445
+
+
+
+
+
+
+
+10
+
+
+
+0
+
+14
+
+
+
+13
+
+N(p,*) N
+
+40
+
+This work
+
+Kettern 2004
+
+Sajjad 1986
+
+Valentin 1965
+
+35
+
+ENDF/B-VII.0
+
+
+
+
+
+. 
+
+
+-./73
+
+ 
+
+Cross section (mb)
+
+
+
+
+
+
+
+20
+
+30
+25
+20
+15
+
+-./73
+
+
+
+
+
+
+
+10
+
+
+
+5
+0
+0
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+
+20
+
+40
+
+60
+
+
+
+
+80 100 120 140 160 180 200
+Proton energy (MeV)
+
+FIG. 9. (Color online) Cross sections for the production of
+N on N and O. Note that, although the original evaluated
+data correspond to the ENDF/B-VII.0 library, in order to
+cover our full energy range we have included also their ICRU63
+extrapolation, which originates the change of style above 150
+MeV.
+
+
+
+
+
+       
+6   ',"*
+
+FIG. 10. (Color online) Cross sections for the production of
+O on N and O. Note that, although the original evaluated
+data correspond to the ENDF/B-VII.0 library, in order to
+cover our full energy range we have included also their ICRU63
+extrapolation, which originates the change of style above 150
+MeV.
+
+13
+
+15
+
+et al. and Valentin et al, but almost a ∼50% lower than
+Foley et al. The low production yields constitute a reason why the cross-section points range around the ﬁtting
+curve.
+
+C.
+
+
+
+Production of 15 O in O and N
+
+In delayed PET range veriﬁcation, the biological
+washout of the generated isotopes plays an important role
+in the feasibility of the technique. Isotopes with shorter
+half-lifes are recommended to avoid this eﬀect. For instance, reducing the time span between irradiation and
+measurement to detect 15 O, which is produced mainly by
+the 16 O(p,x)15 O reaction (see Fig. 7, bottom), would reduce wash-out eﬀects. The increase in the interest in using
+this isotope brings about new measurements, such as in
+Horst et at. (2019) [33], Masuda et al. (2018) [38] and Akagi et al. (2013) [37], to complete the previous ones from
+Sajjad et al. (1985) [44], Valentin et al. (1965) [41] and
+Albouy et al. (1962) [35]. It seems that in this case, see
+Fig. 10, our data and most previous measurements are in
+good agreement, especially below ∼80 MeV, while above
+that energy our data are slightly lower than all others. It is
+589
+
+noticeable that the shape of the ENDF/B-VII.0 library is
+quite far from all experimental data, a diﬀerence that has
+considerable eﬀects in the activation proﬁles estimations
+necessary for PET range veriﬁcation.
+Last, although its role in this context is very limited,
+for the sake of completeness, the production of 15 O in
+nitrogen has been obtained as well. In this particular
+case, there is no previous measurement in the literature,
+hence the importance of the new data set obtained in this
+work. The evaluated data are not available in ENDF/BVII.0 library (and therefore neither they are in ICRU63
+and TENDL-2019). The only data available are in older
+TENDL libraries, calculated with TALYS code, which oﬀer
+in general less conﬁdence.
+
+V.
+
+SUMMARY AND CONCLUSIONS
+
+In the last few years, there is an increased interest in
+the proton therapy community to improve the dose delivery by means of PET range veriﬁcation [45, 46]. The
+reliable implementation of this technique requires accurate production cross section data, speciﬁcally for the
+the long-lived positron emitters 11 C, 13 N and 15 O in the
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+
+energy range up to 200 MeV. In this context, new measurements with minimized uncertainties should lead to
+higher accuracy in the cross sections used in the Monte
+Carlo calculations which determine the β + activity distributions in the body needed for PET range veriﬁcation
+[8]. Furthermore, these data are also extremely useful for
+the development of more precise reaction models and to
+improve existing evaluated databases.
+The experimental method employed in this work combines the common multi-foil activation technique with
+the use of a PET scanner as detector. This allows measuring the activity of all the foils at the same time in a
+single PET acquisition, hence minimizing the number of
+irradiations needed and possible systematic errors in the
+irradiation and in the subsequent activity determination.
+Several actions have been implemented successfully in
+order to validate the results obtained with this new technique: i) a PE foil has been placed in front of each multifoil stack (agreement within 1.8% between diﬀerent irradiation and beam energies), ii) the IAEA monitor reaction
+cross section of nat Cu(p,x)63 Zn was measured (3% agreement with the evaluated cross section), iii) the beam energies were chosen such that some data points are measured
+twice (agreement within uncertainties).
+The multi-foil targets could not be employed to study
+very low (below 30 MeV) energies. Therefore, a set of
+single irradiations and production yield measurement with
+conventional detectors, instead of the PET scanner, has
+been performed, using again the evaluated nat Cu(p,x)63 Zn
+production cross section for validation (agreement better
+than 6%).
+The outcome of this work is a total of seven excitation functions (40 energy points/reaction) from 30 up to
+200 MeV. The production of 11 C, 13 N and 15 O in the
+main elements of the human body and up to 200 MeV,
+via the reactions 12 C(p,x)11 C, 16 O(p,x)15 O, 16 O(p,x)11 C,
+
+[1] W. D. Newhauser and R. Zhang, “The physics of proton
+therapy,” P h y s . M e d i c i n e B i o l. 60, 155 (2015).
+[2] M. Moteabbed, T. I. Yock, and H. Paganetti, “The risk of
+radiation-induced second cancers in the high to medium
+dose region: A comparison between passive and scanned
+proton therapy, IMRT and VMAT for pediatric patients
+with brain tumors,” P h y s . M e d i c i n e B i o l. 59, 2883
+(2014).
+[3] A. C. Kraan, “Range veriﬁcation methods in particle
+therapy: Underlying physics and monte carlo modeling,”
+F ro n t . O n c o l. 5 (2015).
+[4] U. Oelfke, G. K. Lam, and M. S. Atkins, “Proton dose
+monitoring with PET: Quantitative studies in lucite,”
+P h y s . M e d i c i n e B i o l. 41, 177 (1996).
+[5] K. Parodi, A. Ferrari, F. Sommerer, and H. Paganetti,
+“Clinical ct-based calculations of dose and positron emitter
+distributions in proton therapy using the FLUKA monte
+carlo code,” P h y s . M e d i c i n e B i o l. 52, 3369 (2007).
+[6] K. Parodi, T. Bortfeld, and T. Haberer, “Comparison between in-beam and oﬄine positron emission tomography
+
+590
+
+T. Rodrı́guez-González et al.
+
+16
+
+O(p,x)13 N, 14 N(p,x)11 C, 14 N(p,γ)15 O and 14 N(p,x)13 N,
+have been measured. In addition to the point-wise cross
+section, the excitation functions have been parameterized
+so that they can be easily implemented in simulations
+codes for PET range veriﬁcation. In this line, work is
+ongoing for a detailed study of the production rates of
+the β + emitters of interest in tissue-equivalent phantoms
+using the cross sections from this work and their comparison with the activity distributions measured in realistic
+clinical scenarios, and preliminary studies illustrate the
+importance of new data and the subsequent data evaluations in the full energy range of interest in proton therapy
+for a reliable implementation of PET range veriﬁcation.
+
+ACKNOWLEDGEMENTS
+
+The research work presented herein has received funding
+from the Spanish Ministry of Economy and Competitiveness projects under grants no RYC-2014-15271, FPA201677689-C2-1-R and RTI2018-098117-B-C21, from the EC
+project H2020-847552 (SANDA), from the “Consejerı́a
+de Economı́a y Conocimiento de la Junta de Andalucı́a”
+project under grant no. P18-RT-1900, from the Regional
+Ministry of Economy, Knowledge, Business and University/FEDER funds under grant no. US-1380791 and from
+the “V Plan Propio de Investigación (V PPIT-US)” programme from the University of Sevilla. M.C. JiménezRamos acknowledges the support to this work through
+a VI PPIT-US contract. J. Bauer acknowledges funding
+from the Universtity of Heidelberg as Olympia-Morata
+fellow. T. Rodriguez-Gonzalez acknowledges the Spanish
+FPI PhD grant associated to the project FPA2016-77689C2-1-R.
+
+imaging of proton and carbon ion therapeutic irradiation
+at synchrotron- and cyclotron-based facilities,” I n t . J .
+R a d i at . O n c o l . B i o l . P h y s. 71, 945 (2008).
+[7] F. T. Tárkányi, A. V. Ignatyuk, A. Hermanne, et al.,
+“Recommended nuclear data for medical radioisotope production: diagnostic positron emitters,” J . R a d i oa n a l .
+N u c l . C h e m. 319, 533 (2019).
+[8] A. L. Nichols and R. Capote, “Nuclear data for medical applications - recent developments and future requirements,”
+N u c l . Data S h e e t s 120, 239 (2014).
+[9] H. Paganetti, “Range uncertainties in proton therapy and
+the role of monte carlo simulations,” P h y s . M e d i c i n e
+B i o l. 57, 99 (2012).
+[10] S. España, X. Zhu, J. Daartz, G. E. Fakhri, T. Bortfeld,
+and H. Paganetti, “The reliability of proton-nuclear interaction cross-section data to predict proton-induced PET
+images in proton therapy,” P h y s . M e d i c i n e B i o l.
+56, 2687 (2011).
+[11] J. W. Engle, A. L. Nichols, and R. Capote, “Summary
+report of the technical meeting on long term data needs
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+
+in medical applications,” I A E A t e c h n i c a l r e p o rt
+INDC(NDS)-0776 (2018).
+[12] T. Rodriguez-Gonzalez, C. Guerrero, M. del Carmen
+Jiménez-Ramos, J. Lerendegui-Marco, M. de los Ángeles
+Millán-Callado, Ángel Parrado, J. Gómez, and J. M. Quesada, “Production yields at the distal fall-oﬀ of the β +
+emitters 11 C and 13 N for in-vivo range veriﬁcation in proton therapy,” R a d i at . P h y s . C h e m. 190 (2022).
+[13] M.-M. Bé, V. Chisté, C. Dulieu, V. Chechev, N. Kuzmenko,
+R. Helmer, A. Nichols, E. Schönfeld, and R. Dersch, “Table
+of radionuclides (vol. 1 - A = 1 to 150),” B u r e au I n t .
+D e s P o i d s E t M e s u r e s 1 (2004).
+[14] C. Bäumer, B. Ackermann, M. Hillbrand, F.-J. Kaiser,
+B. Koska, H. Latzel, A. Lühr, S. Menkel, and B. Timmermann, “Dosimetry intercomparison of four proton therapy institutions in germany employing spot scanning,” Z .
+f ü r M e d i z i n i s c h e P h y s i k 27, 80 (2017).
+[15] E. Grusell, U. Isacsson, A. Montelius, and J. Medin, “Faraday cup dosimetry in a proton therapy beam without collimation,” P h y s . M e d i c i n e B i o l. 40, 1831 (1995).
+[16] C. Bäumer, C. M. Bäcker, M. Gerhardt, et al., “Measurement of absolute activation cross sections from carbon and aluminum for proton therapy,” N u c l . I n s t .
+M e t h . P h y s . R e s . S e c t . B : B e a m I n t e r ac t i o n s w i t h M at e r . At o m s 440, 75 (2019).
+[17] “Siemens healthineers biograph vision.”
+[18] B. Arjomandy, P. Taylor, C. Ainsley, et al., “AAPM task
+group 224: Comprehensive proton therapy machine quality assurance,” M e d . P h y s. 46, 678 (2019).
+[19] D. Ondreka and U. Weinrich, “The heidelberg ion therapy (HIT) accelerator coming into operation,” P ro c .
+E PAC 0 8, 979 (2008).
+[20] C. Schoemers, E. Feldmeier, J. Naumann, R. Panse, A. Peters, and T. Haberer, “The intensity feedback system
+at heidelberg ion-beam therapy centre,” N u c l . I n s t .
+M e t h . P h y s . R e s . S e c t . A : Ac c e l . S p e c t ro m e t e r s , D e t e c t . A s s o c . E q u i p. 795, 92
+(2015).
+[21] T. Tessonnier, T. T. Böhlen, F. Ceruti, A. Ferrari, P. Sala,
+S. Brons, T. Haberer, J. Debus, K. Parodi, and A. Mairani,
+“Dosimetric veriﬁcation in water of a monte carlo treatment
+planning tool for proton, helium, carbon and oxygen ion
+beams at the heidelberg ion beam therapy center,” P h y s .
+M e d i c i n e B i o l. 62, 6579 (2017).
+[22] P. Forck, “Lecture notes on beam instrumentation and
+diagnostics,” J t . U n i v . Ac c e l . S c h. (2011).
+[23] J. Allison, K. Amako, J. Apostolakis, et al., “Recent developments in GEANT4,” N u c l . I n s t . M e t h . P h y s .
+R e s . S e c t . A : Ac c e l . S p e c t ro m e t e r s , D e t e c t . A s s o c . E q u i p. 835, 186 (2016).
+[24] A. Hermanne, A. V. Ignatyuk, R. Capote, et al., “Reference cross sections for charged-particle monitor reactions,”
+N u c l . Data S h e e t s 148, 338 (2018).
+[25] “Image processing software.”
+[26] “Root data analysis framework.”
+[27] C. J. Malmer, “Icru report 63. nuclear data for neutron
+and proton radiotherapy and for radiation protection,”
+M e d . P h y s. 28 (2001).
+[28] N. M. Hintz and N. F. Ramsey, “Excitation functions to
+100 MeV,” P h y s . R e v. 88, 19 (1952).
+[29] R. L. Aamodt, V. Peterson, and R. Phillips,
+“12 C(p,pn)11 C cross section from threshold to 340
+MeV,” P h y s . R e v. 88, 739 (1952).
+
+591
+
+T. Rodrı́guez-González et al.
+
+[30] C. M. Bäcker, C. Bäumer, M. Gerhardt, et al., “Measurement of nuclear activation cross sections of protons on
+natural carbon for proton beam energies between 100 and
+220 MeV,” N u c l . I n s t . M e t h . P h y s . R e s . S e c t .
+B : B e a m I n t e r ac t i o n s w i t h M at e r . At o m s
+454, 50 (2019).
+[31] H. Gauvin, M. Lefort, and X. Tarrago, “Émission d’hélions
+dans les réactions de spallation,” N u c l . P h y s. 39, 447
+(1962).
+[32] K. Matsushita, T. Nishio, S. Tanaka, M. Tsuneda, A. Sugiura, and K. Ieki, “Measurement of proton-induced target
+fragmentation cross sections in carbon,” N u c l . P h y s .
+A 946, 104 (2016).
+[33] F. Horst, W. Adi, G. Aricò, et al., “Measurement of PET
+isotope production cross sections for protons and carbon
+ions on carbon and oxygen targets for applications in
+particle therapy range veriﬁcation,” P h y s . M e d i c i n e
+B i o l. 64 (2019).
+[34] C. M. Bäcker, F. Horst, W. Adi, et al., “Experimental consolidation and absolute measurement of the nat C(p,x)11 C
+nuclear activation cross section at 100 MeV for particle
+therapy physics,” E u r . P h y s . J . A 57 (2021).
+[35] G. Albouy, J. P. Cohen, M. Gusakow, N. Poﬀe, H. Sergolle,
+and L. Valentin, “Spallation de l’oxygene par des protons
+de 20 a 150 MeV,” P h y s . L e t t. 2, 306 (1962).
+[36] K. Kettern, Y. N. Shubin, G. F. Steyn, T. N. V. D. Walt,
+H. H. Coenen, and S. M. Qaim, “Formation of short-lived
+positron emitters in reactions of protons of energies up to
+200 MeV with the target elements carbon, nitrogen and
+oxygen,” A p p l . R a d i at . I s o t. 60, 939 (2004).
+[37] T. Akagi, M. Yagi, T. Yamashita, M. Murakami, Y. Yamakawa, K. Kitamura, K. Ogura, K. Kondo, and S. Kawanishi, “Experimental study for the production cross sections
+of positron emitters induced from 12 C and 16 O nuclei by
+low-energy proton beams,” R a d i at . M e a s. 59, 262
+(2013).
+[38] T. Masuda, J. Kataoka, M. Arimoto, M. Takabe, T. Nishio,
+K. Matsushita, T. Miyake, S. Yamamoto, T. Inaniwa, and
+T. Toshito, “Measurement of nuclear reaction cross sections by using Cherenkov radiation toward high-precision
+proton therapy,” S c i . R e p o rt s 8 (2018).
+[39] M.Fassbender, B.Scholten, Yu.N.Shubin, and S.M.Qaim,
+“Activation cross section data for (p,x) processes of therapeutic relevance,” in International Conference on Nuclear
+Data for Science and Technology (1997).
+[40] M. Sajjad, R. M. Lambrecht, and A. P. Wolf, “Cyclotron
+isotopes and radiopharmaceuticals xxxvii. excitation functions for the 16 O(p,α)13 N and 14 N(p,pn)13 N reactions,”
+R a d i o c h i m i c a Ac ta 39, 165 (1986).
+[41] L. Valentin, “Réactions (p, n) et (p, pn) induites à
+moyenne énergie sur des noyaux légers,” N u c l . P h y s.
+62, 81 (1965).
+[42] K. J. Foley, G. L. Salmon, and A. B. Clegg, “Gamma
+radiation from the bombardment of 16 O and 19 F nuclei
+with 150 MeV protons,” N u c l . P h y s. 31, 43 (1962).
+[43] L. Valentin, G. Albouy, J. P. Cohen, and M. Gusakow,
+“Reactions induites par des protons de 155 MeV sur des
+noyaux legers,” P h y s . L e t t. 7, 163 (1963).
+[44] M. Sajjad, R. M. Lambrecht, and A. P. Wolf, “Cyclotron
+isotopes and radiopharmaceuticals: Xxxvi. investigation
+of some excitation functions for the preparation of 15 O,
+13
+N and 11 C,” R a d i o c h i m i c a Ac ta 38, 57 (1985).
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+
+[45] K. Parodi, “Latest developments in in-vivo imaging for
+proton therapy,” B r . J . R a d i o l. 93 (2020).
+[46] J. Bauer, D. Unholtz, C. Kurz, and K. Parodi, “An experimental approach to improve the monte carlo modelling
+of oﬄine pet/ct-imaging of positron emitters induced by
+scanned proton beams,” P h y s . M e d i c i n e B i o l. 58,
+5193 (2013).
+
+592
+
+T. Rodrı́guez-González et al.
+
+Production of 11 C, 13 N and 15 O. . .
+
+NUCLEAR DATA SHEETS
+APPENDIX
+A.
+
+Production cross sections
+
+TABLE VI. 12 C(p,x)11 C experimental cross sections.
+Facility E (MeV)
+
+σ (mb)
+12
+
+C(p,x)11 C
+
+23.6(12)
+25.8(11)
+27.9(10)
+
+20.5(8)
+44.4(18)
+68(3)
+
+30(3)
+32(3)
+33(3)
+35.2(24)
+36.9(23)
+38.4(23)
+44.1(18)
+51.9(15)
+58.2(13)
+68.1(11)
+49.5+1.4
+−1.3
+56.6(12)
+63.1(11)
+69.1(10)
+74.7(8)
+80.0(8)
+85.0(7)
+89.8(6)
+94.4(4)
+98.9(4)
+WPE
+85.1(17)
+93.7(15)
+101.9(14)
+109.5(12)
+116.8(11)
+123.8(10)
+130.5(8)
+136.9(7)
+143.1(5)
+149.2(3)
+138.9(15)
+145.1(14)
+151.1(13)
+157.0(12)
+162.6+1.1
+−1.2
+168.2(10)
+173.6(9)
+179.0(7)
+184.2(5)
+189.3(3)
+
+87(3)
+94(3)
+97(4)
+97(4)
+97(4)
+96(3)
+94(3)
+91(3)
+89(3)
+86(3)
+86(3)
+90(3)
+87(3)
+83(3)
+81(3)
+76(3)
+73(3)
+72(3)
+71(3)
+68.3(25)
+66.1(24)
+68.9(25)
+66.9(24)
+64.8(23)
+62.6(23)
+59.5(21)
+57.3(21)
+56.3(20)
+55.1(20)
+56.6(20)
+53.5(19)
+54.3(20)
+54.9(20)
+53.3(19)
+53.4(19)
+52.9(19)
+52.1(19)
+49.8(18)
+48.8(18)
+48.9(18)
+
+HIT
+
+593
+
+T. Rodrı́guez-González et al.
+
+Production of 11 C, 13 N and 15 O. . .
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+TABLE VII. 16 O(p,x)11 C, 16 O(p,x)13 N and 16 O(p,x)15 O experimental cross sections.
+Facility E (MeV)
+
+σ (mb)
+16
+
+11
+
+O(p,x) C
+
+16
+
+O(p,x)13 N 16 O(p,x)15 O
+
+20.2+2.5
+−2.4
+24.8(21)
+
+0.69(3)
+2.08(11)
+
+8.7(5)
+3.24(19)
+
+10.9(5)
+40.8(21)
+
+28+4
+−3
+32(3)
+35(3)
+38.2+2.5
+−2.4
+41.2+2.1
+−2.0
+43.9(19)
+46.5+1.9
+−1.8
+49.0+1.8
+−1.7
+57.2(14)
+64.6(13)
+48.2+1.8
+−1.7
+51.8+1.6
+−1.5
+55.3(15)
+62.9(13)
+69.7(12)
+76.2+1.1
+−1.0
+82.2(9)
+87.9(8)
+93.3(8)
+WPE 98.6(7)
+77.3(21)
+87.4(19)
+96.6(16)
+105.2(14)
+113.3(12)
+121.0(11)
+128.4(9)
+135.5(8)
+142.3(6)
+148.9(5)
+133.7(17)
+140.5(15)
+147.2(15)
+153.6(13)
+159.9(12)
+166.0(11)
+172.0+1.0
+−0.9
+177.8(8)
+183.5(6)
+189.1(5)
+
+5.3(2)
+11.0(4)
+16.1(6)
+23.5(9)
+24.9(9)
+27.3(10)
+28.0(10)
+27.0(10)
+25.6(9)
+22.7(8)
+27.2(11)
+24.9(9)
+23.8(9)
+22.1(8)
+21.1(8)
+20.6(9)
+20.3(11)
+18.8(20)
+18.8(10)
+17.8(9)
+21.5(8)
+20.0(7)
+18.5(7)
+17.2(6)
+17.0(6)
+16.8(6)
+16.3(7)
+16.3(6)
+15.5(6)
+15.4(6)
+15.6(6)
+16.8(7)
+16.2(6)
+15.9(6)
+16.2(6)
+15.6(6)
+15.8(6)
+15.5(7)
+14.4(6)
+15.2(6)
+
+0.82(7)
+0.98(8)
+1.32(11)
+2.51(19)
+3.39(25)
+4.2(3)
+4.7(4)
+5.20(21)
+5.94(25)
+5.9(3)
+5.3(5)
+5.4(3)
+5.7(3)
+5.3(3)
+5.8(3)
+5.6(5)
+5.9(5)
+6.0(5)
+5.6(5)
+5.6(5)
+5.60(21)
+5.78(21)
+5.54(20)
+5.91(22)
+5.59(20)
+5.40(20)
+5.17(20)
+4.88(25)
+4.82(19)
+4.5(3)
+5.3(4)
+5.4(3)
+5.3(3)
+5.3(3)
+5.6(3)
+5.0(3)
+4.97(23)
+4.8(4)
+5.0(3)
+5.4(3)
+
+62.6(23)
+70(3)
+72(3)
+73(3)
+72(3)
+75(3)
+72(3)
+72(3)
+66.2(24)
+57.8(21)
+68.7(25)
+70(3)
+67.0(24)
+65.5(24)
+63.4(23)
+62.6(23)
+61.4(23)
+56.8(24)
+52.0(19)
+48.1(18)
+54.4(20)
+56.6(20)
+55.5(19)
+47.5(17)
+47.6(17)
+46.5(17)
+43.8(16)
+41.8(15)
+40.1(15)
+40.8(15)
+42.3(18)
+39.7(14)
+39.3(14)
+37.0(13)
+37.0(13)
+37.0(13)
+37.0(13)
+36.0(15)
+33.7(12)
+31.7(11)
+
+HIT
+
+594
+
+Production of 11 C, 13 N and 15 O. . .
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+
+TABLE VIII. 14 N(p,x)11 C, 14 N(p,x)13 N and 14 N(p,x)15 O experimental cross sections.
+Facility E (MeV)
+
+σ (mb)
+14
+
+11
+
+N(p,x) C
+
+14
+
+N(p,x)13 N 14 N(p,γ)15 O
+
+22.7(20)
+25.6(18)
+29.1(17)
+
+24.3(12)
+6.1(3)
+9.0(5)
+
+17.5(9)
+25.4(13)
+32.5(17)
+
+6.1(3)
+5.1(3)
+7.1(4)
+
+32(3)
+35(3)
+37.8(24)
+40.3+2.3
+−2.2
+42.7+2.1
+−2.0
+45.1(19)
+47.5(17)
+49.6(16)
+57.6(14)
+64.7(12)
+48.2+1.8
+−1.7
+51.8(16)
+57.0(14)
+64.2(12)
+70.9(11)
+77.0(9)
+82.8(8)
+88.3(8)
+93.6(7)
++0.7
+WPE 98.6−0.6
+79.0+2.0
+−1.9
+88.8(19)
+97.8(16)
+106.1(14)
+114.1(13)
+121.6(11)
+128.8+1.0
+−0.9
+135.8(8)
+142.5(6)
+149.0(5)
+134.8(17)
+141.5(16)
+148.1(14)
+154.3(13)
+160.6(12)
+166.5(10)
+172.3(9)
+178.1(7)
+183.7(6)
+189.1(4)
+
+13.6(9)
+17.0(12)
+18.8(8)
+20.8(9)
+21.3(9)
+22.9(9)
+24.3(10)
+24.7(12)
+26.4(13)
+25.9(13)
+25.5(10)
+25.5(10)
+25.5(12)
+26.3(11)
+26.0(11)
+25.5(10)
+25.5(10)
+25.8(11)
+25.8(12)
+25.4(10)
+26.1(10)
+24.6(14)
+24.6(9)
+24.6(9)
+23.8(9)
+23.8(9)
+23.7(9)
+23.5(9)
+23.3(9)
+22.9(9)
+23.2(11)
+23.6(9)
+22.2(8)
+22.0(8)
+21.9(8)
+21.7(8)
+22.1(10)
+22.0(8)
+21.8(8)
+22.4(8)
+
+33.0(21)
+30.5(14)
+29.2(11)
+26.8(11)
+24.3(10)
+23.5(14)
+23.3(9)
+22.4(11)
+19.4(10)
+18.1(9)
+22.5(8)
+21.2(8)
+19.0(7)
+18.1(8)
+16.0(7)
+14.6(5)
+13.8(6)
+13.0(5)
+12.5(7)
+11.6(6)
+13.7(6)
+11.9(4)
+11.6(8)
+11.6(5)
+10.5(4)
+10.3(5)
+10.3(5)
+9.5(10)
+9.5(4)
+9.0(4)
+10.0(6)
+9.5(5)
+9.8(4)
+9.6(4)
+9.2(7)
+9.2(5)
+9.2(5)
+8.5(4)
+8.2(4)
+7.4(4)
+
+3.7(3)
+6.0(5)
+4.5(3)
+4.9(3)
+6.1(5)
+5.7(3)
+5.5(3)
+6.2(3)
+7.2(3)
+5.2(3)
+5.5(5)
+5.0(4)
+5.1(3)
+6.4(5)
+6.5(5)
+6.4(4)
+5.4(4)
+6.8(5)
+6.3(5)
+5.4(5)
+4.5(3)
+4.7(3)
+4.76(20)
+3.90(18)
+4.97(22)
+4.76(20)
+4.8(3)
+5.29(22)
+5.20(24)
+4.45(21)
+4.9(3)
+4.9(3)
+3.81(22)
+4.07(23)
+3.73(18)
+3.79(20)
+4.9(3)
+4.58(22)
+5.0(3)
+4.9(3)
+
+HIT
+
+595
+
+Production of 11 C, 13 N and 15 O. . .
+B.
+
+T. Rodrı́guez-González et al.
+
+NUCLEAR DATA SHEETS
+Parametrization of the production cross sections
+
+The data presented in this work have been ﬁtted to Eq. 9. The range of the ﬁt and its parameters are presented in
+the following table.
+TABLE IX. Parameters of the production cross section ﬁtting curve
+
+Reaction
+Parameter
+a0
+a1
+a2
+a3
+a4
+b0
+b1
+b2
+b3
+b4
+Fit range
+
+12
+
+C(p,x)11 C
+
+16
+
+O(p,x)11 C
+
+14
+
+N(p,x)11 C
+
+16
+
+O(p,x)13 N
+
+14
+
+N(p,x)13 N
+
+16
+
+O(p,x)15 O
+
+86423.8
+20837
+27254
+3302.52
+1076.84
+8471.57
+-4.53238e+06 -1.17523e+06 1.08172e+06
+-344921
+-440478
+-166317
+1.18775e+08 2.83661e+07 -8.3163e+07 3.40013e+07 5.1973e+07
+-277389
+-1.69095e+09 -3.73377e+08 4.79638e+08 -1.46591e+09 -1.13565e+09 3.02514e+06
+9.66632e+09 2.33149e+09 1.31897e+10 2.02267e+10 6.57578e+09 1.9191e+08
+2169.2
+1265.09
+1406.69
+258.171
+-377.248
+52.5751
+-258391
+-90285.8
+-29509.3
+1679.85
+37082.4
+-3007.49
+1.41445e+07 1.78423e+06
+22058.5
+-128921
+109057
+164369
+-3.70622e+08
+712909
+1733.01
+-7.39076e+06 -4.35666e+07 -6.1241e+06
+3.73828e+09
+5558.11
+88.8574
+3.88967e+08 7.49259e+08 8.58641e+07
+(14,190)
+
+(19.5,190)
+
+(21.8,190)
+
+596
+
+(19.5,190)
+
+(9,190)
+
+(16,190)
+
+
