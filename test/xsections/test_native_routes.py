@@ -23,8 +23,8 @@ class NativeRouteTests(unittest.TestCase):
         production = summary.loc[
             summary["profile_label"] == "all_production"].iloc[0]
         self.assertAlmostEqual(production["unmodeled_fraction"], 0.15)
-        inroom = summary.loc[summary["profile_label"] == "all_inroom"].iloc[0]
-        self.assertLess(inroom["unmodeled_fraction"], production["unmodeled_fraction"])
+        reference = summary.loc[summary["profile_label"] == "all_d120s300"].iloc[0]
+        self.assertLess(reference["unmodeled_fraction"], production["unmodeled_fraction"])
 
     def test_negative_counts_are_rejected(self):
         routes = pd.DataFrame({

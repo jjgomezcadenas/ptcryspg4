@@ -237,25 +237,25 @@ class ExposureFoldingTests(unittest.TestCase):
         self.assertAlmostEqual(n13, 20.0)
         self.assertEqual(
             set(profile["profile_label"]),
-            {"C11", "O15", "N13", "all_production", "all_inroom"},
+            {"C11", "O15", "N13", "all_production", "all_d120s300"},
         )
 
-    def test_inroom_aggregate_uses_named_handoff_factors(self):
+    def test_scenario_aggregate_uses_named_handoff_factors(self):
         frame = pd.DataFrame([
             exposure_row("C12", 1.0e27),
             exposure_row("O16", 2.0e27),
         ])
         result = fold_exposure(frame, self.ensemble)
         profile = result.nominal_isotope_profiles.set_index("profile_label")
-        scenario = resolve_scenario("inroom")
+        scenario = resolve_scenario("d120s300")
         expected = sum(
             profile.loc[name, "expected_count_run"]
             * scenario.measured_fraction(ISOTOPE_DATA[NAME_TO_ID[name]].lam)
             for name in ("C11", "O15", "N13")
         )
         self.assertAlmostEqual(
-            profile.loc["all_inroom", "expected_count_run"], expected)
-        self.assertEqual(profile.loc["all_inroom", "quantity"], "measured_decays")
+            profile.loc["all_d120s300", "expected_count_run"], expected)
+        self.assertEqual(profile.loc["all_d120s300", "quantity"], "measured_decays")
 
     def test_replicas_scale_same_frozen_exposure(self):
         rows = []
@@ -401,14 +401,14 @@ class ExposureFoldingTests(unittest.TestCase):
                     "unmodeled_fraction": 0.10,
                 },
                 {
-                    "profile_label": "all_inroom",
+                    "profile_label": "all_d120s300",
                     "modeled_count": 45.0,
                     "unmodeled_count": 2.0,
                     "total_count": 47.0,
                     "unmodeled_fraction": 2.0 / 47.0,
                 },
             ]).to_csv(route_path, index=False)
-            scenario = resolve_scenario("inroom")
+            scenario = resolve_scenario("d120s300")
             write_result(
                 result,
                 output / "fold",
@@ -419,7 +419,7 @@ class ExposureFoldingTests(unittest.TestCase):
             )
             metadata = json.loads(
                 (output / "fold/folding_meta.json").read_text())
-            self.assertEqual(metadata["handoff_scenario"]["name"], "inroom")
+            self.assertEqual(metadata["handoff_scenario"]["name"], "d120s300")
             self.assertFalse(
                 metadata["native_route_diagnostic"]["affects_folded_source"])
             self.assertEqual(

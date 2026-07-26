@@ -245,6 +245,30 @@ figures included; scenarios-repo commit d6f887f).
 
 **Status: complete.**
 
+## Scenario modernization — CBS acquisition protocols
+
+**Trigger.** The fast/inroom/offline handoff scenarios (20-30 min windows)
+predate the CRYSP study; cbs.tex defines short modulated scans by start
+delay and duration (reference: 300 s scan starting 120 s after beam-off).
+
+**Done.** config/handoff_scenarios.toml replaced by five named protocols
+(t_irr 60 s): d120s300 (reference), d120s120, d180s300, d180s120,
+d300s300. Every scenario reference repointed (folding, comparison,
+budgets, native routes, plots, tests, analytic reference); the comparison
+table carries a generated timing legend so labels cannot drift from the
+numbers. The 1e8 products were refolded and recompared; budgets re-frozen
+into uniform_headep_sobp_1e8_dd (scenarios-repo commit 4323c71).
+
+**Physics.** Under CBS weighting the combined displacement runs from
+-1.08 +- 0.16 mm (d120s120) through -0.80 +- 0.17 (reference) to
++0.32 +- 0.19 mm (d300s300) - crossing zero inside the studied range;
+short windows weight O15, later starts restore C11. Scenario-weighted
+yield ratios 1.02-1.11. Reference-scan u_xs band: +-0.14 mm. The note's
+Results and Conclusions carry the new numbers, with the
+displacement-not-error phrasing made explicit.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
 - Phase 3d: detector-study reruns on the data-driven scenario and the
   native-vs-data sigma_R cross-check (PTCryspMC, unweighted pipeline).

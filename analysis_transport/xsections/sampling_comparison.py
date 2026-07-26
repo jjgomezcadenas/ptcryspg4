@@ -117,7 +117,8 @@ def analyze(run_dir: Path, repo: Path):
     # acquisition scenario applied to both tallies. The compensation seen in
     # raw production depends on the isotope weights; these rows measure how
     # the paired displacement moves with the acquisition timing.
-    for scenario_name in ("inroom", "fast", "offline"):
+    for scenario_name in ("d120s300", "d120s120", "d180s300",
+                          "d180s120", "d300s300"):
         scenario = resolve_scenario(scenario_name, DEFAULT_SCENARIO_CONFIG)
         factors = {
             isotope: scenario.measured_fraction(
@@ -223,17 +224,30 @@ def analyze(run_dir: Path, repo: Path):
     uncertainty = pd.read_csv(run_dir / "folding/uncertainty_summary.csv")
     band_labels = {"O15": "$^{15}$O", "C11": "$^{11}$C", "N13": "$^{13}$N",
                    "all_production": "combined (production)",
-                   "all_inroom": "combined (in-room weighted)"}
+                   "all_d120s300": "combined (reference scan)"}
     with (generated / "systematic_band.tex").open("w", encoding="utf-8") as stream:
         stream.write("\\begin{tabular}{lrr}\n\\toprule\n")
         stream.write("Profile & $R_{50}$ (mm) & "
                      "$u_{\\mathrm{xs}}$ (mm) \\\\\n\\midrule\n")
-        for key in ("O15", "C11", "N13", "all_production", "all_inroom"):
+        for key in ("O15", "C11", "N13", "all_production", "all_d120s300"):
             row = uncertainty[uncertainty.profile_label == key].iloc[0]
             stream.write(
                 f"{band_labels[key]} & {row.R50_nominal_mm:.2f} & "
                 f"$\\pm${row.R50_shift_half_width_mm:.2f} \\\\\n")
         stream.write("\\bottomrule\n\\end{tabular}\n")
+
+    # Timing legend for the scenario rows, generated from the config so the
+    # labels can never drift from the numbers.
+    with (generated / "scenario_times.tex").open("w", encoding="utf-8") as stream:
+        parts = []
+        for name in ("d120s300", "d120s120", "d180s300", "d180s120",
+                     "d300s300"):
+            s = resolve_scenario(name, DEFAULT_SCENARIO_CONFIG)
+            parts.append(f"{name}: {s.t_del_s:.0f}/{s.t_meas_s:.0f}")
+        stream.write(
+            "Scenario timing (scan start delay after beam-off / scan "
+            "duration, s): " + "; ".join(parts) +
+            f"; irradiation {s.t_irr_s:.0f} s throughout.\n")
 
     with (generated / "delta_r50.tex").open("w", encoding="utf-8") as stream:
         stream.write("\\begin{tabular}{lrrrrr}\n\\toprule\n")

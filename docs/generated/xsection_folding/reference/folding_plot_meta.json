@@ -1,6 +1,6 @@
 {
   "context_label": "Analytic exposure reference (not a transport result)",
-  "convergence_sha256": "ccce2dac4d6a1f65c5957cc1fb988a07e63c56c5ee584253f6d800dc5edc3445",
+  "convergence_sha256": "79747004aa5033b52afc214e250b4e9f61adecfc906fc927b78764aa7aa1b8da",
   "convergence_source": "analytic_folding_reference_v1",
   "figures": [
     "production_profiles.pdf",
@@ -10,10 +10,10 @@
   ],
   "folding_source": "analytic_folding_reference_v1",
   "inputs_sha256": {
-    "bands": "6a61211b58ee4607026e607af9d314576cb3f901978da16c886d80bffbeeb029",
-    "nominal": "bc5399ec1a896e9c3573d59f05c76a75354b734a076a9628c8f4b51aff47f4cc",
-    "summary": "bbc1bc500e1e4f5bb04dfe36ce4ce37ab39bbe73ca3cf7f5b96da6f056ac77ad",
-    "uncertainty": "b0065360f2ac06794287ed4cb529ef79a24ce1a076c1d810eac0ae967a1d2966"
+    "bands": "3ee66517d1278a16fef11a70d645d214e2dd97d46b31d39cb371aa42e2d247f9",
+    "nominal": "035cf9cedadd89f408226bba77c2c8fcbfbe904a54f6ad581b966c3af1617164",
+    "summary": "3cf0e877b8a36062699175e4e758e2f0b721fd8e23a8000346cbdf3c63712385",
+    "uncertainty": "ed3e2acb18723b5f424ff02fedf949b832305fb73115b5b1405210a715866efd"
   },
   "schema_version": 1
 }

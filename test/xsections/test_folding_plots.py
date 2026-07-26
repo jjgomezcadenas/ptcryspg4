@@ -18,7 +18,7 @@ def write_synthetic_products(directory: Path) -> None:
         "O15": 1.3,
         "N13": 0.35,
         "all_production": 2.65,
-        "all_inroom": 1.15,
+        "all_d120s300": 1.15,
     }
     nominal_rows = []
     band_rows = []
@@ -29,7 +29,7 @@ def write_synthetic_products(directory: Path) -> None:
         nominal_r50 = distal_r50(depth, nominal_profile)
         nominal_yield = float(nominal_profile.sum())
         quantity = (
-            "measured_decays" if label == "all_inroom" else "production_nuclei")
+            "measured_decays" if label == "all_d120s300" else "production_nuclei")
         replicas = []
         replica_r50 = []
         for replica_id in range(30):

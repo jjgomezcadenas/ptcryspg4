@@ -51,7 +51,7 @@ RUN_META_FIELDS = (
 )
 
 
-def assemble(run_dir: Path, repo: Path, scenarios=("inroom", "fast", "offline")):
+def assemble(run_dir: Path, repo: Path, scenarios=("d120s300", "d120s120", "d180s300", "d180s120", "d300s300")):
     meta = json.loads((run_dir / "run_meta_raw.json").read_text())
     geometry = meta["geometry"]
     if geometry not in GEOMETRY_REGIONS:

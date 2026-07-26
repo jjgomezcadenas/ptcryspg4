@@ -1,8 +1,8 @@
 {
   "all_candidates_pass": false,
   "exposure_rows": 11883,
-  "fit_meta_sha256": "f5f8bd1792f580fb031049c1724980dba7d6d30ce6f52bdfaeabe31a2eb20861",
-  "handoff_scenario_sha256": "2fa7700553e5027ac4053ca8505d1eb876d1a3e50529b54797ae8b73fe86c149",
+  "fit_meta_sha256": "338107a81274ada13f41973a4ebf2e87083f90a41620c89d6ddb4ee14da13c13",
+  "handoff_scenario_sha256": "dcd8e2e53b013ac912a76080e1639afadadcd0b0a45fa49a3260fbab256482fb",
   "parameters": {
     "candidate_energy_widths_MeV": [
       0.5,
@@ -25,7 +25,7 @@
     "range_energy_exponent": 0.56,
     "reference_range_mm": 112.0,
     "relative_tolerance_fraction": 0.1,
-    "scenario": "inroom",
+    "scenario": "d120s300",
     "target_dose_Gy": 0.01,
     "target_exposure_scales": {
       "C12": 0.12,

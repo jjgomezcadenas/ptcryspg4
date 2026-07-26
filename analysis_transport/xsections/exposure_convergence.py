@@ -225,7 +225,7 @@ def main() -> None:
     parser.add_argument(
         "--config", type=Path,
         default=Path("config/xsection_exposure_convergence.toml"))
-    parser.add_argument("--scenario", default="inroom")
+    parser.add_argument("--scenario", default="d120s300")
     parser.add_argument("--scenario-config", type=Path, default=DEFAULT_SCENARIO_CONFIG)
     parser.add_argument("--output-dir", type=Path, required=True)
     arguments = parser.parse_args()

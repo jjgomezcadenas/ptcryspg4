@@ -48,7 +48,7 @@ REFERENCE_PARAMETERS = {
     "exposure_scale_cm2_inv": 1.0e27,
     "n_protons": 1.0e6,
     "target_dose_Gy": 0.01,
-    "scenario": "inroom",
+    "scenario": "d120s300",
     "candidate_energy_widths_MeV": [0.5, 1.0, 2.0, 5.0],
     "relative_tolerance_fraction": 0.10,
     "r50_absolute_tolerance_mm": 0.10,

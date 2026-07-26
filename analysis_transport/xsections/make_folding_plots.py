@@ -15,20 +15,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-PROFILE_ORDER = ("C11", "O15", "N13", "all_production", "all_inroom")
+PROFILE_ORDER = ("C11", "O15", "N13", "all_production", "all_d120s300")
 PROFILE_TITLES = {
     "C11": "C-11 production",
     "O15": "O-15 production",
     "N13": "N-13 production",
     "all_production": "All production",
-    "all_inroom": "In-room measured decays",
+    "all_d120s300": "In-room measured decays",
 }
 COLORS = {
     "C11": "#0072B2",
     "O15": "#D55E00",
     "N13": "#009E73",
     "all_production": "#7A6FAC",
-    "all_inroom": "#CC79A7",
+    "all_d120s300": "#CC79A7",
 }
 
 
@@ -317,7 +317,7 @@ def _write_summary_tex(summary: pd.DataFrame, path: Path) -> None:
         "O15": "$^{15}$O",
         "N13": "$^{13}$N",
         "all_production": "All production",
-        "all_inroom": "All in-room",
+        "all_d120s300": "All in-room",
     }
     with path.open("w", encoding="utf-8") as stream:
         stream.write("\\begin{tabular}{lrrrr}\n\\toprule\n")

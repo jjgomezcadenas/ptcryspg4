@@ -1,19 +1,35 @@
 schema_version = 1
 
-[scenario.inroom]
-description = "Standard cyclotron beam-off acquisition"
+# CBS-aligned acquisition protocols (CryspBrainSim/latex/cbs.tex): the scan
+# is defined by its start delay after beam-off (t_del) and its duration
+# (t_meas), with a 60 s irradiation. Names carry the numbers.
+
+[scenario.d120s300]
+description = "CBS reference: 300 s scan starting 120 s after beam-off"
 t_irr_s = 60.0
 t_del_s = 120.0
-t_meas_s = 1200.0
+t_meas_s = 300.0
 
-[scenario.fast]
-description = "Fast in-room transfer sensitivity"
+[scenario.d120s120]
+description = "Short scan at the reference delay"
 t_irr_s = 60.0
-t_del_s = 60.0
-t_meas_s = 1200.0
+t_del_s = 120.0
+t_meas_s = 120.0
 
-[scenario.offline]
-description = "Conservative offline acquisition"
+[scenario.d180s300]
+description = "Full scan at 180 s delay"
+t_irr_s = 60.0
+t_del_s = 180.0
+t_meas_s = 300.0
+
+[scenario.d180s120]
+description = "Short scan at 180 s delay"
+t_irr_s = 60.0
+t_del_s = 180.0
+t_meas_s = 120.0
+
+[scenario.d300s300]
+description = "Full scan at the latest studied delay"
 t_irr_s = 60.0
 t_del_s = 300.0
-t_meas_s = 1800.0
+t_meas_s = 300.0

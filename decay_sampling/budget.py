@@ -38,7 +38,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
-    ap.add_argument("--scenario", default="inroom")
+    ap.add_argument("--scenario", default="d120s300")
     ap.add_argument("--scenario-config", default=str(DEFAULT_SCENARIO_CONFIG))
     ap.add_argument("--dose", type=float, default=1.0, help="delivered dose D [Gy]")
     args = ap.parse_args()

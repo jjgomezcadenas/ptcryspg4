@@ -614,7 +614,7 @@ def fold_exposure(
 
     table = validate_exposure_table(exposure)
     metadata = metadata or ExposureMetadata.synthetic()
-    scenario = scenario or resolve_scenario("inroom")
+    scenario = scenario or resolve_scenario("d120s300")
     validate_exposure_against_metadata(table, metadata)
     depth_bins = _depth_bins(table)
     depth_key = {
@@ -952,7 +952,7 @@ def main() -> None:
         "--fit-dir", type=Path, default=Path("data/xsections/fits"),
         help="directory containing fit_meta.json and channel fit products")
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--scenario", default="inroom")
+    parser.add_argument("--scenario", default="d120s300")
     parser.add_argument(
         "--scenario-config", type=Path, default=DEFAULT_SCENARIO_CONFIG)
     parser.add_argument(

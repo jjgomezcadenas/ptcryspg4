@@ -31,7 +31,7 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     _here = os.path.dirname(os.path.abspath(__file__))
     ap.add_argument("data_dir", help="a run directory, e.g. data/runs/cylinder_sobp_1e7")
-    ap.add_argument("--scenario", default="inroom")
+    ap.add_argument("--scenario", default="d120s300")
     ap.add_argument("--realizations", type=int, default=100)
     ap.add_argument("--seed", type=int, default=1234)
     args = ap.parse_args()

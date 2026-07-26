@@ -56,7 +56,7 @@ def validate_native_routes(frame: pd.DataFrame) -> pd.DataFrame:
 def classify_native_routes(
     frame: pd.DataFrame,
     *,
-    scenario_names=("inroom",),
+    scenario_names=("d120s300",),
     scenario_config: Path | str = DEFAULT_SCENARIO_CONFIG,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return route-level classifications and modeled/unmodeled fractions."""
@@ -106,7 +106,7 @@ def main() -> None:
     parser.add_argument("--scenario-config", type=Path, default=DEFAULT_SCENARIO_CONFIG)
     parser.add_argument("--output-dir", type=Path, required=True)
     arguments = parser.parse_args()
-    scenarios = arguments.scenario or ["inroom"]
+    scenarios = arguments.scenario or ["d120s300"]
     detailed, summary = classify_native_routes(
         pd.read_csv(arguments.native_route_csv),
         scenario_names=scenarios,
