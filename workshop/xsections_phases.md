@@ -269,9 +269,40 @@ displacement-not-error phrasing made explicit.
 
 **Status: complete.**
 
+## Decisions — error budget and remaining work (2026-07-26)
+
+1. **Error budget structure.** Quote separately, each shown small against
+   the 1 mm target: sigma_R (statistical, per configuration, from the CBS
+   shard/thinning machinery), u_xs (cross-section systematic on the
+   prediction: +-0.13 mm production, +-0.14 mm reference scan), and the
+   pending hadronic-transport envelope (BIC/INCL++/Bertini exposure runs).
+   Quadrature sum stated once as the conservative total. sigma_R and u_xs
+   are different kinds (noise-like vs non-averaging systematic).
+
+2. **Phase 4 (PTCryspMC weighted LORs) deferred indefinitely.** The
+   production-level u_xs stands as the cross-section systematic:
+   reconstruction is smooth near the edge, couplings act at second order
+   on a 0.13 mm band (<0.03 mm). Optional cheap verification: 2-3 extreme
+   replicas resampled from the bank through the existing unweighted
+   pipeline. The xsection-weighted-lors branch machinery is not needed for
+   the paper's budget.
+
+3. **Phase 3d refined scope.** On `uniform_headep_sobp_1e8_dd` (which is
+   the NOMINAL data-driven source — emitters sampled from the median
+   curves only; the envelope exists only in source_bank.csv, not in any
+   detector-facing file): redo the reference-protocol sigma_R (BGO + CsI)
+   and the CsI timing scan; spot-check one AFOV extreme; keep the rest of
+   the AFOV grid native with the cross-check stated. Physics motivation:
+   the distal tail under the erfc fit differs (data-driven N13 reaches
+   deepest, native under-produces it 1.5x) — a shape change, not a shift.
+   Byproducts: native-vs-dd sigma_R shift per configuration, and the
+   fitted-edge shift = the reconstructed-level Delta for the nominal
+   curve (the b_reco vs b_prod verification, free).
+
 ## Later phases (scoped when reached)
-- Phase 3d: detector-study reruns on the data-driven scenario and the
-  native-vs-data sigma_R cross-check (PTCryspMC, unweighted pipeline).
+- Phase 3d (refined above): CBS-side reruns on the dd scenario.
+- Hadronic-transport envelope: INCL++/Bertini exposure runs folded with
+  the same curves (xsections_plan.tex).
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,
   weights evaluator, resampler (`docs/shared_plan.tex`;
   `PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`).
