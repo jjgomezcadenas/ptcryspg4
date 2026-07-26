@@ -275,7 +275,7 @@ displacement-not-error phrasing made explicit.
    the 1 mm target: sigma_R (statistical, per configuration, from the CBS
    shard/thinning machinery), u_xs (cross-section systematic on the
    prediction: +-0.13 mm production, +-0.14 mm reference scan), and the
-   pending hadronic-transport envelope (BIC/INCL++/Bertini exposure runs).
+   hadronic-transport term (phase 3e: u_transport = +-0.10 mm).
    Quadrature sum stated once as the conservative total. sigma_R and u_xs
    are different kinds (noise-like vs non-averaging systematic).
 
@@ -299,15 +299,45 @@ displacement-not-error phrasing made explicit.
    fitted-edge shift = the reconstructed-level Delta for the nominal
    curve (the b_reco vs b_prod verification, free).
 
+## Phase 3e — hadronic-transport envelope (branch transport-envelope)
+
+**Goal.** Measure the transport term of the edge budget: production is
+exposure x fitted sigma, so the hadronic model enters only via the exposure
+map (secondary protons; nonelastic attenuation of the primary fluence).
+
+**Method.** (a) Model swap: repeat the 1e7 uniform_headep SOBP exposure run
+with QGSP_BERT_HP and QGSP_INCLXX_HP (same seed, same config; the app
+already takes --physics-list and tags the run dir with it), fold each with
+the same nominal curves. The three lists share G4's proton inelastic
+cross-section dataset, so the swap varies final states (secondaries) at
+fixed attenuation; the scorer books all protons including secondaries.
+(b) Attenuation: multiply the reference folded profiles by
+exp(-+0.03*Sigma*z), Sigma = 0.010 /cm for brain (45*A^(2/3) mb per
+element, H excluded), optical depth 0.087 at the edge. (c) Statistical
+scale: fold the BIC 1e8 exposure and take its R50 difference from the 1e7
+— under 0.01 mm on every profile, so the table is resolved.
+
+**Deliverables.** `analysis_transport/xsections/transport_envelope.py` ->
+`docs/generated/sampling_xsections/transport_envelope.{csv,tex}`; note
+section "The transport term of the distal edge" + updated Conclusions;
+exposure runs `uniform_headep_sobp_QGSP_{BERT,INCLXX}_HP_1e7`
+(regenerable; finalized with finalize_exposure.py).
+
+**Results.** u_transport = +-0.10 mm on the combined edges (INCL++ is the
+extreme; Bertini 0.02 mm, attenuation tilt 0.02 mm), +-0.14 mm on the N13
+tail. Integral yields agree across lists to 0.5%. Same order as u_xs
+(+-0.13/0.14 mm); an order of magnitude below the replaced model
+displacements. The error-budget decision (item 1 above) is now fully
+quantified: sigma_R + u_xs + u_transport.
+
+**Status: complete.**
+
 ## Later phases (scoped when reached)
 - Phase 3d (refined above): CBS-side reruns on the dd scenario.
-- Hadronic-transport envelope: INCL++/Bertini exposure runs folded with
-  the same curves (xsections_plan.tex).
 - Phase 4: PTCryspMC.jl — second parent id on randoms, bank source mode,
   weights evaluator, resampler (`docs/shared_plan.tex`;
   `PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`).
-- Phase 5: end-to-end replica propagation and the hadronic-transport
-  envelope.
+- Phase 5: end-to-end replica propagation.
 
 ## Recovery notes
 
