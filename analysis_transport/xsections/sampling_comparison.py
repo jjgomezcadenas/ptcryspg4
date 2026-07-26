@@ -236,6 +236,33 @@ def analyze(run_dir: Path, repo: Path):
                 f"$\\pm${row.R50_shift_half_width_mm:.2f} \\\\\n")
         stream.write("\\bottomrule\n\\end{tabular}\n")
 
+    # Production-level consequences table for docs/xsection_fit.tex: the
+    # curves' own uncertainty at production level, no reference to any
+    # transport-model comparison.
+    fit_generated = repo / "docs/generated/xsection_fit"
+    fit_generated.mkdir(parents=True, exist_ok=True)
+    uncertainty = pd.read_csv(run_dir / "folding/uncertainty_summary.csv")
+    consequence_labels = {
+        "O15": "$^{15}$O", "C11": "$^{11}$C", "N13": "$^{13}$N",
+        "all_production": "combined (production)",
+        "all_d120s300": "combined (reference scan)"}
+    with (fit_generated / "production_consequences.tex").open(
+            "w", encoding="utf-8") as stream:
+        stream.write("\\begin{tabular}{lrrr}\n\\toprule\n")
+        stream.write("Profile & Yield (Gy$^{-1}$) & band & "
+                     "$R_{50}$ $\\pm$ $u_{\\mathrm{xs}}$ (mm) \\\\\n"
+                     "\\midrule\n")
+        for key in ("O15", "C11", "N13", "all_production", "all_d120s300"):
+            row = uncertainty[uncertainty.profile_label == key].iloc[0]
+            rel = row.yield_half_width_per_Gy / row.nominal_yield_per_Gy
+            stream.write(
+                f"{consequence_labels[key]} & "
+                f"{row.nominal_yield_per_Gy:.2e} & "
+                f"$\\pm${100*rel:.1f}\\% & "
+                f"{row.R50_nominal_mm:.2f} $\\pm$ "
+                f"{row.R50_shift_half_width_mm:.2f} \\\\\n")
+        stream.write("\\bottomrule\n\\end{tabular}\n")
+
     # Timing legend for the scenario rows, generated from the config so the
     # labels can never drift from the numbers.
     with (generated / "scenario_times.tex").open("w", encoding="utf-8") as stream:

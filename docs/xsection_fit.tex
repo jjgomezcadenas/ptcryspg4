@@ -647,6 +647,33 @@ the corresponding figures one directory above the analytic reference.  Their
 metadata distinguish the transport run, physics list, dose normalization and
 named acquisition scenario from the reference calculation.
 
+\section{Production-level consequences}
+
+The purpose of the fitted curves is production: folded with the
+target-resolved proton exposure of the standard treatment field
+(\SI{1}{Gy} to the target, uniform brain-tissue head), they determine the
+per-isotope yields and distal production edges, and the replica ensemble
+determines the uncertainty those quantities inherit from the cross
+sections.  Table~\ref{tab:consequences} reports both: the yield per gray
+with its 16--84\% band, and the edge $R_{50}$ with its cross-section
+systematic $u_{\mathrm{xs}}$, per isotope, for the raw production sum and
+for the profile weighted by the reference acquisition protocol.  The
+$^{13}$N band is the largest, the imprint of its resonance-region data
+spread.  The folding and edge machinery, and the comparison of these
+predictions with the transport code's internal production model, are the
+subject of \file{docs/sampling\_xsections.tex}; the table regenerates with
+that analysis, so it always reflects the current curves and the current
+transport run.
+
+\begin{table}[H]
+\centering
+\caption{Yields per gray and distal edges of the standard field, with the
+uncertainties inherited from the fitted cross sections (1000-replica
+fold).}
+\label{tab:consequences}
+\input{\generateddir/production_consequences.tex}
+\end{table}
+
 \section{Conclusions}
 
 The curation retains 79 absolute EXFOR series for the five selected production
