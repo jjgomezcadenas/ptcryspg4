@@ -654,22 +654,33 @@ target-resolved proton exposure of the standard treatment field
 (\SI{1}{Gy} to the target, uniform brain-tissue head), they determine the
 per-isotope yields and distal production edges, and the replica ensemble
 determines the uncertainty those quantities inherit from the cross
-sections.  Table~\ref{tab:consequences} reports both: the yield per gray
-with its 16--84\% band, and the edge $R_{50}$ with its cross-section
-systematic $u_{\mathrm{xs}}$, per isotope, for the raw production sum and
-for the profile weighted by the reference acquisition protocol.  The
-$^{13}$N band is the largest, the imprint of its resonance-region data
-spread.  The folding and edge machinery, and the comparison of these
-predictions with the transport code's internal production model, are the
-subject of \path{docs/sampling_xsections.tex}; the table regenerates with
-that analysis, so it always reflects the current curves and the current
-transport run.
+sections.  The prediction carries a second uncertainty of the same nature:
+the exposure map itself depends on the hadronic transport --- the
+secondary protons the final-state model adds to the beam and the
+nonelastic attenuation of the primary fluence.  That term,
+$u_{\mathrm{transport}}$, is measured by folding the same nominal curves
+with exposure maps transported under alternate final-state models
+(Bertini and Li\`ege cascades against the binary-cascade reference) and
+by varying the nonelastic attenuation by $\pm3\%$.
+
+Table~\ref{tab:consequences} reports the full uncertainty of the
+prediction: the yield per gray with its 16--84\% band, and the edge
+$R_{50}$ with its cross-section systematic $u_{\mathrm{xs}}$ and its
+transport term $u_{\mathrm{transport}}$, per isotope, for the raw
+production sum and for the profile weighted by the reference acquisition
+protocol.  The $^{13}$N band is the largest, the imprint of its
+resonance-region data spread; on the combined edges the two terms are of the same order and
+their quadrature sum stays below $\pm0.2$~mm.  The folding, edge and transport-envelope machinery is
+the subject of \path{docs/sampling_xsections.tex}; the table regenerates
+with that analysis, so it always reflects the current curves and the
+current transport runs.
 
 \begin{table}[H]
 \centering
 \caption{Yields per gray and distal edges of the standard field, with the
-uncertainties inherited from the fitted cross sections (1000-replica
-fold).}
+uncertainties of the prediction: the 1000-replica cross-section fold
+($u_{\mathrm{xs}}$) and the hadronic-transport term
+($u_{\mathrm{transport}}$).}
 \label{tab:consequences}
 \input{\generateddir/production_consequences.tex}
 \end{table}

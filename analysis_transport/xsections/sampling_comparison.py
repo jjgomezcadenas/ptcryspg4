@@ -237,20 +237,27 @@ def analyze(run_dir: Path, repo: Path):
         stream.write("\\bottomrule\n\\end{tabular}\n")
 
     # Production-level consequences table for docs/xsection_fit.tex: the
-    # curves' own uncertainty at production level, no reference to any
-    # transport-model comparison.
+    # uncertainty of the prediction — the curves' 16–84% band and the
+    # hadronic-transport term of the exposure map they are folded with.
     fit_generated = repo / "docs/generated/xsection_fit"
     fit_generated.mkdir(parents=True, exist_ok=True)
     uncertainty = pd.read_csv(run_dir / "folding/uncertainty_summary.csv")
+    transport = pd.read_csv(
+        repo / "docs/generated/sampling_xsections/transport_envelope.csv"
+    ).set_index("profile")["u_transport_mm"]
+    transport_key = {"O15": "O15", "C11": "C11", "N13": "N13",
+                     "all_production": "combined",
+                     "all_d120s300": "combined_d120s300"}
     consequence_labels = {
         "O15": "$^{15}$O", "C11": "$^{11}$C", "N13": "$^{13}$N",
         "all_production": "combined (production)",
         "all_d120s300": "combined (reference scan)"}
     with (fit_generated / "production_consequences.tex").open(
             "w", encoding="utf-8") as stream:
-        stream.write("\\begin{tabular}{lrrr}\n\\toprule\n")
+        stream.write("\\begin{tabular}{lrrrr}\n\\toprule\n")
         stream.write("Profile & Yield (Gy$^{-1}$) & band & "
-                     "$R_{50}$ $\\pm$ $u_{\\mathrm{xs}}$ (mm) \\\\\n"
+                     "$R_{50}$ $\\pm$ $u_{\\mathrm{xs}}$ (mm) & "
+                     "$u_{\\mathrm{transport}}$ (mm) \\\\\n"
                      "\\midrule\n")
         for key in ("O15", "C11", "N13", "all_production", "all_d120s300"):
             row = uncertainty[uncertainty.profile_label == key].iloc[0]
@@ -260,7 +267,8 @@ def analyze(run_dir: Path, repo: Path):
                 f"{row.nominal_yield_per_Gy:.2e} & "
                 f"$\\pm${100*rel:.1f}\\% & "
                 f"{row.R50_nominal_mm:.2f} $\\pm$ "
-                f"{row.R50_shift_half_width_mm:.2f} \\\\\n")
+                f"{row.R50_shift_half_width_mm:.2f} & "
+                f"$\\pm${transport[transport_key[key]]:.2f} \\\\\n")
         stream.write("\\bottomrule\n\\end{tabular}\n")
 
     # Timing legend for the scenario rows, generated from the config so the
