@@ -568,9 +568,8 @@ thresholds, to supply explicit zero-production bins for distal-edge
 interpolation.
 
 The absolute exposure scale and the assigned proton count and dose are fixed
-reference constants; they do not represent a treatment normalization.  The
-profile shapes, replica-to-nominal ratios, paired edge shifts and convergence
-ratios are the reference quantities.  Candidate energy widths of 0.5, 1, 2
+reference constants; the reference quantities are the profile shapes,
+replica-to-nominal ratios, paired edge shifts and convergence ratios.  Candidate energy widths of 0.5, 1, 2
 and \SI{5}{MeV} are obtained by exact recombination of the fine table.  The
 complete definition, fit and timing digests, numerical profiles, replica
 summaries and convergence table are stored under
@@ -592,8 +591,7 @@ because the analytic exposure normalization is arbitrary.}
 \caption{Analytic-reference production-depth profiles and pointwise
 16th--84th percentile bands from the cross-section replicas.  Each profile is
 divided by its nominal maximum so that its distal shape and nominal $R_{50}$
-can be compared directly.  These are method-validation profiles, not a Geant4
-treatment prediction.}
+can be compared directly.}
 \label{fig:folding-profiles}
 \end{figure}
 
@@ -639,8 +637,8 @@ The \SI{1}{MeV} candidate energy grid satisfies every reference criterion.
 The \SI{2}{MeV} grid fails the replica-relative $R_{50}$ condition for
 $^{15}$O and the in-room aggregate, while the \SI{5}{MeV} grid fails it for
 four of the five profiles.  These decisions demonstrate the convergence
-procedure; the accepted physical grid will be determined from the Geant4
-exposure rather than copied from the analytic reference.
+procedure; the accepted physical grid is determined from the Geant4
+exposure.
 
 The physical exposure run is processed by the same plotting program and writes
 the corresponding figures one directory above the analytic reference.  Their
@@ -654,36 +652,57 @@ target-resolved proton exposure of the standard treatment field
 (\SI{1}{Gy} to the target, uniform brain-tissue head), they determine the
 per-isotope yields and distal production edges, and the replica ensemble
 determines the uncertainty those quantities inherit from the cross
-sections.  The prediction carries a second uncertainty of the same nature:
-the exposure map itself depends on the hadronic transport --- the
-secondary protons the final-state model adds to the beam and the
-nonelastic attenuation of the primary fluence.  That term,
-$u_{\mathrm{transport}}$, is measured by folding the same nominal curves
-with exposure maps transported under alternate final-state models
-(Bertini and Li\`ege cascades against the binary-cascade reference) and
-by varying the nonelastic attenuation by $\pm3\%$.
-
-Table~\ref{tab:consequences} reports the full uncertainty of the
-prediction: the yield per gray with its 16--84\% band, and the edge
-$R_{50}$ with its cross-section systematic $u_{\mathrm{xs}}$ and its
-transport term $u_{\mathrm{transport}}$, per isotope, for the raw
-production sum and for the profile weighted by the reference acquisition
-protocol.  The $^{13}$N band is the largest, the imprint of its
-resonance-region data spread; on the combined edges the two terms are of the same order and
-their quadrature sum stays below $\pm0.2$~mm.  The folding, edge and transport-envelope machinery is
-the subject of \path{docs/sampling_xsections.tex}; the table regenerates
-with that analysis, so it always reflects the current curves and the
-current transport runs.
+sections.  Table~\ref{tab:consequences} reports the yield per gray with
+its 16--84\% band and the edge $R_{50}$ with its cross-section systematic
+$u_{\mathrm{xs}}$, per isotope, for the raw production sum and for the
+profile weighted by the reference acquisition protocol; the last column
+carries the transport term of Section~\ref{sec:transport-term}.  The
+$^{13}$N band is the largest, the imprint of its resonance-region data
+spread.  The folding and edge machinery is the subject of
+\path{docs/sampling_xsections.tex}; the table regenerates with that
+analysis, so it always reflects the current curves and the current
+transport runs.
 
 \begin{table}[H]
 \centering
 \caption{Yields per gray and distal edges of the standard field, with the
 uncertainties of the prediction: the 1000-replica cross-section fold
 ($u_{\mathrm{xs}}$) and the hadronic-transport term
-($u_{\mathrm{transport}}$).}
+($u_{\mathrm{transport}}$, Section~\ref{sec:transport-term}).}
 \label{tab:consequences}
 \input{\generateddir/production_consequences.tex}
 \end{table}
+
+\section{The effect of transport}
+\label{sec:transport-term}
+
+The folded prediction rests on two inputs: the fitted cross sections and
+the proton exposure map that Geant4 transports.  The hadronic model shapes
+that map through two channels --- the secondary protons its final-state
+model adds to the beam, and the nonelastic attenuation of the primary
+fluence.  The stopping power that places the edge is electromagnetic and
+common to all models.
+
+Both channels are varied directly.  The exposure run of the standard field
+is repeated with the Bertini and the Li\`ege intranuclear cascades in
+place of the binary-cascade reference, and each map is folded with the
+same nominal curves; the three models share Geant4's proton inelastic
+cross-section dataset, so this swap varies the secondary-proton term at
+fixed attenuation.  The attenuation itself is varied by $\pm3\%$ --- the
+scale of the differences between modern inelastic evaluations ---
+multiplying the folded profiles by $e^{\mp\delta\Sigma z}$, with
+$\Sigma = 0.010$~cm$^{-1}$ the nonelastic macroscopic cross section of the
+brain phantom.  A fold of the tenfold-larger reference exposure bounds the
+statistical scale of the comparison below \SI{0.01}{mm}.
+
+The result is the $u_{\mathrm{transport}}$ column of
+Table~\ref{tab:consequences}: $\pm0.09$~mm on the combined production edge
+and $\pm0.10$~mm under the reference scan, dominated by the Li\`ege-cascade
+displacement, with integral yields stable to $0.5\%$ across the models.
+On the combined edges the transport term and the cross-section band are of
+the same order, and their quadrature sum stays below $\pm0.2$~mm.  The
+measurement is documented in \path{docs/sampling_xsections.tex} and
+regenerates with \path{analysis_transport/xsections/transport_envelope.py}.
 
 \section{Conclusions}
 
@@ -691,13 +710,13 @@ The curation retains 79 absolute EXFOR series for the five selected production
 channels and assigns six series to pending verification.  The fitted ensembles
 preserve reported point errors, coherent campaign variation, and uncertainty
 in the smooth representation.  Folding each complete curve with a common
-Geant4 proton track-length field transfers this uncertainty to isotope budgets
-and spatial production profiles without using Geant4 residual-production
-cross sections.  The
-between-campaign dispersion is channel dependent and is largest for
-$^{16}$O(p,x)$^{13}$N in the present selection.  The physical importance of
-each variation will be determined by propagation to the reconstructed distal
-edge rather than by its distance from the nominal cross-section curve.
+Geant4 proton track-length field transfers this uncertainty to isotope
+budgets and spatial production profiles.  The between-campaign dispersion is
+channel dependent and is largest for $^{16}$O(p,x)$^{13}$N in the present
+selection.  Propagated to the standard field, the curves contribute
+$\pm2$--$3\%$ to the yields per gray and $\pm0.13$~mm to the combined
+production edge, and the transport of the exposure map contributes a term
+of the same order beside it.
 
 \appendix
 
