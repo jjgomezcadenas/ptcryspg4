@@ -42,18 +42,16 @@ The reader does not need to be told the cheat we avoided or the doubt we
 anticipated — just say the positive fact. This applies to anything written for a
 person to read.
 
-## Active feature branches
+## Branch record
 
-- **`xsection-source-bank` (this repo).** The cross-section uncertainty work:
-  fitted EXFOR excitation functions with 1000 correlated replicas, the
-  exposure-folding layer, and the coming `stageA_xsection_ensemble/` Geant4
-  application that scores proton exposure and writes the shared source bank.
-  Governing documents: `docs/shared_plan.tex` (cross-repository contract) and
-  `docs/xsections_plan.tex` (Geant4 and folding implementation).
-- **`xsection-weighted-lors` (PTCryspMC.jl repo).** The detector side of the
-  same work: recorded coincidences keep the identity of the source event that
-  produced them, so a cross-section variation is applied by re-weighting
-  recorded events instead of re-simulating the detector.
+Work happens on `main`. The cross-section uncertainty program
+(`xsection-source-bank`, merged into `main` on 2026-07-26) delivered the
+fitted EXFOR excitation functions with 1000 correlated replicas, the
+`stageA_xsection_ensemble/` Geant4 application, the source bank, and the
+frozen data-driven scenario `uniform_headep_sobp_1e8_dd`; its running record
+is `workshop/xsections_phases.md`. The detector-side branch
+`xsection-weighted-lors` (PTCryspMC.jl repo) is deferred — see
+`PTCryspMC.jl/dev/xsection_weighted_lors_plan.md`.
 
 ## Purpose
 
